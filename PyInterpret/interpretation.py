@@ -9,7 +9,8 @@ class Interpretation(object):
         
         
     def regress_model(self, add_constant = False):
-        X = self.oracle.sample_data()
+
+        X = self.oracle.get_population()
         if add_constant:
             X = add_constant(X)
         y = self.model.predict(X)
