@@ -7,10 +7,26 @@ class DataOracle(object):
         self.is_loaded = data is not None        
         self.feature_ids = self.create_feature_ids()
         self.quantile_map = self.create_quantiles(**kwargs)
+        self.n_features = len(self.feature_ids)
+
+    def get_data_complexity(self):
+        if self.is_loaded:
+            return 1.0
+
+
+    def get_reasonable_sample_size(self):
+        if self.is_loaded:
+            #this is garbage, just a place holder
+            return (np.log(self.n_features) * 1000) * self.get_data_complexity() 
         
     
     def get_population(self):
         return self.data
+    
+    def sample_from_population(self, p = None, size = None, replace = True):
+
+        idx = np.random.randint(self.data.shape[0], size=size)
+        return self.data[idx]
 
 
     def get_useful_values(self, feature_id, model = None, method = 'quantiles'):

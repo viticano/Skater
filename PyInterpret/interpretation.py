@@ -24,17 +24,22 @@ class Interpretation(object):
 
         assert feature_id in self.oracle.feature_ids, "Pass in a valid ID"        
 
-        X = self.oracle.get_population()
+        
+        sample_size = self.oracle.get_reasonable_sample_size()        
+
+        X = self.oracle.sample_from_population(size = sample_size)
         target_feature_values = self.oracle.get_useful_values(feature_id)
 
         means, stds = [], []
 
+        #print X.shape
         for value in target_feature_values:
             X[:, feature_id] = value
             predictions = self.model.predict(X)
-            means.append( np.mean(predictions.mean()) ) 
-            stds.append( np.std(predictions.mean()))
+            means.append( np.mean(predictions) ) 
+            stds.append( np.std(predictions))
 
+        
         return {'vals': target_feature_values, 'means':means, 'stds':stds}
 
 
