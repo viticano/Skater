@@ -12,12 +12,19 @@ class Model(object):
         for test in self.unit_tests:
             test()
 
-        
 
 class LocalModel(Model):
-    def __init__(self, path):
-        self.predict = pickle.load(open(path))        
+    def __init__(self):
+        self.predict = None
+    
+        
+    def load_from_file(self,path):
+        self.predict = pickle.load(open(path))
         super(Model, self).__init__()
+
+    def load_from_object(self,object):
+        self.predict = object
+        super(Model, self).__init__()        
 
         
         
