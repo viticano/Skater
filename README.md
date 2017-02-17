@@ -1,10 +1,15 @@
 # PyInterpret
 
+### Installation
+git@github.com:datascienceinc/PyInterpret.git
+cd PyInterpret
+python setup.py install
+
+
 ### Use this kind of this stuff to do cool stuff.
 
 ```
-
-import PyInterpret
+from PyInterpret.explanations import Explainer
 import numpy as np
 from scipy.stats import norm
 
@@ -23,9 +28,9 @@ rf.fit(X, y)
 
 
 #explain it
-explainer = PyInterpret.Explainer(X)
-explainer.partial_dependence(0)
-explainer.explain_instance(X[0], rf.predict)
-
+explainer = Explainer(X, rf.predict)
+explainer.partial_dependence(0) #some great stuff happens here
+explainer.explain_instance(X[0]) #and some other magic here
 
 ```
+
