@@ -2,7 +2,7 @@
 
 ### Installation
 ```
-git@github.com:datascienceinc/PyInterpret.git
+git clone git@github.com:datascienceinc/PyInterpret.git
 cd PyInterpret
 python setup.py install
 ```
