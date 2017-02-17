@@ -1,9 +1,11 @@
 # PyInterpret
 
 ### Installation
+```
 git@github.com:datascienceinc/PyInterpret.git
 cd PyInterpret
 python setup.py install
+```
 
 
 ### Use this kind of this stuff to do cool stuff.
