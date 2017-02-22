@@ -7,7 +7,7 @@ setup(name='PyInterpret',
       author_email='aaron@datascience.com',
       url='https://github.com/datascienceinc/PyInterpret/tree/master',
       packages=['PyInterpret'],
-      #install_requires = requirements,
+      install_requires = ['numpy','scipy','scikit-learn>=0.18'],
       include_package_data=True,
       zip_safe=False,
      )

@@ -1,4 +1,4 @@
-Cython>=0.25.2
--e git+http://github.com/datascienceinc/scikit-learn.git@general-pplot#egg=sklearn
--e git+http://github.com/datascienceinc/lime.git#egg=lime
+file:///cust/lime#egg=lime
 -e .
+
+
