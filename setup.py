@@ -1,6 +1,5 @@
 from setuptools import setup
 
-
 setup(name='PyInterpret',
       version='0.0.1',
       description='Model Agnostic Interpretation Library',
@@ -8,7 +7,7 @@ setup(name='PyInterpret',
       author_email='aaron@datascience.com',
       url='https://github.com/datascienceinc/PyInterpret/tree/master',
       packages=['PyInterpret'],
-      install_requires = ['numpy', 'scipy'],
+      #install_requires = requirements,
       include_package_data=True,
-      zip_safe=False      
+      zip_safe=False,
      )

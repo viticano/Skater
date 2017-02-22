@@ -1,10 +1,17 @@
 # PyInterpret
 
-### Installation
+### Dev Installation
 ```
 git clone git@github.com:datascienceinc/PyInterpret.git
 cd PyInterpret
-python setup.py install
+sudo pip install -r requirements.txt
+```
+
+### Prod Installation
+```
+git clone git@github.com:datascienceinc/PyInterpret.git
+cd PyInterpret
+sudo python setup.py install
 ```
 
 
