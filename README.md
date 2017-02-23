@@ -2,7 +2,7 @@
 
 ###Layout
 
-![layout](../blob/master/PyInterpret.png?raw=true)
+![layout](../master/PyInterpret.png?raw=true)
 
 ### Dev Installation
 ```
