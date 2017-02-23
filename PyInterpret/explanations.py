@@ -97,18 +97,4 @@ def interpretation(interpretation_type):
         return LocalInterpretation(interpretation_type)
     else:
         raise KeyError("interpretation_type needs to be element of {}".format(ModelInterpreter._types()))
-    assert 0, "Bad shape creation: " + type
-
-
-def main():
-    pdp_obj = interpretation_type("pdp")
-    pdp_obj.partial_dependency()
-
-    local_obj = interpretation_type("local")
-    local_obj.lime()
-
-    var_imp_obj = interpretation_type("var_imp")
-    var_imp_obj.default()
-
-if __name__ == '__main__':
-    main()
+    
