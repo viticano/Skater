@@ -1,5 +1,9 @@
 # PyInterpret
 
+###Layout
+
+![layout](https://raw.githubusercontent.com/datascienceinc/PyInterpret/master/PyInterpret.png)
+
 ### Dev Installation
 ```
 git clone git@github.com:datascienceinc/PyInterpret.git
