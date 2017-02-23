@@ -2,7 +2,7 @@
 
 ###Layout
 
-![layout](https://raw.githubusercontent.com/datascienceinc/PyInterpret/master/PyInterpret.png)
+![layout](../blob/master/PyInterpret.png?raw=true)
 
 ### Dev Installation
 ```
