@@ -11,7 +11,7 @@ class DataSet(object):
 		ndim = len(data.shape) 
 		
 		if ndim == 1:
-			data = data[: np.newaxis]
+			data = data[:, np.newaxis]
 
 		elif ndim >= 3:
 			raise ValueError("Data needs to be 1 or 2 dimensions, yours is {}".format(ndim))
@@ -70,6 +70,8 @@ class DataSet(object):
 		self.data.__setitem__(key, newval)
 		
 	def generate_sample(self, sample = True, n_samples_from_dataset = 1000, strategy = 'random-choice', replace = True, samples_per_bin = 20):
+
+		#
 
 		if not sample:
 			return self.data
