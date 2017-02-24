@@ -16,7 +16,7 @@ class DataSet(object):
 
 
 		"""
-		assert isinstance(data, np.ndarray), 'Data needs to be a numpy array'
+		assert isinstance(data, (np.ndarray, pd.DataFrame)), 'Data needs to be a numpy array'
 
 		ndim = len(data.shape) 
 		
@@ -27,14 +27,26 @@ class DataSet(object):
 			raise ValueError("Data needs to be 1 or 2 dimensions, yours is {}".format(ndim))
 
 		self.n, self.dim = data.shape
-		if not feature_names:
-			feature_names = range(self.dim)
-		if not index:
-			index = range(self.n)	
 
-		self.feature_ids = feature_names	
-		self.index = index
-		self.data = pd.DataFrame(data, columns = self.feature_ids, index = self.index)
+		if isinstance(data, pd.DataFrame):
+			if not feature_names:
+				feature_names = list(data.columns.values)
+			if not index:
+				index = range(self.n)
+			self.feature_ids = feature_names	
+			self.index = index
+			self.data = pd.DataFrame(data, columns = self.feature_ids, index = self.index)
+
+
+		elif isinstance(data, np.ndarray):	
+			if not feature_names:
+				feature_names = range(self.dim)
+			if not index:
+				index = range(self.n)
+			self.feature_ids = feature_names	
+			self.index = index
+			self.data = pd.DataFrame(data, columns = self.feature_ids, index = self.index)
+
 		self.metastore = None
 		
 
