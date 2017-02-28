@@ -1,5 +1,8 @@
+import numpy as np
+import pandas as pd
 from .base import BaseLocalInterpretation
-
+from sklearn.linear_model import LinearRegression
+import sklearn
 class Lime(BaseLocalInterpretation):
 		def lime_ds(self, data_row, predict_fn, sample = False, 
 							n_samples = 5000, sampling_strategy = 'uniform-over-similarity-ranks',
