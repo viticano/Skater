@@ -1,12 +1,12 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
-setup(name='PyInterpret',
+setup(name='pyinterpret',
       version='0.0.1',
       description='Model Agnostic Interpretation Library',
       author='Aaron Kramer',
       author_email='aaron@datascience.com',
-      url='https://github.com/datascienceinc/PyInterpret/tree/master',
-      packages=['PyInterpret'],
+      #url='https://github.com/datascienceinc/PyInterpret/tree/master',
+      packages=find_packages(),
       install_requires = ['numpy','scipy','scikit-learn>=0.18'],
       include_package_data=True,
       zip_safe=False,
