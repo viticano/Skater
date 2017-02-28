@@ -1,3 +1,5 @@
+import numpy as np
+import pandas as pd
 from .base import BaseGlobalInterpretation
 
 class PartialDependence(BaseGlobalInterpretation):
