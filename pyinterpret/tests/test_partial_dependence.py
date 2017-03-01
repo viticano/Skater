@@ -1,5 +1,5 @@
 import unittest
-from pyinterpret.explanations import Interpretation
+from pyinterpret.core.explanations import Interpretation
 import numpy as np
 from numpy.testing import assert_array_equal
 from scipy.stats import norm
@@ -31,9 +31,9 @@ class TestPartialDependence(unittest.TestCase):
 
 
 	def test_pdp_regression_coefs_are_close(self, epsilon = 1):
-		pdp_for_regressor = Interpretation('partial_dependence')
-		pdp_for_regressor.consider(self.X)
-		coefs = pdp_for_regressor.partial_dependence([self.regressor_feature], self.regressor_predict_fn)
+		interpreter = Interpretation()
+		interpreter.consider(self.X)
+		coefs = interpreter.partial_dependence.partial_dependence([self.regressor_feature], self.regressor_predict_fn)
 
 
 		coef_vals = [(i,coefs[self.regressor_feature][i]['mean']) for i in coefs[self.regressor_feature]]
