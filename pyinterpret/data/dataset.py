@@ -3,7 +3,6 @@ import numpy as np
 from scipy import stats
 import pandas as pd
 
-
 class DataSet(object):
 	def __init__(self, data, feature_names=None, index=None):
 		"""
@@ -166,19 +165,3 @@ class DataSet(object):
 				new_samples = np.random.choice(idx, replace=True, size=samples_per_bin)
 				samples.extend(self.data.loc[new_samples].values)
 			return pd.DataFrame(samples, index=self.index, columns=self.feature_ids)
-
-
-class ModelInterpreter(object):
-	'''
-	Base Interpreter class. Common methods include loading a dataset and type setting.
-	'''
-
-	def __init__(self):
-		self.data_set = None
-
-	@staticmethod
-	def _types():
-		return ['partial_dependence', 'lime']
-
-	def consider(self, training_data, index=None, feature_names=None):
-		self.data_set = DataSet(training_data, index=None, feature_names=None)

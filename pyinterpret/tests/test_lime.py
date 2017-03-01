@@ -1,5 +1,5 @@
 import unittest
-from pyinterpret.explanations import Interpretation
+from pyinterpret.core.explanations import Interpretation
 import numpy as np
 from numpy.testing import assert_array_equal
 from scipy.stats import norm
@@ -37,9 +37,9 @@ class TestLime(unittest.TestCase):
 		self.classifier_point = self.X[0]
 
 	def test_lime_regression_coefs_are_close(self, epsilon = 1):
-		lime_for_regressor = Interpretation('lime')
-		lime_for_regressor.consider(self.X)
-		coefs = lime_for_regressor.lime_ds(self.regressor_point, self.regressor_predict_fn)
+		interpreter = Interpretation()
+		interpreter.consider(self.X)
+		coefs = interpreter.lime.lime_ds(self.regressor_point, self.regressor_predict_fn)
 
 		coefs_are_close_warning = "Lime coefficients  for regressions model are not close to true values for trivial case"
 		coefs_are_close = all(abs(coefs - self.B) < epsilon)
@@ -49,9 +49,9 @@ class TestLime(unittest.TestCase):
 			self.fail(coefs_are_close_warning)
 
 	def test_lime_classifier_coefs_correct_sign(self):
-		lime_for_classifier = Interpretation('lime')
-		lime_for_classifier.consider(self.X)
-		neg_coefs, pos_coefs = lime_for_classifier.lime_ds(self.classifier_point, self.classifier_predict_fn)
+		interpreter = Interpretation()
+		interpreter.consider(self.X)
+		neg_coefs, pos_coefs = interpreter.lime.lime_ds(self.classifier_point, self.classifier_predict_fn)
 
 		coefs_are_correct_sign_warning = "Lime coefficients for classifier model are not correct sign for trivial case"
 		coefs_are_correct_sign = all(np.sign(pos_coefs) ==  np.sign(self.B))
