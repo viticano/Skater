@@ -5,7 +5,7 @@ import pandas as pd
 
 
 class DataSet(object):
-	def __init__(self, data, feature_names = None, index = None):
+	def __init__(self, data, feature_names=None, index=None):
 		"""
 		The abtraction around using, accessing, sampling data for interpretation purposes.
 
@@ -19,8 +19,8 @@ class DataSet(object):
 		"""
 		assert isinstance(data, (np.ndarray, pd.DataFrame)), 'Data needs to be a numpy array'
 
-		ndim = len(data.shape) 
-		
+		ndim = len(data.shape)
+
 		if ndim == 1:
 			data = data[:, np.newaxis]
 
@@ -33,26 +33,29 @@ class DataSet(object):
 			if not feature_names:
 				feature_names = list(data.columns.values)
 			if not index:
-				index = range(self.n)
-			self.feature_ids = feature_names	
+				index = list(data.index.values)
+			self.feature_ids = feature_names
 			self.index = index
-			self.data = pd.DataFrame(data, columns = self.feature_ids, index = self.index)
+			self.data = pd.DataFrame(data, columns=self.feature_ids, index=self.index)
 
 
-		elif isinstance(data, np.ndarray):	
+		elif isinstance(data, np.ndarray):
 			if not feature_names:
 				feature_names = range(self.dim)
 			if not index:
 				index = range(self.n)
-			self.feature_ids = feature_names	
+			self.feature_ids = feature_names
 			self.index = index
-			self.data = pd.DataFrame(data, columns = self.feature_ids, index = self.index)
+			self.data = pd.DataFrame(data, columns=self.feature_ids, index=self.index)
+
+		else:
+			raise ValueError("Currently we only support pandas dataframes and numpy arrays"
+							 "If you would like support for additional data structures let us "
+							 "know!")
 
 		self.metastore = None
-		
 
-
-	def generate_grid(self, feature_ids, grid_resolution = None, grid_range = None):
+	def generate_grid(self, feature_ids, grid_resolution=100, grid_range=(.05, .95)):
 		"""
 		Generates a grid of values on which to compute pdp. For each feature xi, for value
 		yj of xi, we will fix xi = yj for every observation in X.
@@ -76,7 +79,6 @@ class DataSet(object):
 								There are as many columns as specified by grid_resolution
 		"""
 
-
 		grid_range_warning = "Grid range values must be between 0 and 1"
 		assert all(i >= 0 and i <= 1 for i in grid_range), grid_range_warning
 
@@ -84,34 +86,29 @@ class DataSet(object):
 		assert isinstance(grid_resolution, int) and grid_resolution > 0, grid_resolution_warning
 
 		feature_id_warning = "Must pass in feature ids contained in DataSet.feature_ids"
-		assert all(feature_id in self.feature_ids for feature_id in feature_id), feature_id_warning
+		assert all(feature_id in self.feature_ids for feature_id in feature_ids), feature_id_warning
 
-
-		grid_range = map(lambda x: x* 100, grid_range)
+		grid_range = map(lambda x: x * 100, grid_range)
 		bins = np.linspace(*grid_range, num=grid_resolution)
 		grid = []
 		for feature_id in feature_ids:
 			vals = np.percentile(self[feature_id], bins)
 			grid.append(vals)
 		return np.array(grid)
-		
-
 
 	def _build_metastore(self):
-		medians = np.median(self.data.values, axis = 0).reshape(1, self.dim)
-		dists = cosine_distances(self.data.values, Y = medians).reshape(-1)
+		medians = np.median(self.data.values, axis=0).reshape(1, self.dim)
+		dists = cosine_distances(self.data.values, Y=medians).reshape(-1)
 		dist_percentiles = map(lambda i: int(stats.percentileofscore(dists, i)), dists)
 		ranks = pd.Series(self.dists).rank().values
 		ranks_rounded = np.array(map(lambda x: round(x, 2), self.ranks / self.ranks.max()))
 		return {
-			'median':median,
-			'dists':dists,
-			'dist_percentiles':dist_percentiles,
-			'ranks':ranks,
-			'ranks_rounded':ranks_rounded,
+			'median': median,
+			'dists': dists,
+			'dist_percentiles': dist_percentiles,
+			'ranks': ranks,
+			'ranks_rounded': ranks_rounded,
 		}
-
-
 
 	def __getitem__(self, key):
 		assert key in self.feature_ids, "The key {} is not the set of feature_ids {}".format(*[key, self.feature_ids])
@@ -119,9 +116,9 @@ class DataSet(object):
 
 	def __setitem__(self, key, newval):
 		self.data.__setitem__(key, newval)
-		
-	def generate_sample(self, sample = True, strategy = 'random-choice', n_samples_from_dataset = 1000, 
-						replace = True, samples_per_bin = 20):
+
+	def generate_sample(self, sample=True, strategy='random-choice', n_samples_from_dataset=1000,
+						replace=True, samples_per_bin=20):
 		'''
 		Method for generating data from the dataset.
 
@@ -143,22 +140,21 @@ class DataSet(object):
 
 
 		'''
-		
 
 		if not sample:
 			return self.data
-		
+
 		samples = []
 
 		if strategy == 'random-choice':
-			idx = np.random.choice(self.index, size = n_samples_from_dataset, replace = replace)
+			idx = np.random.choice(self.index, size=n_samples_from_dataset, replace=replace)
 			return self.data.loc[idx]
 
 		elif strategy == 'uniform-from-percentile':
 			raise NotImplemented("We havent coded this yet.")
-		
+
 		elif strategy == 'uniform-over-similarity-ranks':
-			
+
 			if not self.metastore:
 				self.metastore = self._build_metastore()
 
@@ -166,12 +162,10 @@ class DataSet(object):
 
 			for i in range(100):
 				j = i / 100.
-				idx = np.where(data_distance_ranks==j)[0]
-				new_samples = np.random.choice(idx, replace = True, size = samples_per_bin)
+				idx = np.where(data_distance_ranks == j)[0]
+				new_samples = np.random.choice(idx, replace=True, size=samples_per_bin)
 				samples.extend(self.data.loc[new_samples].values)
-			return pd.DataFrame(samples, index = self.index, columns = self.feature_ids)
-
-
+			return pd.DataFrame(samples, index=self.index, columns=self.feature_ids)
 
 
 class ModelInterpreter(object):
@@ -184,12 +178,7 @@ class ModelInterpreter(object):
 
 	@staticmethod
 	def _types():
-		return ['partial_dependence','lime']
+		return ['partial_dependence', 'lime']
 
-	def consider(self, training_data, index = None, feature_names = None):
-		self.data_set = DataSet(training_data, index = None, feature_names = None)
-
-
-
-
-
+	def consider(self, training_data, index=None, feature_names=None):
+		self.data_set = DataSet(training_data, index=None, feature_names=None)
