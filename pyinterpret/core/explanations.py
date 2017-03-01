@@ -6,13 +6,14 @@ import datetime
 import abc
 
 print "__name__: {}".format(__name__ )
-from .base import ModelInterpreter
+from .model_interpreter import ModelInterpreter
 from .local_interpretation.lime import Lime
 from .global_interpretation.partial_dependence import PartialDependence
+from ..data.dataset import DataSet
 
 
 # Create based on class name:
-def Interpretation(interpretation_type):
+class Interpretation(object):
 	'''
 	Returns an interpretation class.
 
@@ -24,11 +25,12 @@ def Interpretation(interpretation_type):
 	----------
 		interpretation subclass
 	'''
-	
-	if interpretation_type == "partial_dependence": 
-		return PartialDependence()
-	if interpretation_type == "lime": 
-		return Lime()
-	else:
-		raise KeyError("interpretation_type needs to be element of {}".format(ModelInterpreter._types()))
+	def __init__(self):
+		self.lime = Lime(self)
+		self.partial_dependence = PartialDependence(self)	
+		self.data_set = None	
+
+	def consider(self, training_data, feature_names = None, index = None):
+		self.data_set = DataSet(training_data, feature_names = feature_names, index = index)
+
 
