@@ -5,3 +5,7 @@ python:
 install: "python setup.py install"
 # command to run tests
 script: . travis.sh
+branches:
+  only:
+    - master
+    - v1-dev
