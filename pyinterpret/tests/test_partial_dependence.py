@@ -29,18 +29,20 @@ class TestPartialDependence(unittest.TestCase):
 		self.regressor_predict_fn = self.regressor.predict
 		self.regressor_feature = 0
 
+	def test_pdp_with_default_sampling(self):
+		interpreter = Interpretation()
+		interpreter.consider(self.X)
+		coefs = interpreter.partial_dependence.partial_dependence([self.regressor_feature], self.regressor_predict_fn, sample=True)
 
-	def test_pdp_regression_coefs_are_close(self, epsilon = 1):
+
+	def test_pdp_regression_coefs_are_close_1d(self, epsilon = 1):
 		interpreter = Interpretation()
 		interpreter.consider(self.X)
 		coefs = interpreter.partial_dependence.partial_dependence([self.regressor_feature], self.regressor_predict_fn)
 
+		y = np.array(coefs['means'])
+		x = np.array(coefs['vals'])
 
-		coef_vals = [(i,coefs[self.regressor_feature][i]['mean']) for i in coefs[self.regressor_feature]]
-
-		x, y = zip(*coef_vals)
-		x = np.array(x)[:, np.newaxis]
-		y = np.array(y)
 		pdp_reg = LinearRegression()
 		pdp_reg.fit(x, y)
 		coef = pdp_reg.coef_[0]

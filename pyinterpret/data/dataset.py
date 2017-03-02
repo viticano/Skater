@@ -95,18 +95,32 @@ class DataSet(object):
 			grid.append(vals)
 		return np.array(grid)
 
-	def _build_metastore(self):
+	def _build_metastore(self, bin_count):
+
+		n = self.data.shape[0]
+
 		medians = np.median(self.data.values, axis=0).reshape(1, self.dim)
+
+		#how far each data point is from the global median
 		dists = cosine_distances(self.data.values, Y=medians).reshape(-1)
-		dist_percentiles = map(lambda i: int(stats.percentileofscore(dists, i)), dists)
-		ranks = pd.Series(self.dists).rank().values
-		ranks_rounded = np.array(map(lambda x: round(x, 2), self.ranks / self.ranks.max()))
+
+		#the percentile distance of each datapoint to the global median
+		#dist_percentiles = map(lambda i: int(stats.percentileofscore(dists, i)), dists)
+
+		ranks = pd.Series(dists).rank().values
+		round_to = n / float(bin_count)
+		rounder_func = lambda x: int(round_to * round(float(x) / round_to))
+		ranks_rounded = map(rounder_func, ranks)
+
+		ranks_rounded = np.array(map(lambda x: round(x, 2), ranks / ranks.max()))
 		return {
-			'median': median,
+			'median': medians,
 			'dists': dists,
-			'dist_percentiles': dist_percentiles,
+			'n':n,
+			#'dist_percentiles': dist_percentiles,
 			'ranks': ranks,
 			'ranks_rounded': ranks_rounded,
+			'round_to':round_to
 		}
 
 	def __getitem__(self, key):
@@ -117,7 +131,7 @@ class DataSet(object):
 		self.data.__setitem__(key, newval)
 
 	def generate_sample(self, sample=True, strategy='random-choice', n_samples_from_dataset=1000,
-						replace=True, samples_per_bin=20):
+						replace=True, samples_per_bin=10, bin_count = 50):
 		'''
 		Method for generating data from the dataset.
 
@@ -143,25 +157,29 @@ class DataSet(object):
 		if not sample:
 			return self.data
 
-		samples = []
-
 		if strategy == 'random-choice':
 			idx = np.random.choice(self.index, size=n_samples_from_dataset, replace=replace)
-			return self.data.loc[idx]
+			values = self.data.loc[idx].values
+			return pd.DataFrame(values, columns = self.feature_ids)
 
 		elif strategy == 'uniform-from-percentile':
 			raise NotImplemented("We havent coded this yet.")
 
 		elif strategy == 'uniform-over-similarity-ranks':
 
-			if not self.metastore:
-				self.metastore = self._build_metastore()
+			metastore = self._build_metastore(bin_count)
 
-			data_distance_ranks = self.metastore['ranks_rounded']
+			total_samples = bin_count * samples_per_bin
 
-			for i in range(100):
-				j = i / 100.
+			data_distance_ranks = metastore['ranks_rounded']
+			round_to = metastore['round_to']
+			n = metastore['n']
+
+			samples = []
+			for i in range(bin_count):
+				j =  (i * round_to) / n
 				idx = np.where(data_distance_ranks == j)[0]
-				new_samples = np.random.choice(idx, replace=True, size=samples_per_bin)
-				samples.extend(self.data.loc[new_samples].values)
-			return pd.DataFrame(samples, index=self.index, columns=self.feature_ids)
+				if idx.any():
+					new_samples = np.random.choice(idx, replace=True, size=samples_per_bin)
+					samples.extend(self.data.loc[new_samples].values)
+			return pd.DataFrame(samples, columns=self.feature_ids)
