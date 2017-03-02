@@ -1,16 +1,22 @@
 
 language: python
+
+dist: trusty
+
 python:
   - "2.7"
-matrix:
-  include:
-    - os: linux
-      dist: trusty
+os: 
+  - linux
+virtualenv:
+  system_site_packages: true
+
+before_install:
+ - sudo apt-get install -qq python-numpy python-scipy
 
 # command to install dependencies
 install: 
-  - pip install scipy
   - pip install -r requirements.txt
+  - pip install -e .
 # command to run tests
 script: . travis.sh
 branches:
