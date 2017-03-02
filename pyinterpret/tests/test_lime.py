@@ -4,6 +4,8 @@ import numpy as np
 from scipy.special import expit
 from scipy.stats import norm
 from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.datasets import load_breast_cancer
+from sklearn.ensemble import RandomForestClassifier
 
 from pyinterpret.core.explanations import Interpretation
 
@@ -60,6 +62,19 @@ class TestLime(unittest.TestCase):
             coefs_are_correct_sign_warning += "True Coefs: {}".format(self.B)
             coefs_are_correct_sign_warning += "Estimated Coefs: {}".format(pos_coefs)
             self.fail(coefs_are_correct_sign_warning)
+
+    def test_coefs_are_non_zero_for_breast_cancer_dataset(self):
+        data = load_breast_cancer()
+        X = data.data
+        y = data.target
+        example = X[0]
+        features = [0]
+        model = RandomForestClassifier()
+        model.fit(X, y)
+        interpreter = Interpretation()
+        interpreter.consider(X)
+        lime_coef_ = interpreter.lime.lime_ds(example, model.predict_proba)
+        assert (lime_coef_ != 0).any(), "All coefficients for this are 0, maybe a bad kernel width"
 
 
 if __name__ == '__main__':

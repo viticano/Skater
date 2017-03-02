@@ -39,6 +39,7 @@ class Lime(BaseLocalInterpretation):
 
         if kernel_width is None:
             kernel_width = np.sqrt(self.data_set.dim) * .75
+        print kernel_width
 
         if explainer_model == None:
             explainer_model = LinearRegression
