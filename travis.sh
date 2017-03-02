@@ -1,0 +1,1 @@
+python pyinterpret/tests/test_all.py
