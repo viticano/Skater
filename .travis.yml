@@ -1,12 +1,13 @@
 
 language: python
 
-dist: trusty
+#dist: trusty
 
 python:
   - "2.7"
 os: 
   - linux
+
 virtualenv:
   system_site_packages: true
 
