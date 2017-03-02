@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
-from .base import BaseLocalInterpretation
-from sklearn.linear_model import LinearRegression
 import sklearn
+from sklearn.linear_model import LinearRegression
+
+from .base import BaseLocalInterpretation
 
 
 class Lime(BaseLocalInterpretation):
@@ -45,17 +46,23 @@ class Lime(BaseLocalInterpretation):
         explainer_model = explainer_model()
         self._check_explainer_model_pre_train(explainer_model)
 
+
+        predict_fn = self.build_annotated_model(predict_fn)
+
         kernel_fn = lambda d: np.sqrt(np.exp(-(d ** 2) / kernel_width ** 2))
 
         # data that has been sampled
         neighborhood = self.interpreter.data_set.generate_sample(strategy=sampling_strategy, sample=sample,
                                                                  n_samples_from_dataset=n_samples)
+
+
         self._check_neighborhood(neighborhood)
 
         distances = sklearn.metrics.pairwise_distances(
-                neighborhood,
-                data_row.reshape(1, -1),
-                metric=distance_metric) \
+            neighborhood,
+            data_row.reshape(1, -1),
+            metric=distance_metric) \
+
             .ravel()
 
         weights = kernel_fn(distances)
