@@ -1,11 +1,8 @@
 import unittest
-from test_data import TestData
-from test_lime import TestLime
-from test_partial_dependence import TestPartialDependence
 
-pdp_tests = unittest.TestLoader().loadTestsFromTestCase(TestPartialDependence)
-dataset_tests = unittest.TestLoader().loadTestsFromTestCase(TestData)
-lime_tests = unittest.TestLoader().loadTestsFromTestCase(TestLime)
+def run_tests():
+    testsuite = unittest.TestLoader().discover('.',pattern="test_*.py")
+    unittest.TextTestRunner(verbosity=2).run(testsuite)
 
-for test in [dataset_tests, lime_tests, pdp_tests]:
-    unittest.TextTestRunner(verbosity=2).run(test)
+if __name__ == '__main__':
+    run_tests()
