@@ -1,11 +1,31 @@
+
 language: python
+
+#dist: trusty
+
 python:
   - "2.7"
+os: 
+  - linux
+
+virtualenv:
+  system_site_packages: true
+
+before_install:
+ - sudo apt-get build-dep python-scipy
+ - pip install scipy
+# - sudo apt-get install -qq python-numpy python-scipy
+
 # command to install dependencies
-install: "python setup.py install"
+install: 
+  - pip install -r requirements.txt
+  - pip install -e .
+  - python -c "import scipy" #make sure that scipy is OK before anything else
+
 # command to run tests
 script: . travis.sh
 branches:
   only:
     - master
     - v1-dev
+    - v1-dev-aaron
