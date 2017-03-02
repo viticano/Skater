@@ -13,6 +13,7 @@ class TestLime(unittest.TestCase):
 		self.build_data()
 		self.build_regressor()
 		self.build_classifier()
+
 	def build_data(self, n = 1000, seed = 1, dim = 3):
 		self.seed = seed
 		self.n = n
@@ -22,7 +23,6 @@ class TestLime(unittest.TestCase):
 		self.y = np.dot(self.X, self.B)
 		self.y_as_prob = expit(self.y)
 		self.y_as_ints = np.array([np.random.choice((0, 1), p=(1-prob,prob)) for prob in self.y_as_prob.reshape(-1)])
-
 
 	def build_regressor(self):
 		self.regressor = LinearRegression()
@@ -59,7 +59,6 @@ class TestLime(unittest.TestCase):
 			coefs_are_correct_sign_warning += "True Coefs: {}".format(self.B)
 			coefs_are_correct_sign_warning += "Estimated Coefs: {}".format(pos_coefs)
 			self.fail(coefs_are_correct_sign_warning)
-
 
 
 if __name__ == '__main__':
