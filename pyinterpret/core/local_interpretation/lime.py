@@ -63,7 +63,6 @@ class Lime(BaseLocalInterpretation):
             neighborhood,
             data_row.reshape(1, -1),
             metric=distance_metric) \
-
             .ravel()
 
         weights = kernel_fn(distances)
