@@ -25,6 +25,7 @@ class TestLime(unittest.TestCase):
         self.y_as_prob = expit(self.y)
         self.y_as_ints = np.array([np.random.choice((0, 1), p=(1 - prob, prob)) for prob in self.y_as_prob.reshape(-1)])
 
+
     def build_regressor(self):
         self.regressor = LinearRegression()
         self.regressor.fit(self.X, self.y)
@@ -60,7 +61,6 @@ class TestLime(unittest.TestCase):
             coefs_are_correct_sign_warning += "True Coefs: {}".format(self.B)
             coefs_are_correct_sign_warning += "Estimated Coefs: {}".format(pos_coefs)
             self.fail(coefs_are_correct_sign_warning)
-
 
 if __name__ == '__main__':
     unittest.main()
