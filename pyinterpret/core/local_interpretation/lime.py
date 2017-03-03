@@ -39,7 +39,7 @@ class Lime(BaseLocalInterpretation):
 
         if kernel_width is None:
             kernel_width = np.sqrt(self.data_set.dim) * .75
-        print kernel_width
+
 
         if explainer_model == None:
             explainer_model = LinearRegression
@@ -47,33 +47,47 @@ class Lime(BaseLocalInterpretation):
         explainer_model = explainer_model()
         self._check_explainer_model_pre_train(explainer_model)
 
-
         predict_fn = self.build_annotated_model(predict_fn)
-
         kernel_fn = lambda d: np.sqrt(np.exp(-(d ** 2) / kernel_width ** 2))
 
         # data that has been sampled
         neighborhood = self.interpreter.data_set.generate_sample(strategy=sampling_strategy, sample=sample,
                                                                  n_samples_from_dataset=n_samples)
 
-
         self._check_neighborhood(neighborhood)
 
-        distances = sklearn.metrics.pairwise_distances(
-            neighborhood,
-            data_row.reshape(1, -1),
-            metric=distance_metric) \
-            .ravel()
+        weights = self.get_weights_from_cosine_similarity(neighborhood.values, data_row)
+        #weights = self.get_weights_kernel_tranformation_of_euclidean_distance(neighborhood, data_row, kernel_width, distance_metric)
 
-        weights = kernel_fn(distances)
         predictions = predict_fn(neighborhood)
-        explainer_model.fit(neighborhood, predictions, sample_weight=weights)
+
+        assert np.isfinite(weights).all(), "weights are nan or inf"
+        assert np.isfinite(predictions).all(), "predictions are nan or inf"
+        assert np.isfinite(neighborhood.values).all(), "neighborhood are nan or inf"
+
+
+        explainer_model.fit(neighborhood.values, predictions, sample_weight=weights)
         self._check_explainer_model_post_train(explainer_model)
+        assert (explainer_model.coef_ != 0.).any(), "All coefs are 0"
 
         return explainer_model.coef_
 
     def lime(self):
         pass
+
+    def get_weights_from_cosine_similarity(self, neighborhood, point):
+        similarities = sklearn.metrics.pairwise.cosine_similarity(neighborhood, point.reshape(1, -1)).ravel()
+        return abs(similarities)
+
+    def get_weights_kernel_tranformation_of_euclidean_distance(self, neighborhood, point, kernel_width, distance_metric):
+        kernel_fn = lambda d: np.sqrt(np.exp(-(d ** 2) / kernel_width ** 2))
+        distances = sklearn.metrics.pairwise_distances(
+            neighborhood,
+            point.reshape(1, -1),
+            metric=distance_metric) \
+            .ravel()
+        weights = kernel_fn(distances)
+        return weights
 
     @staticmethod
     def _check_explainer_model_pre_train(explainer_model):
