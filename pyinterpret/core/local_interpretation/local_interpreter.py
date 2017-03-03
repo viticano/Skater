@@ -107,6 +107,7 @@ class LocalInterpreter(BaseLocalInterpretation):
         self._check_explainer_model_post_train(explainer_model)
         assert (explainer_model.coef_ != 0.).any(), "All coefs are 0"
 
+        #results = pd.DataFrame(explainer_model.coef_, self.data_set.feature_ids, index = 'coef')
         return explainer_model.coef_
 
     @staticmethod

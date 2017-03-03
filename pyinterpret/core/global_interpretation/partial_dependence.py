@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from .base import BaseGlobalInterpretation
-
+from ...util.static_types import StaticTypes
 
 class PartialDependence(BaseGlobalInterpretation):
     """Contains methods for partial dependence. Subclass of BaseGlobalInterpretation"""
@@ -136,7 +136,7 @@ class PartialDependence(BaseGlobalInterpretation):
             for feature_idx, feature_id in enumerate(feature_ids):
                 pdp[feature_id] = new_row[feature_idx]
 
-            if predict_fn.n_classes:
+            if predict_fn.n_classes not in (StaticTypes.unknown, StaticTypes.not_applicable):
                 for i in range(predict_fn.n_classes):
                     pdp['mean_{}'.format(i)] = mean_prediction[i]
                     pdp['sd_{}'.format(i)] = std_prediction[i]

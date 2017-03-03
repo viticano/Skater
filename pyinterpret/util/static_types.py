@@ -1,12 +1,4 @@
 """Static types class and methods for inferring types."""
-class StaticTypes(object):
-    """Stores values for model types, output types, and keywords"""
-    model_types = ModelTypes
-    output_types = OutputTypes
-    unknown = 'unknown'
-    not_applicable = 'not applicable'
-
-
 class ModelTypes(object):
     """Stores values for model types and keywords"""
     regressor = 'regressor'
@@ -22,6 +14,13 @@ class OutputTypes(object):
     iterable = 'iterable'
     unknown = 'unknown'
 
+
+class StaticTypes(object):
+    """Stores values for model types, output types, and keywords"""
+    model_types = ModelTypes
+    output_types = OutputTypes
+    unknown = 'unknown'
+    not_applicable = 'not applicable'
 
 def return_data_type(thing):
     """Returns an output type given a variable"""

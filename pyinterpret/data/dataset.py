@@ -111,7 +111,7 @@ class DataSet(object):
         # dist_percentiles = map(lambda i: int(stats.percentileofscore(dists, i)), dists)
 
         ranks = pd.Series(dists).rank().values
-        round_to = n / float(bin_count)
+        round_to = n_rows / float(bin_count)
         rounder_func = lambda x: int(round_to * round(float(x) / round_to))
         ranks_rounded = map(rounder_func, ranks)
 
