@@ -1,6 +1,6 @@
 print "__name__: {}".format(__name__)
 from .global_interpretation.partial_dependence import PartialDependence
-from .local_interpretation.lime import Lime
+from .local_interpretation.local_interpreter import LocalInterpreter
 from ..data.dataset import DataSet
 
 
@@ -19,7 +19,7 @@ class Interpretation(object):
     '''
 
     def __init__(self):
-        self.lime = Lime(self)
+        self.local_interpreter = LocalInterpreter(self)
         self.partial_dependence = PartialDependence(self)
         self.data_set = None
 

@@ -15,7 +15,7 @@ class LocalInterpreter(BaseLocalInterpretation):
     def rbf_kernel(d, kernel_width = 1.0):
         return np.sqrt(np.exp(-(d ** 2) / kernel_width ** 2))
 
-    def lime_ds(self, data_row, predict_fn, similarity_method = 'unscaled-kernel-substitution', sample=False,
+    def lime_ds(self, data_row, predict_fn, similarity_method = 'local-affinity-scaling', sample=False,
                 n_samples=5000, sampling_strategy='uniform-over-similarity-ranks',
                 distance_metric='euclidean', kernel_width=None,
                 explainer_model=None):
@@ -82,11 +82,13 @@ class LocalInterpreter(BaseLocalInterpretation):
         if similarity_method == 'cosine-similarity':
             weights = self.get_weights_from_cosine_similarity(neighborhood.values, data_row)
         elif similarity_method == 'unscaled-kernel-substitution':
-            weights = self.get_weights_kernel_tranformation_of_euclidean_distance(neighborhood, data_row, kernel_width, distance_metric)
+            weights = self.get_weights_via_kernel_subtitution(neighborhood, data_row, kernel_width, distance_metric)
         elif similarity_method == 'scaled-kernel-substitution':
             weights = self.get_weights_kernel_tranformation_of_scaled_euclidean_distance(neighborhood, data_row, kernel_width, distance_metric)
         elif similarity_method == 'local-affinity-scaling':
-            weights = self.local_scaling_weights(neighborhood, data_row, distance_metric)
+            weights = self.get_weights_via_local_scaling_weights(neighborhood, data_row, distance_metric)
+        else:
+            raise ValueError("{} is not a valid similarity method".format(similarity_method))
 
         predictions = predict_fn(neighborhood)
 
