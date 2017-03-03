@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import sklearn
+from sklearn import metrics
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import NearestNeighbors
@@ -9,7 +9,7 @@ from sklearn.neighbors import NearestNeighbors
 from .base import BaseLocalInterpretation
 
 
-class Lime(BaseLocalInterpretation):
+class LocalInterpreter(BaseLocalInterpretation):
 
     @staticmethod
     def rbf_kernel(d, kernel_width = 1.0):
@@ -64,7 +64,7 @@ class Lime(BaseLocalInterpretation):
             kernel_width = np.sqrt(self.data_set.dim) * .75
 
 
-        if explainer_model == None:
+        if explainer_model is None:
             explainer_model = LinearRegression
 
         explainer_model = explainer_model()
@@ -110,7 +110,7 @@ class Lime(BaseLocalInterpretation):
         scaled_neighborhood = scaler.fit_transform(neighborhood)
         scaled_point = scaler.transform(point)
 
-        distances = sklearn.metrics.pairwise_distances(
+        distances = metrics.pairwise_distances(
             scaled_neighborhood,
             scaled_point.reshape(1, -1),
             metric=distance_metric) \
@@ -119,12 +119,12 @@ class Lime(BaseLocalInterpretation):
         return weights
 
     def get_weights_from_cosine_similarity(self, neighborhood, point):
-        similarities = sklearn.metrics.pairwise.cosine_similarity(neighborhood, point.reshape(1, -1)).ravel()
+        similarities = metrics.pairwise.cosine_similarity(neighborhood, point.reshape(1, -1)).ravel()
         return abs(similarities)
 
     def get_weights_via_kernel_subtitution(self, neighborhood, point, kernel_width, distance_metric):
         kernel_fn = lambda d: np.sqrt(np.exp(-(d ** 2) / kernel_width ** 2))
-        distances = sklearn.metrics.pairwise_distances(
+        distances = metrics.pairwise_distances(
             neighborhood,
             point.reshape(1, -1),
             metric=distance_metric) \
@@ -134,7 +134,7 @@ class Lime(BaseLocalInterpretation):
 
 
     def get_weights_via_local_scaling_weights(self, neighborhood, point, distance_metric):
-        distances = sklearn.metrics.pairwise_distances(
+        distances = metrics.pairwise_distances(
             neighborhood,
             point.reshape(1, -1),
             metric=distance_metric) \
@@ -165,3 +165,15 @@ class Lime(BaseLocalInterpretation):
     @staticmethod
     def _check_neighborhood(neighborhood):
         assert isinstance(neighborhood, (np.ndarray, pd.DataFrame))
+
+    def local_explainer(self, training_data, feature_names=None, categorical_features=None,
+                        categorical_names=None, kernel_width=3, verbose=False, class_names=None,
+                        feature_selection='auto', discretize_continuous=True):
+        #import lime
+        #import lime.lime_tabular
+        #, training_data, feature_names=None, categorical_features=None, categorical_names=None,
+        #kernel_width=3, verbose=False, class_names=None, feature_selection='auto', discretize_continuous=True
+
+        #return lime.lime_tabular.LimeTabularExplainer(training_data, feature_names=feature_names,
+        #                                       class_names=class_names, discretize_continuous=True)
+        pass
