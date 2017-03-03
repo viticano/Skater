@@ -1,12 +1,12 @@
 import numpy as np
 import pandas as pd
-import sklearn
+from  sklearn import metrics
 from sklearn.linear_model import LinearRegression
 
 from .base import BaseLocalInterpretation
 
 
-class Lime(BaseLocalInterpretation):
+class LocalInterpreter(BaseLocalInterpretation):
     def lime_ds(self, data_row, predict_fn, sample=False,
                 n_samples=5000, sampling_strategy='uniform-over-similarity-ranks',
                 distance_metric='euclidean', kernel_width=None,
@@ -40,13 +40,12 @@ class Lime(BaseLocalInterpretation):
         if kernel_width is None:
             kernel_width = np.sqrt(self.data_set.dim) * .75
 
-        if explainer_model == None:
+        if explainer_model is None:
             explainer_model = LinearRegression
 
         explainer_model = explainer_model()
+
         self._check_explainer_model_pre_train(explainer_model)
-
-
         predict_fn = self.build_annotated_model(predict_fn)
 
         kernel_fn = lambda d: np.sqrt(np.exp(-(d ** 2) / kernel_width ** 2))
@@ -54,16 +53,12 @@ class Lime(BaseLocalInterpretation):
         # data that has been sampled
         neighborhood = self.interpreter.data_set.generate_sample(strategy=sampling_strategy, sample=sample,
                                                                  n_samples_from_dataset=n_samples)
-
-
         self._check_neighborhood(neighborhood)
 
-        distances = sklearn.metrics.pairwise_distances(
+        distances = metrics.pairwise_distances(
             neighborhood,
             data_row.reshape(1, -1),
-            metric=distance_metric) \
-
-            .ravel()
+            metric=distance_metric).ravel()
 
         weights = kernel_fn(distances)
         predictions = predict_fn(neighborhood)
@@ -72,17 +67,23 @@ class Lime(BaseLocalInterpretation):
 
         return explainer_model.coef_
 
-    def lime(self):
+    def local_explainer(self, training_data, feature_names=None, categorical_features=None,
+                        categorical_names=None, kernel_width=3, verbose=False, class_names=None,
+                        feature_selection='auto', discretize_continuous=True):
+        #import lime
+        #import lime.lime_tabular
+        #, training_data, feature_names=None, categorical_features=None, categorical_names=None,
+        #kernel_width=3, verbose=False, class_names=None, feature_selection='auto', discretize_continuous=True
+
+        #return lime.lime_tabular.LimeTabularExplainer(training_data, feature_names=feature_names,
+        #                                       class_names=class_names, discretize_continuous=True)
         pass
 
-    @staticmethod
-    def _check_explainer_model_pre_train(explainer_model):
+    def _check_explainer_model_pre_train(self, explainer_model):
         assert hasattr(explainer_model, 'fit'), "Model needs to have a fit method "
 
-    @staticmethod
-    def _check_explainer_model_post_train(explainer_model):
+    def _check_explainer_model_post_train(self, explainer_model):
         assert hasattr(explainer_model, 'coef_'), "Model needs to have coefficients to explain "
 
-    @staticmethod
-    def _check_neighborhood(neighborhood):
+    def _check_neighborhood(self, neighborhood):
         assert isinstance(neighborhood, (np.ndarray, pd.DataFrame))
