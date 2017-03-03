@@ -83,7 +83,7 @@ class Model(object):
             example_output = outputs[0][0]
             self.output_var_type = self._return_data_type(example_output)
         else:
-            pass
+            raise ValueError("Unsupported model type, output dim = 3")
 
 
 class InMemoryModel(Model):

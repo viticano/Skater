@@ -4,13 +4,16 @@ import numpy as np
 from scipy.special import expit
 from scipy.stats import norm
 from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.datasets import load_breast_cancer
+from sklearn.ensemble import RandomForestClassifier
+import pandas as pd
 
 from pyinterpret.core.explanations import Interpretation
 
 
-class TestLime(unittest.TestCase):
+class TestLocalInterpreter(unittest.TestCase):
     def __init__(self, *args, **kwargs):
-        super(TestLime, self).__init__(*args, **kwargs)
+        super(TestLocalInterpreter, self).__init__(*args, **kwargs)
         self.build_data()
         self.build_regressor()
         self.build_classifier()
@@ -41,7 +44,7 @@ class TestLime(unittest.TestCase):
     def test_lime_regression_coefs_are_close(self, epsilon=1):
         interpreter = Interpretation()
         interpreter.consider(self.X)
-        coefs = interpreter.lime.lime_ds(self.regressor_point, self.regressor_predict_fn)
+        coefs = interpreter.local_interpreter.lime_ds(self.regressor_point, self.regressor_predict_fn)
 
         coefs_are_close_warning = "Lime coefficients  for regressions model are not close to true values for trivial case"
         coefs_are_close = all(abs(coefs - self.B) < epsilon)
@@ -53,7 +56,7 @@ class TestLime(unittest.TestCase):
     def test_lime_classifier_coefs_correct_sign(self):
         interpreter = Interpretation()
         interpreter.consider(self.X)
-        neg_coefs, pos_coefs = interpreter.lime.lime_ds(self.classifier_point, self.classifier_predict_fn)
+        neg_coefs, pos_coefs = interpreter.local_interpreter.lime_ds(self.classifier_point, self.classifier_predict_fn)
 
         coefs_are_correct_sign_warning = "Lime coefficients for classifier model are not correct sign for trivial case"
         coefs_are_correct_sign = all(np.sign(pos_coefs) == np.sign(self.B))
@@ -61,6 +64,20 @@ class TestLime(unittest.TestCase):
             coefs_are_correct_sign_warning += "True Coefs: {}".format(self.B)
             coefs_are_correct_sign_warning += "Estimated Coefs: {}".format(pos_coefs)
             self.fail(coefs_are_correct_sign_warning)
+
+
+    def test_coefs_are_non_zero_for_breast_cancer_dataset(self):
+        data = load_breast_cancer()
+        X = data.data
+        y = data.target
+        example = X[0]
+        features = [0]
+        model = RandomForestClassifier()
+        model.fit(X, y)
+        interpreter = Interpretation()
+        interpreter.consider(X)
+        lime_coef_ = interpreter.local_interpreter.lime_ds(example, model.predict_proba)
+        assert (lime_coef_ != 0).any(), "All coefficients for this are 0, maybe a bad kernel width"
 
 if __name__ == '__main__':
     unittest.main()
