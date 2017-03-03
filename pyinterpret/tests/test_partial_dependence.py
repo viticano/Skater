@@ -38,9 +38,10 @@ class TestPartialDependence(unittest.TestCase):
         interpreter.consider(self.X)
         coefs = interpreter.partial_dependence.partial_dependence([self.regressor_feature], self.regressor_predict_fn)
 
-        y = np.array(coefs['means'])
-        x = np.array(coefs['vals'])
+        y = np.array(coefs['mean'])
+        x = np.array(coefs[self.regressor_feature])[:, np.newaxis]
 
+        print x.shape, y.shape
         pdp_reg = LinearRegression()
         pdp_reg.fit(x, y)
         coef = pdp_reg.coef_[0]

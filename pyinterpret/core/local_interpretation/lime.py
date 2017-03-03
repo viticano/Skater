@@ -2,12 +2,20 @@ import numpy as np
 import pandas as pd
 import sklearn
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import NearestNeighbors
+
 
 from .base import BaseLocalInterpretation
 
 
 class Lime(BaseLocalInterpretation):
-    def lime_ds(self, data_row, predict_fn, similarity_method = 'cosine-similarity', sample=False,
+
+    @staticmethod
+    def rbf_kernel(d, kernel_width = 1.0):
+        return np.sqrt(np.exp(-(d ** 2) / kernel_width ** 2))
+
+    def lime_ds(self, data_row, predict_fn, similarity_method = 'unscaled-kernel-substitution', sample=False,
                 n_samples=5000, sampling_strategy='uniform-over-similarity-ranks',
                 distance_metric='euclidean', kernel_width=None,
                 explainer_model=None):
@@ -23,6 +31,21 @@ class Lime(BaseLocalInterpretation):
                 The observation to explain.
             predict_fn(function):
                 The model to explain
+            similarity_method(string):
+                The means by which similarities are computed. Currently supported options:
+                    cosine-similarity:
+                        generally gives more global coefficients
+                    unscaled-kernel-substitution:
+                        calculates euclidean distances, then passes these distances
+                        through a gaussian kernel with hyperparameter kernel_width
+                    scaled-kernel-substitution:
+                        calculates euclidean distances on standard-scaled data, then passes these distances
+                        through a gaussian kernel with hyperparameter kernel_width. Not recommended
+                    local-affinity-weighting:
+                        calculates euclidean distances, then passes these through an adaptive kernel
+                        function that weights according to local scales of the given data_row and each
+                        point in the neighborhood.
+
             sample(Bool):
                 Whether or not to sample the data.
             distance_metric(string):
@@ -58,8 +81,12 @@ class Lime(BaseLocalInterpretation):
 
         if similarity_method == 'cosine-similarity':
             weights = self.get_weights_from_cosine_similarity(neighborhood.values, data_row)
-        elif similarity_method == 'distance-then-transform':
+        elif similarity_method == 'unscaled-kernel-substitution':
             weights = self.get_weights_kernel_tranformation_of_euclidean_distance(neighborhood, data_row, kernel_width, distance_metric)
+        elif similarity_method == 'scaled-kernel-substitution':
+            weights = self.get_weights_kernel_tranformation_of_scaled_euclidean_distance(neighborhood, data_row, kernel_width, distance_metric)
+        elif similarity_method == 'local-affinity-scaling':
+            weights = self.local_scaling_weights(neighborhood, data_row, distance_metric)
 
         predictions = predict_fn(neighborhood)
 
@@ -77,11 +104,25 @@ class Lime(BaseLocalInterpretation):
     def lime(self):
         pass
 
+    def get_weights_kernel_tranformation_of_scaled_euclidean_distance(self, neighborhood, point, kernel_width, distance_metric):
+
+        scaler = StandardScaler(copy=True, with_mean=True, with_std=True)
+        scaled_neighborhood = scaler.fit_transform(neighborhood)
+        scaled_point = scaler.transform(point)
+
+        distances = sklearn.metrics.pairwise_distances(
+            scaled_neighborhood,
+            scaled_point.reshape(1, -1),
+            metric=distance_metric) \
+            .ravel()
+        weights = self.rbf_kernel(distances, kernel_width=kernel_width)
+        return weights
+
     def get_weights_from_cosine_similarity(self, neighborhood, point):
         similarities = sklearn.metrics.pairwise.cosine_similarity(neighborhood, point.reshape(1, -1)).ravel()
         return abs(similarities)
 
-    def get_weights_kernel_tranformation_of_euclidean_distance(self, neighborhood, point, kernel_width, distance_metric):
+    def get_weights_via_kernel_subtitution(self, neighborhood, point, kernel_width, distance_metric):
         kernel_fn = lambda d: np.sqrt(np.exp(-(d ** 2) / kernel_width ** 2))
         distances = sklearn.metrics.pairwise_distances(
             neighborhood,
@@ -90,6 +131,28 @@ class Lime(BaseLocalInterpretation):
             .ravel()
         weights = kernel_fn(distances)
         return weights
+
+
+    def get_weights_via_local_scaling_weights(self, neighborhood, point, distance_metric):
+        distances = sklearn.metrics.pairwise_distances(
+            neighborhood,
+            point.reshape(1, -1),
+            metric=distance_metric) \
+            .ravel()
+
+        combined = np.concatenate((neighborhood, point[:, np.newaxis].T), axis=0)
+        nn = NearestNeighbors(7)
+        nn.fit(combined)
+        local_distances, indices = nn.kneighbors(combined)
+        local_distances = local_distances[:, 6]
+        point_sigma = local_distances[-1:]
+        population_sigmas = local_distances[:-1]
+
+        affinities = np.exp((-1 * (distances ** 2)) / (point_sigma[0] * population_sigmas)).reshape(-1)
+        print affinities.shape
+        print neighborhood.shape
+        return affinities
+
 
     @staticmethod
     def _check_explainer_model_pre_train(explainer_model):
