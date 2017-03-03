@@ -1,29 +1,28 @@
+"""Local Interpreter class"""
+
 import numpy as np
 import pandas as pd
 from sklearn import metrics
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import NearestNeighbors
-
+from ...util.kernels import rbf_kernel
 
 from .base import BaseLocalInterpretation
 
 
 class LocalInterpreter(BaseLocalInterpretation):
+    """Contains all methods for LIME style interpretations"""
 
-    @staticmethod
-    def rbf_kernel(d, kernel_width = 1.0):
-        return np.sqrt(np.exp(-(d ** 2) / kernel_width ** 2))
-
-    def lime_ds(self, data_row, predict_fn, similarity_method = 'local-affinity-scaling', sample=False,
-                n_samples=5000, sampling_strategy='uniform-over-similarity-ranks',
+    def lime_ds(self, data_row, predict_fn, similarity_method='local-affinity-scaling',
+                sample=False, n_samples=5000,
+                sampling_strategy='uniform-over-similarity-ranks',
                 distance_metric='euclidean', kernel_width=None,
-                explainer_model=None):
+                explainer_model=LinearRegression):
 
-        """
-        For performing Local interpretable model explanation. Creates a sample of data around of point,
-        passing these points through your prediction function. This gives a linear model of the full model
-        centered around a point.
+        """For performing Local interpretable model explanation. Creates a sample of data
+        around of point, passing these points through your prediction function. This
+        gives a linear model of the full model centered around a point.
 
         Parameters
         ----------
@@ -32,29 +31,31 @@ class LocalInterpreter(BaseLocalInterpretation):
             predict_fn(function):
                 The model to explain
             similarity_method(string):
-                The means by which similarities are computed. Currently supported options:
+                The means by which similarities are computed. Currently supported
+                options:
                     cosine-similarity:
                         generally gives more global coefficients
                     unscaled-kernel-substitution:
                         calculates euclidean distances, then passes these distances
                         through a gaussian kernel with hyperparameter kernel_width
                     scaled-kernel-substitution:
-                        calculates euclidean distances on standard-scaled data, then passes these distances
-                        through a gaussian kernel with hyperparameter kernel_width. Not recommended
+                        calculates euclidean distances on standard-scaled data,
+                        then passes these distances through a gaussian kernel with
+                        hyperparameter kernel_width. Not recommended
                     local-affinity-weighting:
-                        calculates euclidean distances, then passes these through an adaptive kernel
-                        function that weights according to local scales of the given data_row and each
-                        point in the neighborhood.
+                        calculates euclidean distances, then passes these through an
+                        adaptive kernel function that weights according to local scales
+                        of the given data_row and each point in the neighborhood.
 
             sample(Bool):
                 Whether or not to sample the data.
             distance_metric(string):
-                The measure by which we evaluate distane between a point in the sampled data
-                and the data row to explain.
+                The measure by which we evaluate distane between a point in the sampled
+                data and the data row to explain.
             kernel_width(numeric):
-                We pass distances through a kernel function, this specifies the width. Smaller widths
-                will give more weight to points neighboring the explained point. Defaults to proportional
-                to dimensionality of dataset.
+                We pass distances through a kernel function, this specifies the width.
+                Smaller widths will give more weight to points neighboring the
+                explained point. Defaults to proportional to dimensionality of dataset.
             explainer_model(scikit learn model):
                 Model to use to explain the point. Defaults to Linear regression.
 
@@ -63,30 +64,35 @@ class LocalInterpreter(BaseLocalInterpretation):
         if kernel_width is None:
             kernel_width = np.sqrt(self.data_set.dim) * .75
 
-
-        if explainer_model is None:
-            explainer_model = LinearRegression
-
         explainer_model = explainer_model()
         self._check_explainer_model_pre_train(explainer_model)
 
         predict_fn = self.build_annotated_model(predict_fn)
-        kernel_fn = lambda d: np.sqrt(np.exp(-(d ** 2) / kernel_width ** 2))
 
         # data that has been sampled
-        neighborhood = self.interpreter.data_set.generate_sample(strategy=sampling_strategy, sample=sample,
+        neighborhood = self.interpreter.data_set.generate_sample(strategy=sampling_strategy,
+                                                                 sample=sample,
                                                                  n_samples_from_dataset=n_samples)
 
         self._check_neighborhood(neighborhood)
 
         if similarity_method == 'cosine-similarity':
-            weights = self.get_weights_from_cosine_similarity(neighborhood.values, data_row)
+            weights = self.get_weights_from_cosine_similarity(neighborhood.values,
+                                                              data_row)
         elif similarity_method == 'unscaled-kernel-substitution':
-            weights = self.get_weights_via_kernel_subtitution(neighborhood, data_row, kernel_width, distance_metric)
+            weights = self.get_weights_via_kernel_subtitution(neighborhood,
+                                                              data_row,
+                                                              kernel_width,
+                                                              distance_metric)
         elif similarity_method == 'scaled-kernel-substitution':
-            weights = self.get_weights_kernel_tranformation_of_scaled_euclidean_distance(neighborhood, data_row, kernel_width, distance_metric)
+            weights = self.get_weights_kernel_tranformation_of_scaled_euclidean_distance(neighborhood,
+                                                                                         data_row,
+                                                                                         kernel_width,
+                                                                                         distance_metric)
         elif similarity_method == 'local-affinity-scaling':
-            weights = self.get_weights_via_local_scaling_weights(neighborhood, data_row, distance_metric)
+            weights = self.get_weights_via_local_scaling_weights(neighborhood,
+                                                                 data_row,
+                                                                 distance_metric)
         else:
             raise ValueError("{} is not a valid similarity method".format(similarity_method))
 
@@ -103,10 +109,13 @@ class LocalInterpreter(BaseLocalInterpretation):
 
         return explainer_model.coef_
 
-    def lime(self):
-        pass
-
-    def get_weights_kernel_tranformation_of_scaled_euclidean_distance(self, neighborhood, point, kernel_width, distance_metric):
+    @staticmethod
+    def get_weights_kernel_tranformation_of_scaled_euclidean_distance(neighborhood,
+                                                                      point,
+                                                                      kernel_width,
+                                                                      distance_metric):
+        """This method scales data, then computes distance metric, then passes
+        through kernel"""
 
         scaler = StandardScaler(copy=True, with_mean=True, with_std=True)
         scaled_neighborhood = scaler.fit_transform(neighborhood)
@@ -117,14 +126,20 @@ class LocalInterpreter(BaseLocalInterpretation):
             scaled_point.reshape(1, -1),
             metric=distance_metric) \
             .ravel()
-        weights = self.rbf_kernel(distances, kernel_width=kernel_width)
+        weights = rbf_kernel(distances, kernel_width=kernel_width)
         return weights
 
-    def get_weights_from_cosine_similarity(self, neighborhood, point):
-        similarities = metrics.pairwise.cosine_similarity(neighborhood, point.reshape(1, -1)).ravel()
+    @staticmethod
+    def get_weights_from_cosine_similarity(neighborhood, point):
+        """This method computes absolute values of cosine similarities"""
+        similarities = metrics.pairwise.cosine_similarity(neighborhood,
+                                                          point.reshape(1, -1)).ravel()
         return abs(similarities)
 
-    def get_weights_via_kernel_subtitution(self, neighborhood, point, kernel_width, distance_metric):
+    @staticmethod
+    def get_weights_via_kernel_subtitution(neighborhood, point, kernel_width,
+                                           distance_metric):
+        """Computes distances, passes through gaussian kernel"""
         kernel_fn = lambda d: np.sqrt(np.exp(-(d ** 2) / kernel_width ** 2))
         distances = metrics.pairwise_distances(
             neighborhood,
@@ -134,8 +149,10 @@ class LocalInterpreter(BaseLocalInterpretation):
         weights = kernel_fn(distances)
         return weights
 
-
-    def get_weights_via_local_scaling_weights(self, neighborhood, point, distance_metric):
+    @staticmethod
+    def get_weights_via_local_scaling_weights(neighborhood, point, distance_metric):
+        """Computes distances, passes through kernel that weights distance by
+        pointwise local densities"""
         distances = metrics.pairwise_distances(
             neighborhood,
             point.reshape(1, -1),
@@ -143,16 +160,15 @@ class LocalInterpreter(BaseLocalInterpretation):
             .ravel()
 
         combined = np.concatenate((neighborhood, point[:, np.newaxis].T), axis=0)
-        nn = NearestNeighbors(7)
-        nn.fit(combined)
-        local_distances, indices = nn.kneighbors(combined)
+        nearest_neighbor = NearestNeighbors(7)
+        nearest_neighbor.fit(combined)
+        local_distances, indices = nearest_neighbor.kneighbors(combined)
         local_distances = local_distances[:, 6]
         point_sigma = local_distances[-1:]
         population_sigmas = local_distances[:-1]
 
-        affinities = np.exp((-1 * (distances ** 2)) / (point_sigma[0] * population_sigmas)).reshape(-1)
-        print affinities.shape
-        print neighborhood.shape
+        affinities = np.exp((-1 * (distances ** 2)) / (point_sigma[0] * population_sigmas))\
+            .reshape(-1)
         return affinities
 
 
@@ -171,11 +187,11 @@ class LocalInterpreter(BaseLocalInterpretation):
     def local_explainer(self, training_data, feature_names=None, categorical_features=None,
                         categorical_names=None, kernel_width=3, verbose=False, class_names=None,
                         feature_selection='auto', discretize_continuous=True):
-        #import lime
-        #import lime.lime_tabular
-        #, training_data, feature_names=None, categorical_features=None, categorical_names=None,
-        #kernel_width=3, verbose=False, class_names=None, feature_selection='auto', discretize_continuous=True
+        """Uses the lime package for explanations
 
-        #return lime.lime_tabular.LimeTabularExplainer(training_data, feature_names=feature_names,
-        #                                       class_names=class_names, discretize_continuous=True)
+        import lime
+        import lime.lime_tabular
+        return lime.lime_tabular.LimeTabularExplainer(training_data, feature_names=feature_names,
+                                               class_names=class_names, discretize_continuous=True)
+        """
         pass

@@ -1,9 +1,12 @@
+"""DataSet object"""
+
 import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_distances
 
 
 class DataSet(object):
+    """Module for passing around data to interpretation objects"""
     def __init__(self, data, feature_names=None, index=None):
         """
         The abtraction around using, accessing, sampling data for interpretation purposes.
@@ -26,7 +29,7 @@ class DataSet(object):
         elif ndim >= 3:
             raise ValueError("Data needs to be 1 or 2 dimensions, yours is {}".format(ndim))
 
-        self.n, self.dim = data.shape
+        self.n_rows, self.dim = data.shape
 
         if isinstance(data, pd.DataFrame):
             if not feature_names:
@@ -42,7 +45,7 @@ class DataSet(object):
             if not feature_names:
                 feature_names = range(self.dim)
             if not index:
-                index = range(self.n)
+                index = range(self.n_rows)
             self.feature_ids = feature_names
             self.index = index
             self.data = pd.DataFrame(data, columns=self.feature_ids, index=self.index)
@@ -97,7 +100,7 @@ class DataSet(object):
 
     def _build_metastore(self, bin_count):
 
-        n = self.data.shape[0]
+        n_rows = self.data.shape[0]
 
         medians = np.median(self.data.values, axis=0).reshape(1, self.dim)
 
@@ -112,11 +115,11 @@ class DataSet(object):
         rounder_func = lambda x: int(round_to * round(float(x) / round_to))
         ranks_rounded = map(rounder_func, ranks)
 
-        ranks_rounded = np.array(map(lambda x: round(x, 2), ranks / ranks.max()))
+        ranks_rounded = np.array([round(x, 2) for x in ranks / ranks.max()])
         return {
             'median': medians,
             'dists': dists,
-            'n': n,
+            'n_rows': n_rows,
             # 'dist_percentiles': dist_percentiles,
             'ranks': ranks,
             'ranks_rounded': ranks_rounded,
@@ -124,7 +127,8 @@ class DataSet(object):
         }
 
     def __getitem__(self, key):
-        assert key in self.feature_ids, "The key {} is not the set of feature_ids {}".format(*[key, self.feature_ids])
+        invalid_key = "The key {} is not the set of feature_ids {}".format(*[key, self.feature_ids])
+        assert key in self.feature_ids, invalid_key
         return self.data.__getitem__(key)
 
     def __setitem__(self, key, newval):
@@ -163,21 +167,19 @@ class DataSet(object):
             return pd.DataFrame(values, columns=self.feature_ids)
 
         elif strategy == 'uniform-from-percentile':
-            raise NotImplemented("We havent coded this yet.")
+            raise NotImplementedError("We havent coded this yet.")
 
         elif strategy == 'uniform-over-similarity-ranks':
 
             metastore = self._build_metastore(bin_count)
 
-            total_samples = bin_count * samples_per_bin
-
             data_distance_ranks = metastore['ranks_rounded']
             round_to = metastore['round_to']
-            n = metastore['n']
+            n_rows = metastore['n_rows']
 
             samples = []
             for i in range(bin_count):
-                j = (i * round_to) / n
+                j = (i * round_to) / n_rows
                 idx = np.where(data_distance_ranks == j)[0]
                 if idx.any():
                     new_samples = np.random.choice(idx, replace=True, size=samples_per_bin)

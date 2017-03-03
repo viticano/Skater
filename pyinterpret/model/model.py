@@ -1,4 +1,7 @@
+"""Model class."""
+
 import abc
+import requests
 import numpy as np
 from ..util.static_types import StaticTypes, return_data_type
 
@@ -24,12 +27,14 @@ class Model(object):
 
     @abc.abstractmethod
     def predict(self, *args, **kwargs):
+        """The way in which the submodule predicts values given an input"""
         return
 
     def __call__(self, *args, **kwargs):
         return self.predict(*args, **kwargs)
 
     def check_output_signature(self, examples):
+        """Determines the model_type, output_type"""
         ids = range(len(examples))
         idx = np.random.choice(ids, size=5, replace=True)
         inputs = examples[idx]
@@ -67,7 +72,19 @@ class Model(object):
 
 
 class InMemoryModel(Model):
+    """This model can be called directly from memory"""
     def __init__(self, prediction_fn, examples=None):
+        """This model can be called directly from memory
+        Parameters
+        ----------
+        prediction_fn(callable)
+            function that returns predictions
+
+        examples(numpy.array or pandas.dataframe):
+            examples to use to make inferences about the function.
+            prediction_fn must be able to take examples as an
+            argument.
+        """
         super(InMemoryModel, self).__init__(self)
         self.prediction_fn = prediction_fn
         self.examples = np.array(examples)
@@ -75,20 +92,46 @@ class InMemoryModel(Model):
             self.check_output_signature(self.examples)
 
     def predict(self, *args, **kwargs):
+        """Just use the function itself for predictions"""
         return self.prediction_fn(*args, **kwargs)
 
 
 class WebModel(Model):
+    """Model that gets predictions from a deployed model"""
     def __init__(self, uri, parse_function=None):
+        """This model can be called by making http requests
+        to the passed in uri.
+
+        Parameters
+        ----------
+        uri(string)
+            Where to post requests
+
+        parse_function(callable)
+            This function will run on outputs before returning
+            results to interpretation objects.
+        """
+        super(WebModel, self).__init__(self)
         self.uri = uri
         self.parse_function = parse_function or self.default_parser
 
-    def default_parser(self, content):
+    @staticmethod
+    def default_parser(content):
+        """Just returns raw results"""
         return content
 
-    def __call__(self, request_body, **kwargs):
-        output = parse_function(requests.get(uri, data=request_body, **kwargs).content)
-        return output
+    def predict(self, request_body, **kwargs):
+        if self.__confirm_server_is_healthy(self.uri):
+            output = self.parse_function(requests.get(self.uri, data=request_body, **kwargs).content)
+            return output
+        else:
+            raise ValueError("Server is not running.")
 
-    def __confirm_server_is_healthy(self, candidate):
-        pass
+    def __call__(self, *args, **kwargs):
+        """Just use the function itself for predictions"""
+        return self.predict(*args, **kwargs)
+
+    @staticmethod
+    def __confirm_server_is_healthy(uri):
+        """Makes sure uri is up"""
+        return bool(uri)
