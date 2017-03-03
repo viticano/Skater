@@ -1,11 +1,9 @@
 import abc
-
 import numpy as np
-
+from ..util.static_types import StaticTypes, return_data_type
 
 class Model(object):
-    """
-    What is a model? A model needs to make predictions, so a means of
+    """What is a model? A model needs to make predictions, so a means of
     passing data into the model, and receiving results.
 
     Goals:
@@ -13,39 +11,20 @@ class Model(object):
         We want to make inferences about the format of the output.
         We want to able to map model outputs to some smaller, universal set of output types.
         We want to infer whether the model is real valued, or classification (n classes?)
-
     """
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, examples=None):
         self.examples = examples
-        self.CLASSIFIER = 'classifier'
-        self.REGRESSOR = 'regressor'
-        self.STRING = 'string'
-        self.INT = 'int'
-        self.FLOAT = 'float'
-        self.UNKNOWN = None
-        self.NA = False
-        self.ITERABLE = 'iterable'
-        self.prediction_type = self.UNKNOWN
-        self.output_var_type = self.UNKNOWN
-        self.output_shape = self.UNKNOWN
-        self.n_classes = self.UNKNOWN
-        self.input_shape = self.UNKNOWN
+        self.model_type = StaticTypes.unknown
+        self.output_var_type = StaticTypes.unknown
+        self.output_shape = StaticTypes.unknown
+        self.n_classes = StaticTypes.unknown
+        self.input_shape = StaticTypes.unknown
 
     @abc.abstractmethod
     def predict(self, *args, **kwargs):
         return
-
-    def _return_data_type(self, thing):
-        if isinstance(thing, (str, unicode)):
-            return self.STRING
-        elif isinstance(thing, int):
-            return self.INT
-        elif isinstance(thing, float):
-            return self.FLOAT
-        elif hasattr(thing, "__iter__"):
-            return self.ITERABLE
 
     def __call__(self, *args, **kwargs):
         return self.predict(*args, **kwargs)
@@ -58,30 +37,31 @@ class Model(object):
         self.output_shape = outputs.shape
         if len(self.output_shape) == 1:
             self.output_shape = (None,)
-            # the predict function is either a continuous prediction, or a most-likely classification
+            # the predict function is either a continuous prediction,
+            # or a most-likely classification
             example_output = outputs[0]
-            self.output_var_type = self._return_data_type(example_output)
+            self.output_var_type = return_data_type(example_output)
 
-            if self.output_var_type == self.STRING:
+            if self.output_var_type == StaticTypes.output_types.string:
+                # the prediction is yield groups as strings, as in a classification model
+                self.model_type = StaticTypes.model_types.classifier
+
+            elif self.output_var_type == StaticTypes.output_types.int:
+                # the prediction is yield groups as integers, as in a classification model
+                self.model_type = StaticTypes.model_types.classifier
+
+            elif self.output_var_type == StaticTypes.output_types.float:
                 # the prediction is yield groups, as in a classification model
-                self.prediction_type = self.CLASSIFIER
-                self.n_classes = self.UNKNOWN
-            elif self.output_var_type == self.INT:
-                # the prediction is yield groups, as in a classification model
-                self.prediction_type = self.CLASSIFIER
-                self.n_classes = self.UNKNOWN
-            elif self.output_var_type == self.FLOAT:
-                # the prediction is yield groups, as in a classification model
-                self.prediction_type = self.REGRESSOR
-                self.n_classes = self.NA
+                self.model_type = StaticTypes.model_types.regressor
+                self.n_classes = StaticTypes.not_applicable
             else:
                 pass  # default unknowns will take care of this
         elif len(self.output_shape) == 2:
             self.output_shape = (None, self.output_shape[1])
-            self.prediction_type = self.CLASSIFIER
+            self.model_type = StaticTypes.model_types.classifier
             self.n_classes = self.output_shape[1]
             example_output = outputs[0][0]
-            self.output_var_type = self._return_data_type(example_output)
+            self.output_var_type = return_data_type(example_output)
         else:
             raise ValueError("Unsupported model type, output dim = 3")
 
