@@ -66,6 +66,7 @@ class PartialDependence(BaseGlobalInterpretation):
         '''
 
         predict_fn = self.build_annotated_model(predict_fn)
+
         assert all(feature_id in self.data_set.feature_ids for feature_id in feature_ids), "Pass in a valid ID"
         assert len(feature_ids) < 3, "Pass in at most 2 features for pdp. If you have a use case where you'd " \
                                      "like to look at 3 simultaneously, please let us know."
@@ -91,8 +92,6 @@ class PartialDependence(BaseGlobalInterpretation):
 
         n_features = len(feature_ids)
 
-        # will store [featurename: {val1: {mean:<>, std:<>}, etc...}]
-
         grid_expanded = np.array(list(product(*grid)))
 
         id_grid = np.array([range(grid_resolution) for _ in range(n_features)])
@@ -101,29 +100,37 @@ class PartialDependence(BaseGlobalInterpretation):
         # pandas dataframe
         X_mutable = X.copy()
 
-        means = np.zeros([grid_resolution for i in range(n_features)])
-        sds = np.zeros([grid_resolution for i in range(n_features)])
+        #means = np.zeros([grid_resolution for i in range(n_features)])
+        #sds = np.zeros([grid_resolution for i in range(n_features)])
 
+
+        pdps = []
         for i in range(grid_expanded.shape[0]):
+            pdp = {}
             new_row = grid_expanded[i]
             row_id = id_grid_expanded[i]
+            row_id = tuple(row_id.tolist())
             for feature_idx, feature_id in enumerate(feature_ids):
                 X_mutable[feature_id] = new_row[feature_idx]
 
             predictions = predict_fn(X_mutable.values)
-            mean_prediction = np.mean(predictions)
-            std_prediction = np.std(predictions)
+            mean_prediction = np.mean(predictions, axis = 0)
+            std_prediction = np.std(predictions, axis = 0)
 
-            means[row_id] = mean_prediction
-            sds[row_id] = std_prediction
+            for feature_idx, feature_id in enumerate(feature_ids):
+                pdp[feature_id] = new_row[feature_idx]
 
-        pdp = {
-            'features': feature_ids,
-            'means': means,
-            'sds': sds,
-            'vals': grid_expanded
-        }
-        return pdp
+            if predict_fn.n_classes:
+                for i in range(predict_fn.n_classes):
+                    pdp['mean_{}'.format(i)] = mean_prediction[i]
+                    pdp['sd_{}'.format(i)] = std_prediction[i]
+            else:
+                pdp['mean'] = mean_prediction
+                pdp['sd'] = std_prediction
+            pdps.append(pdp)
+
+
+        return pd.DataFrame(pdps)
 
     def partial_dependency_sklearn(self):
         pass

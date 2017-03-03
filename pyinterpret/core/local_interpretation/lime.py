@@ -7,7 +7,7 @@ from .base import BaseLocalInterpretation
 
 
 class Lime(BaseLocalInterpretation):
-    def lime_ds(self, data_row, predict_fn, sample=False,
+    def lime_ds(self, data_row, predict_fn, similarity_method = 'cosine-similarity', sample=False,
                 n_samples=5000, sampling_strategy='uniform-over-similarity-ranks',
                 distance_metric='euclidean', kernel_width=None,
                 explainer_model=None):
@@ -56,8 +56,10 @@ class Lime(BaseLocalInterpretation):
 
         self._check_neighborhood(neighborhood)
 
-        weights = self.get_weights_from_cosine_similarity(neighborhood.values, data_row)
-        #weights = self.get_weights_kernel_tranformation_of_euclidean_distance(neighborhood, data_row, kernel_width, distance_metric)
+        if similarity_method == 'cosine-similarity':
+            weights = self.get_weights_from_cosine_similarity(neighborhood.values, data_row)
+        elif similarity_method == 'distance-then-transform':
+            weights = self.get_weights_kernel_tranformation_of_euclidean_distance(neighborhood, data_row, kernel_width, distance_metric)
 
         predictions = predict_fn(neighborhood)
 
