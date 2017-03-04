@@ -1,5 +1,5 @@
 # PyInterpret
-
+##### Master: [![Build Status-master](https://api.travis-ci.com/repositories/datascienceinc/model-interpretation.svg?token=okdWYn5kDgeoCPJZGPEz&branch=master)]
 ###Layout
 
 ![layout](../master/PyInterpret.png?raw=true)
