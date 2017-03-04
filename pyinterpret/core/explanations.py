@@ -1,4 +1,3 @@
-print "__name__: {}".format(__name__)
 from .global_interpretation.partial_dependence import PartialDependence
 from .local_interpretation.local_interpreter import LocalInterpreter
 from ..data.dataset import DataSet

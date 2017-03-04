@@ -1,6 +1,7 @@
 import unittest
 
 import numpy as np
+import pandas as pd
 from scipy.special import expit
 from scipy.stats import norm
 from sklearn.linear_model import LinearRegression, LogisticRegression
@@ -46,7 +47,7 @@ class TestLocalInterpreter(unittest.TestCase):
         interpreter.consider(self.X)
         coefs = interpreter.local_interpreter.lime_ds(self.regressor_point, self.regressor_predict_fn)
 
-        coefs_are_close_warning = "Lime coefficients  for regressions model are not close to true values for trivial case"
+        coefs_are_close_warning = "Lime coefficients for regressions model are not close to true values for trivial case"
         coefs_are_close = all(abs(coefs - self.B) < epsilon)
         if not coefs_are_close:
             coefs_are_close_warning += "True Coefs: {}".format(self.B)
@@ -65,13 +66,22 @@ class TestLocalInterpreter(unittest.TestCase):
             coefs_are_correct_sign_warning += "Estimated Coefs: {}".format(pos_coefs)
             self.fail(coefs_are_correct_sign_warning)
 
+    def test_initializing_default_lime(self):
+        interpreter = Interpretation()
+        input_feature_names = ['a', 'b', 'c']
+        input_df = pd.DataFrame(np.random.randn(5, 4), columns=['a', 'b', 'c', 'd'])
+        input_class_names = [0, 1]
+        #explainer = interpreter.local_interpreter.local_explainer(input_df, class_names=input_class_names,
+        #                                             feature_names=input_feature_names)
+        #explainer = interpreter.local_interpreter.local_explainer()
+        #import pdb
+        #pdb.set_trace()
 
     def test_coefs_are_non_zero_for_breast_cancer_dataset(self):
         data = load_breast_cancer()
         X = data.data
         y = data.target
         example = X[0]
-        features = [0]
         model = RandomForestClassifier()
         model.fit(X, y)
         interpreter = Interpretation()
