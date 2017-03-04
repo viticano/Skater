@@ -19,6 +19,7 @@ install:
   # make sure that scipy is OK before anything else
   - python -c "import scipy"
   - python -c "import numpy"
+  - python -c "import lime"
 
 # command to run tests
 script: . run_test.sh
