@@ -5,6 +5,9 @@ import pandas as pd
 from scipy.special import expit
 from scipy.stats import norm
 from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.datasets import load_breast_cancer
+from sklearn.ensemble import RandomForestClassifier
+import pandas as pd
 
 from pyinterpret.core.explanations import Interpretation
 
@@ -74,6 +77,17 @@ class TestLocalInterpreter(unittest.TestCase):
         #import pdb
         #pdb.set_trace()
 
+    def test_coefs_are_non_zero_for_breast_cancer_dataset(self):
+        data = load_breast_cancer()
+        X = data.data
+        y = data.target
+        example = X[0]
+        model = RandomForestClassifier()
+        model.fit(X, y)
+        interpreter = Interpretation()
+        interpreter.consider(X)
+        lime_coef_ = interpreter.local_interpreter.lime_ds(example, model.predict_proba)
+        assert (lime_coef_ != 0).any(), "All coefficients for this are 0, maybe a bad kernel width"
 
 if __name__ == '__main__':
     unittest.main()
