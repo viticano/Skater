@@ -1,1 +1,1 @@
-python pyinterpret/tests/test_all.py
+python pyinterpret/tests/all_tests.py
