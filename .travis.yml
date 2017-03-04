@@ -12,7 +12,7 @@ virtualenv:
   system_site_packages: true
 
 before_install:
- - sudo apt-get build-dep python-scipy
+ - apt-get build-dep python-scipy
  - pip install scipy
  # - sudo apt-get install -qq python-numpy python-scipy
 
