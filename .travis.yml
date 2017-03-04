@@ -15,7 +15,7 @@ before_install:
 
 # command to install dependencies
 install:
-  - sudo python setup.py install
+  - python setup.py install
   # make sure that scipy is OK before anything else
   - python -c "import scipy"
 
