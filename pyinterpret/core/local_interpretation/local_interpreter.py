@@ -2,21 +2,25 @@
 
 import numpy as np
 import pandas as pd
-from sklearn import metrics
+from  sklearn import metrics
 from sklearn.linear_model import LinearRegression
+
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import NearestNeighbors
 from ...util.kernels import rbf_kernel
+
 
 from .base import BaseLocalInterpretation
 
 
 class LocalInterpreter(BaseLocalInterpretation):
+
     """Contains all methods for LIME style interpretations"""
 
     def lime_ds(self, data_row, predict_fn, similarity_method='local-affinity-scaling',
                 sample=False, n_samples=5000,
                 sampling_strategy='uniform-over-similarity-ranks',
+
                 distance_metric='euclidean', kernel_width=None,
                 explainer_model=LinearRegression):
 
@@ -65,15 +69,14 @@ class LocalInterpreter(BaseLocalInterpretation):
             kernel_width = np.sqrt(self.data_set.dim) * .75
 
         explainer_model = explainer_model()
-        self._check_explainer_model_pre_train(explainer_model)
 
+        self._check_explainer_model_pre_train(explainer_model)
         predict_fn = self.build_annotated_model(predict_fn)
 
         # data that has been sampled
         neighborhood = self.interpreter.data_set.generate_sample(strategy=sampling_strategy,
                                                                  sample=sample,
                                                                  n_samples_from_dataset=n_samples)
-
         self._check_neighborhood(neighborhood)
 
         if similarity_method == 'cosine-similarity':
@@ -96,19 +99,15 @@ class LocalInterpreter(BaseLocalInterpretation):
         else:
             raise ValueError("{} is not a valid similarity method".format(similarity_method))
 
+
+        weights = kernel_fn(distances)
         predictions = predict_fn(neighborhood)
-
-        assert np.isfinite(weights).all(), "weights are nan or inf"
-        assert np.isfinite(predictions).all(), "predictions are nan or inf"
-        assert np.isfinite(neighborhood.values).all(), "neighborhood are nan or inf"
-
-
-        explainer_model.fit(neighborhood.values, predictions, sample_weight=weights)
+        explainer_model.fit(neighborhood, predictions, sample_weight=weights)
         self._check_explainer_model_post_train(explainer_model)
-        assert (explainer_model.coef_ != 0.).any(), "All coefs are 0"
 
         #results = pd.DataFrame(explainer_model.coef_, self.data_set.feature_ids, index = 'coef')
         return explainer_model.coef_
+
 
     @staticmethod
     def get_weights_kernel_tranformation_of_scaled_euclidean_distance(neighborhood,
@@ -185,6 +184,7 @@ class LocalInterpreter(BaseLocalInterpretation):
     def _check_neighborhood(neighborhood):
         assert isinstance(neighborhood, (np.ndarray, pd.DataFrame))
 
+
     def local_explainer(self, training_data, feature_names=None, categorical_features=None,
                         categorical_names=None, kernel_width=3, verbose=False, class_names=None,
                         feature_selection='auto', discretize_continuous=True):
@@ -196,3 +196,12 @@ class LocalInterpreter(BaseLocalInterpretation):
                                                class_names=class_names, discretize_continuous=True)
         """
         pass
+
+    def _check_explainer_model_pre_train(self, explainer_model):
+        assert hasattr(explainer_model, 'fit'), "Model needs to have a fit method "
+
+    def _check_explainer_model_post_train(self, explainer_model):
+        assert hasattr(explainer_model, 'coef_'), "Model needs to have coefficients to explain "
+
+    def _check_neighborhood(self, neighborhood):
+        assert isinstance(neighborhood, (np.ndarray, pd.DataFrame))
