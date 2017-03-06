@@ -24,6 +24,7 @@ class Model(object):
         self.output_shape = StaticTypes.unknown
         self.n_classes = StaticTypes.unknown
         self.input_shape = StaticTypes.unknown
+        self.probability = StaticTypes.unknown
 
     @abc.abstractmethod
     def predict(self, *args, **kwargs):
@@ -50,15 +51,18 @@ class Model(object):
             if self.output_var_type == StaticTypes.output_types.string:
                 # the prediction is yield groups as strings, as in a classification model
                 self.model_type = StaticTypes.model_types.classifier
+                self.probability = False
 
             elif self.output_var_type == StaticTypes.output_types.int:
                 # the prediction is yield groups as integers, as in a classification model
                 self.model_type = StaticTypes.model_types.classifier
+                self.probability = False
 
             elif self.output_var_type == StaticTypes.output_types.float:
                 # the prediction is yield groups, as in a classification model
                 self.model_type = StaticTypes.model_types.regressor
                 self.n_classes = StaticTypes.not_applicable
+                self.probability = StaticTypes.not_applicable
             else:
                 pass  # default unknowns will take care of this
         elif len(self.output_shape) == 2:
@@ -67,6 +71,10 @@ class Model(object):
             self.n_classes = self.output_shape[1]
             example_output = outputs[0][0]
             self.output_var_type = return_data_type(example_output)
+            if self.output_var_type == StaticTypes.output_types.float:
+                self.probability = True
+            else:
+                self.probability = False
         else:
             raise ValueError("Unsupported model type, output dim = 3")
 

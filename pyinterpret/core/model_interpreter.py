@@ -1,8 +1,6 @@
 """Base ModelInterpreter class. submodules like lime and partial dependence"
 must have these methods"""
 
-from ..model.model import InMemoryModel
-
 
 class ModelInterpreter(object):
     '''
@@ -26,23 +24,5 @@ class ModelInterpreter(object):
         self.interpreter.consider(training_data, index=index, feature_names=feature_names)
 
     def build_annotated_model(self, prediction_function):
-        """returns a callable model that has annotations.
-        Uses examples from the Interpreter's dataset if available
+        return self.interpreter.build_annotated_model(prediction_function)
 
-        Parameters
-        ----------
-        prediction_function(callable):
-            function to generate predictions
-
-        Returns
-        ----------
-        pyinterpret.model.Model type.
-        """
-        if self.interpreter.data_set:
-            examples = self.interpreter.data_set.generate_sample(sample=True,
-                                                                 n_samples_from_dataset=5,
-                                                                 strategy='random-choice')
-        else:
-            examples = None
-        annotated_model = InMemoryModel(prediction_function, examples=examples)
-        return annotated_model
