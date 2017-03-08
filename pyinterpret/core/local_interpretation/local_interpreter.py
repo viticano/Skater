@@ -17,7 +17,7 @@ class LocalInterpreter(BaseLocalInterpretation):
 
     """Contains all methods for LIME style interpretations"""
 
-    def lime_ds(self, data_row, predict_fn, similarity_method='local-affinity-scaling',
+    def __ds_explain(self, data_row, predict_fn, similarity_method='local-affinity-scaling',
                 sample=False, n_samples=5000,
                 sampling_strategy='uniform-over-similarity-ranks',
 
@@ -100,7 +100,6 @@ class LocalInterpreter(BaseLocalInterpretation):
             raise ValueError("{} is not a valid similarity method".format(similarity_method))
 
 
-        weights = kernel_fn(distances)
         predictions = predict_fn(neighborhood)
         explainer_model.fit(neighborhood, predictions, sample_weight=weights)
         self._check_explainer_model_post_train(explainer_model)
@@ -110,7 +109,7 @@ class LocalInterpreter(BaseLocalInterpretation):
 
 
     @staticmethod
-    def get_weights_kernel_tranformation_of_scaled_euclidean_distance(neighborhood,
+    def _get_weights_kernel_tranformation_of_scaled_euclidean_distance(neighborhood,
                                                                       point,
                                                                       kernel_width,
                                                                       distance_metric):
@@ -130,14 +129,14 @@ class LocalInterpreter(BaseLocalInterpretation):
         return weights
 
     @staticmethod
-    def get_weights_from_cosine_similarity(neighborhood, point):
+    def _get_weights_from_cosine_similarity(neighborhood, point):
         """This method computes absolute values of cosine similarities"""
         similarities = metrics.pairwise.cosine_similarity(neighborhood,
                                                           point.reshape(1, -1)).ravel()
         return abs(similarities)
 
     @staticmethod
-    def get_weights_via_kernel_subtitution(neighborhood, point, kernel_width,
+    def _get_weights_via_kernel_subtitution(neighborhood, point, kernel_width,
                                            distance_metric):
         """Computes distances, passes through gaussian kernel"""
         kernel_fn = lambda d: np.sqrt(np.exp(-(d ** 2) / kernel_width ** 2))
@@ -150,7 +149,7 @@ class LocalInterpreter(BaseLocalInterpretation):
         return weights
 
     @staticmethod
-    def get_weights_via_local_scaling_weights(neighborhood, point, distance_metric):
+    def _get_weights_via_local_scaling_weights(neighborhood, point, distance_metric):
         """Computes distances, passes through kernel that weights distance by
         pointwise local densities"""
         distances = metrics.pairwise_distances(
@@ -184,19 +183,6 @@ class LocalInterpreter(BaseLocalInterpretation):
     def _check_neighborhood(neighborhood):
         assert isinstance(neighborhood, (np.ndarray, pd.DataFrame))
 
-
-    def local_explainer(self, training_data, feature_names=None, categorical_features=None,
-                        categorical_names=None, kernel_width=3, verbose=False, class_names=None,
-                        feature_selection='auto', discretize_continuous=True):
-        """Uses the lime package for explanations
-
-        import lime
-        import lime.lime_tabular
-        return lime.lime_tabular.LimeTabularExplainer(training_data, feature_names=feature_names,
-                                               class_names=class_names, discretize_continuous=True)
-        """
-        pass
-
     def _check_explainer_model_pre_train(self, explainer_model):
         assert hasattr(explainer_model, 'fit'), "Model needs to have a fit method "
 
@@ -205,3 +191,4 @@ class LocalInterpreter(BaseLocalInterpretation):
 
     def _check_neighborhood(self, neighborhood):
         assert isinstance(neighborhood, (np.ndarray, pd.DataFrame))
+

@@ -2,7 +2,7 @@ from .global_interpretation.partial_dependence import PartialDependence
 from .local_interpretation.local_interpreter import LocalInterpreter
 from ..data.dataset import DataSet
 from ..model.model import InMemoryModel
-
+import lime
 
 # Create based on class name:
 class Interpretation(object):
@@ -62,3 +62,4 @@ class Interpretation(object):
             examples = None
         annotated_model = InMemoryModel(prediction_function, examples=examples)
         return annotated_model
+
