@@ -32,7 +32,7 @@ class DataSet(object):
         self.n_rows, self.dim = data.shape
 
         if isinstance(data, pd.DataFrame):
-            if not feature_names:
+            if feature_names is None:
                 feature_names = list(data.columns.values)
             if not index:
                 index = list(data.index.values)
@@ -42,7 +42,7 @@ class DataSet(object):
 
 
         elif isinstance(data, np.ndarray):
-            if not feature_names:
+            if feature_names is None:
                 feature_names = range(self.dim)
             if not index:
                 index = range(self.n_rows)
