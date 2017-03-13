@@ -13,6 +13,10 @@ class TestPartialDependence(unittest.TestCase):
         self.build_data()
         self.build_regressor()
 
+    @staticmethod
+    def feature_column_name_formatter(columnname):
+        return "val_{}".format(columnname)
+
     def build_data(self, n=1000, seed=1, dim=3):
         self.seed = seed
         self.n = n
@@ -37,9 +41,9 @@ class TestPartialDependence(unittest.TestCase):
         interpreter = Interpretation()
         interpreter.consider(self.X)
         coefs = interpreter.partial_dependence.partial_dependence([self.regressor_feature], self.regressor_predict_fn)
-
+        val_col = self.feature_column_name_formatter(self.regressor_feature)
         y = np.array(coefs['mean'])
-        x = np.array(coefs[self.regressor_feature])[:, np.newaxis]
+        x = np.array(coefs[val_col])[:, np.newaxis]
 
         print x.shape, y.shape
         pdp_reg = LinearRegression()
