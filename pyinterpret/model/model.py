@@ -81,7 +81,7 @@ class Model(object):
         else:
             raise ValueError("Unsupported model type, output dim = 3")
 
-        self.processor = self.post_processer()
+        self.formatter = self.return_formatter_func()
 
     @staticmethod
     def classifier_prediction_to_encoded_output(output):
@@ -95,7 +95,7 @@ class Model(object):
         return output
 
 
-    def post_processer(self):
+    def return_formatter_func(self):
         if self.model_type == StaticTypes.model_types.regressor:
             return lambda x: x
 
@@ -130,7 +130,7 @@ class InMemoryModel(Model):
 
     def predict(self, *args, **kwargs):
         """Just use the function itself for predictions"""
-        return self.processor(self.prediction_fn(*args, **kwargs))
+        return self.formatter(self.prediction_fn(*args, **kwargs))
 
 
 class WebModel(Model):
