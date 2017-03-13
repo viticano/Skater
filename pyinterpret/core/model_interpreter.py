@@ -19,7 +19,7 @@ class ModelInterpreter(object):
     def _types():
         return ['partial_dependence', 'lime']
 
-    def consider(self, training_data, index=None, feature_names=None):
+    def load_data(self, training_data, index=None, feature_names=None):
         """.consider routes to Interpreter's .consider"""
         self.interpreter.consider(training_data, index=index, feature_names=feature_names)
 

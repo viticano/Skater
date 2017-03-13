@@ -23,7 +23,7 @@ class Interpretation(object):
         self.partial_dependence = PartialDependence(self)
         self.data_set = None
 
-    def consider(self, training_data, feature_names=None, index=None):
+    def load_data(self, training_data, feature_names=None, index=None):
         """Creates a DataSet object from inputs, ties to interpretation object.
         This will be exposed to all submodules.
 
