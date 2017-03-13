@@ -144,8 +144,9 @@ class PartialDependence(BaseGlobalInterpretation):
             for feature_idx, feature_id in enumerate(feature_ids):
                 pdp['val_{}'.format(feature_id)] = new_row[feature_idx]
 
-            if predict_fn.n_classes not in (StaticTypes.unknown, StaticTypes.not_applicable):
-                for class_i in range(predict_fn.n_classes):
+            #if predict_fn.n_classes not in (StaticTypes.unknown, StaticTypes.not_applicable):
+            if isinstance(mean_prediction, np.ndarray):
+                for class_i in range(mean_prediction.shape[0]):
                     pdp['mean_class_{}'.format(class_i)] = mean_prediction[class_i]
 
                     #we can return 1 sd since its a common variance across classes
@@ -236,6 +237,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                       sampling_strategy=sampling_strategy,
                                       n_samples=n_samples, bin_count=bin_count,
                                       samples_per_bin=samples_per_bin)
+
 
         ax = self._plot_pdp_from_df(feature_ids, pdp, with_variance=with_variance)
         return ax
