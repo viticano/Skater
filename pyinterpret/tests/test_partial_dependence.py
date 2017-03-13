@@ -33,13 +33,13 @@ class TestPartialDependence(unittest.TestCase):
 
     def test_pdp_with_default_sampling(self):
         interpreter = Interpretation()
-        interpreter.consider(self.X)
+        interpreter.load_data(self.X)
         coefs = interpreter.partial_dependence.partial_dependence([self.regressor_feature], self.regressor_predict_fn,
                                                                   sample=True)
 
     def test_pdp_regression_coefs_are_close_1d(self, epsilon=1):
         interpreter = Interpretation()
-        interpreter.consider(self.X)
+        interpreter.load_data(self.X)
         coefs = interpreter.partial_dependence.partial_dependence([self.regressor_feature], self.regressor_predict_fn)
         val_col = self.feature_column_name_formatter(self.regressor_feature)
         y = np.array(coefs['mean'])

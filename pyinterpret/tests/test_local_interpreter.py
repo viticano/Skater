@@ -44,8 +44,8 @@ class TestLocalInterpreter(unittest.TestCase):
 
     def test_lime_regression_coefs_are_close(self, epsilon=1):
         interpreter = Interpretation()
-        interpreter.consider(self.X)
-        coefs = interpreter.local_interpreter.lime_ds(self.regressor_point, self.regressor_predict_fn)
+        interpreter.load_data(self.X)
+        coefs = interpreter.local_interpreter.__ds_explain(self.regressor_point, self.regressor_predict_fn)
 
         coefs_are_close_warning = "Lime coefficients for regressions model are not close to true values for trivial case"
         coefs_are_close = all(abs(coefs - self.B) < epsilon)
@@ -56,8 +56,8 @@ class TestLocalInterpreter(unittest.TestCase):
 
     def test_lime_classifier_coefs_correct_sign(self):
         interpreter = Interpretation()
-        interpreter.consider(self.X)
-        neg_coefs, pos_coefs = interpreter.local_interpreter.lime_ds(self.classifier_point, self.classifier_predict_fn)
+        interpreter.load_data(self.X)
+        neg_coefs, pos_coefs = interpreter.local_interpreter.__ds_explain(self.classifier_point, self.classifier_predict_fn)
 
         coefs_are_correct_sign_warning = "Lime coefficients for classifier model are not correct sign for trivial case"
         coefs_are_correct_sign = all(np.sign(pos_coefs) == np.sign(self.B))
@@ -85,10 +85,10 @@ class TestLocalInterpreter(unittest.TestCase):
         model = RandomForestClassifier()
         model.fit(X, y)
         interpreter = Interpretation()
-        interpreter.consider(X)
-        lime_coef_ = interpreter.local_interpreter.lime_ds(example, model.predict_proba)
+        interpreter.load_data(X)
+        lime_coef_ = interpreter.local_interpreter.__ds_explain(example, model.predict_proba)
         #TODO : check on this function
         #assert (lime_coef_ != 0).any(), "All coefficients for this are 0, maybe a bad kernel width"
 
-if __name__ == '__main__':
-    unittest.main()
+#if __name__ == '__main__':
+    #unittest.main()
