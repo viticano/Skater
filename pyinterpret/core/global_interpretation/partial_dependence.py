@@ -18,7 +18,7 @@ class PartialDependence(BaseGlobalInterpretation):
     def partial_dependence(self, feature_ids, predict_fn, grid=None, grid_resolution=100,
                            grid_range=None, sample=False,
                            sampling_strategy='uniform-over-similarity-ranks',
-                           n_samples=5000, bin_count=50, samples_per_bin=10, classes=None):
+                           n_samples=5000, bin_count=50, samples_per_bin=10):
 
         """
         Computes partial_dependence of a set of variables. Essentially approximates
@@ -79,10 +79,6 @@ class PartialDependence(BaseGlobalInterpretation):
             sampling_strategy = 'uniform', use n_samples.
             total samples = bin_count * samples per bin.
 
-        classes(iterable):
-            Only build pdps for these classes. If regression model then this
-            argument is ignored. If
-
         """
 
         invalid_feature_id = "Pass in a valid ID"
@@ -121,7 +117,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
         #in the event of a regressor, this will be one
         #otherwise, itll be the number of columns in the predictor
-        #n_classes = predict_fn(examples)[:, np.newaxis].shape[-1]
+        n_classes = predict_fn(examples)[:, np.newaxis].shape[-1]
         n_features = len(feature_ids)
 
         grid_expanded = np.array(list(product(*grid)))
