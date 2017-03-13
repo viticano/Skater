@@ -3,6 +3,7 @@
 import abc
 import requests
 import numpy as np
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from ..util.static_types import StaticTypes, return_data_type
 
 class Model(object):
@@ -25,6 +26,7 @@ class Model(object):
         self.n_classes = StaticTypes.unknown
         self.input_shape = StaticTypes.unknown
         self.probability = StaticTypes.unknown
+        self.processor = lambda x: x
 
     @abc.abstractmethod
     def predict(self, *args, **kwargs):
@@ -42,12 +44,13 @@ class Model(object):
         outputs = self(inputs)
         self.output_shape = outputs.shape
         if len(self.output_shape) == 1:
+            print "shape is 1"
             self.output_shape = (None,)
             # the predict function is either a continuous prediction,
             # or a most-likely classification
             example_output = outputs[0]
             self.output_var_type = return_data_type(example_output)
-
+            print "output type: {}".format(self.output_var_type)
             if self.output_var_type == StaticTypes.output_types.string:
                 # the prediction is yield groups as strings, as in a classification model
                 self.model_type = StaticTypes.model_types.classifier
@@ -78,6 +81,32 @@ class Model(object):
         else:
             raise ValueError("Unsupported model type, output dim = 3")
 
+        self.processor = self.post_processer()
+
+    @staticmethod
+    def classifier_prediction_to_encoded_output(output):
+        label_encoder = LabelEncoder()
+        _labels = label_encoder.fit_transform(output)[:, np.newaxis]
+        class_names = label_encoder.classes_.tolist()
+
+        onehot_encoder = OneHotEncoder()
+        output = onehot_encoder.fit_transform(_labels).todense()
+        output = np.squeeze(np.asarray(output))
+        return output
+
+
+    def post_processer(self):
+        if self.model_type == StaticTypes.model_types.regressor:
+            return lambda x: x
+
+        if self.model_type == StaticTypes.model_types.classifier:
+            if self.probability == True:
+                return lambda x: x
+            elif self.probability == False:
+                return self.classifier_prediction_to_encoded_output
+        else:
+            return lambda x: x
+
 
 class InMemoryModel(Model):
     """This model can be called directly from memory"""
@@ -96,12 +125,12 @@ class InMemoryModel(Model):
         super(InMemoryModel, self).__init__(self)
         self.prediction_fn = prediction_fn
         self.examples = np.array(examples)
-        if self.examples.any():
-            self.check_output_signature(self.examples)
+        # if self.examples.any():
+        #     self.check_output_signature(self.examples)
 
     def predict(self, *args, **kwargs):
         """Just use the function itself for predictions"""
-        return self.prediction_fn(*args, **kwargs)
+        return self.processor(self.prediction_fn(*args, **kwargs))
 
 
 class WebModel(Model):

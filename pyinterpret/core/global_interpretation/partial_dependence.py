@@ -19,9 +19,9 @@ class PartialDependence(BaseGlobalInterpretation):
     def partial_dependence(self, feature_ids, predict_fn, grid=None, grid_resolution=100,
                            grid_range=(0.03, 0.97), sample=False,
                            sampling_strategy='uniform-over-similarity-ranks',
-                           n_samples=5000, bin_count=50, samples_per_bin=10):
+                           n_samples=5000, bin_count=50, samples_per_bin=10, classes = None):
 
-        '''
+        """
         Computes partial_dependence of a set of variables. Essentially approximates
         the partial partial_dependence of the predict_fn with respect to the variables
         passed.
@@ -80,9 +80,11 @@ class PartialDependence(BaseGlobalInterpretation):
             sampling_strategy = 'uniform', use n_samples.
             total samples = bin_count * samples per bin.
 
-        '''
+        classes(iterable):
+            Only build pdps for these classes. If regression model then this
+            argument is ignored. If
 
-        predict_fn = self.build_annotated_model(predict_fn)
+        """
 
         invalid_feature_id = "Pass in a valid ID"
         too_many_features = "Pass in at most 2 features for pdp. If you have a " \
@@ -111,6 +113,13 @@ class PartialDependence(BaseGlobalInterpretation):
         # make sure data_set module is giving us correct data structure
         self._check_dataset(data_sample)
 
+        predict_fn = self.build_annotated_model(predict_fn)
+        examples = data_sample.iloc[:5].values
+        predict_fn.check_output_signature(examples)
+
+        #in the event of a regressor, this will be one
+        #otherwise, itll be the number of columns in the predictor
+        n_classes = predict_fn(examples)[:, np.newaxis].shape[-1]
         n_features = len(feature_ids)
 
         grid_expanded = np.array(list(product(*grid)))
@@ -120,10 +129,6 @@ class PartialDependence(BaseGlobalInterpretation):
 
         # pandas dataframe
         data_sample_mutable = data_sample.copy()
-
-        #means = np.zeros([grid_resolution for i in range(n_features)])
-        #sds = np.zeros([grid_resolution for i in range(n_features)])
-
 
         pdps = []
         for i in range(grid_expanded.shape[0]):
@@ -142,16 +147,16 @@ class PartialDependence(BaseGlobalInterpretation):
                 pdp['val_{}'.format(feature_id)] = new_row[feature_idx]
 
             if predict_fn.n_classes not in (StaticTypes.unknown, StaticTypes.not_applicable):
-                for i in range(predict_fn.n_classes):
-                    pdp['mean_class_{}'.format(i)] = mean_prediction[i]
+                for class_i in range(predict_fn.n_classes):
+                    pdp['mean_class_{}'.format(class_i)] = mean_prediction[class_i]
 
-                #we can return 1 sd since its a common variance across classes
-                pdp['sd'] = std_prediction[i]
+                    #we can return 1 sd since its a common variance across classes
+                    #this line is currently redudant, as in it gets executed multiple times
+                    pdp['sd'] = std_prediction[class_i]
             else:
                 pdp['mean'] = mean_prediction
                 pdp['sd'] = std_prediction
             pdps.append(pdp)
-
 
         return pd.DataFrame(pdps)
 
@@ -162,7 +167,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                 n_samples=5000, bin_count=50, samples_per_bin=10
                                 ,with_variance = False):
 
-        '''
+        """
         Computes partial_dependence of a set of variables. Essentially approximates
         the partial partial_dependence of the predict_fn with respect to the variables
         passed.
@@ -221,7 +226,7 @@ class PartialDependence(BaseGlobalInterpretation):
             sampling_strategy = 'uniform', use n_samples.
             total samples = bin_count * samples per bin.
 
-        '''
+        """
 
 
         # in the event that a user wants a 3D pdp with multiple classes, how should
@@ -268,18 +273,20 @@ class PartialDependence(BaseGlobalInterpretation):
         if var_count == 1:
             feature_name = val_columns[0]
 
-            f, axes = plt.subplots(n_figs)
-            figure_list.append(f)
-            if n_figs == 1:
-                axes_cycle = cycle([axes])
-            else:
-                axes_cycle = cycle(axes)
+            # f, axes = plt.subplots(n_figs)
+            # figure_list.append(f)
+            # if n_figs == 1:
+            #     axes_cycle = cycle([axes])
+            # else:
+            #     axes_cycle = cycle(axes)
+            # ax = axes_cycle.next()
 
             for mean_col in mean_columns:
 
                 class_name = self._mean_column_name_to_class(mean_col)
 
-                ax = axes_cycle.next()
+                f, ax = plt.subplots(1)
+                figure_list.append(f)
                 axis_list.append(ax)
                 color = colors.next()
 
@@ -349,7 +356,7 @@ class PartialDependence(BaseGlobalInterpretation):
             return ""
 
         elif multi_class_regex.match(column_name):
-            start_of_name_reg = re.compile("^mean_")
+            start_of_name_reg = re.compile(r"^mean_")
             return start_of_name_reg.sub("", column_name)
 
         else:
