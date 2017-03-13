@@ -1,4 +1,5 @@
 from .model import Model
+import numpy as np
 
 class InMemoryModel(Model):
     """This model can be called directly from memory"""

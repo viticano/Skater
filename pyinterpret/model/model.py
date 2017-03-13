@@ -26,7 +26,7 @@ class Model(object):
         self.n_classes = StaticTypes.unknown
         self.input_shape = StaticTypes.unknown
         self.probability = StaticTypes.unknown
-        self.processor = lambda x: x
+        self.formatter = lambda x: x
 
     @abc.abstractmethod
     def predict(self, *args, **kwargs):

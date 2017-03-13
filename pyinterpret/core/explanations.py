@@ -1,7 +1,7 @@
 from .global_interpretation.partial_dependence import PartialDependence
 from .local_interpretation.local_interpreter import LocalInterpreter
 from ..data.dataset import DataSet
-from ..model.model import InMemoryModel
+from ..model.local import InMemoryModel
 import lime
 
 # Create based on class name:

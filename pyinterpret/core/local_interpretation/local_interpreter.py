@@ -17,7 +17,7 @@ class LocalInterpreter(BaseLocalInterpretation):
 
     """Contains all methods for LIME style interpretations"""
 
-    def __ds_explain(self, data_row, predict_fn, similarity_method='local-affinity-scaling',
+    def _ds_explain(self, data_row, predict_fn, similarity_method='local-affinity-scaling',
                 sample=False, n_samples=5000,
                 sampling_strategy='uniform-over-similarity-ranks',
 
@@ -80,20 +80,20 @@ class LocalInterpreter(BaseLocalInterpretation):
         self._check_neighborhood(neighborhood)
 
         if similarity_method == 'cosine-similarity':
-            weights = self.get_weights_from_cosine_similarity(neighborhood.values,
+            weights = self._get_weights_from_cosine_similarity(neighborhood.values,
                                                               data_row)
         elif similarity_method == 'unscaled-kernel-substitution':
-            weights = self.get_weights_via_kernel_subtitution(neighborhood,
+            weights = self._get_weights_via_kernel_subtitution(neighborhood,
                                                               data_row,
                                                               kernel_width,
                                                               distance_metric)
         elif similarity_method == 'scaled-kernel-substitution':
-            weights = self.get_weights_kernel_tranformation_of_scaled_euclidean_distance(neighborhood,
+            weights = self._get_weights_kernel_tranformation_of_scaled_euclidean_distance(neighborhood,
                                                                                          data_row,
                                                                                          kernel_width,
                                                                                          distance_metric)
         elif similarity_method == 'local-affinity-scaling':
-            weights = self.get_weights_via_local_scaling_weights(neighborhood,
+            weights = self._get_weights_via_local_scaling_weights(neighborhood,
                                                                  data_row,
                                                                  distance_metric)
         else:
