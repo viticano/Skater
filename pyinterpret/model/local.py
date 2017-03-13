@@ -1,5 +1,6 @@
-from .model import Model
+"""Model subclass for in memory predict functions"""
 import numpy as np
+from .model import Model
 
 class InMemoryModel(Model):
     """This model can be called directly from memory"""

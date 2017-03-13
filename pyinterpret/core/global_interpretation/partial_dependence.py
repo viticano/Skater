@@ -1,25 +1,24 @@
 """Partial Dependence class"""
-from itertools import product
-
+from itertools import product, cycle
+import re
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 from .base import BaseGlobalInterpretation
 from ...util.static_types import StaticTypes
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-import re
-from itertools import cycle
 
-COLORS = ['#328BD5', '#404B5A','#3EB642','#E04341', '#8665D0']
+
+COLORS = ['#328BD5', '#404B5A', '#3EB642', '#E04341', '#8665D0']
 plt.rcParams['figure.autolayout'] = True
 
 class PartialDependence(BaseGlobalInterpretation):
     """Contains methods for partial dependence. Subclass of BaseGlobalInterpretation"""
     def partial_dependence(self, feature_ids, predict_fn, grid=None, grid_resolution=100,
-                           grid_range=(0.03, 0.97), sample=False,
+                           grid_range=None, sample=False,
                            sampling_strategy='uniform-over-similarity-ranks',
-                           n_samples=5000, bin_count=50, samples_per_bin=10, classes = None):
+                           n_samples=5000, bin_count=50, samples_per_bin=10, classes=None):
 
         """
         Computes partial_dependence of a set of variables. Essentially approximates
@@ -94,6 +93,9 @@ class PartialDependence(BaseGlobalInterpretation):
             , invalid_feature_id
         assert len(feature_ids) < 3, too_many_features
 
+        grid_range = grid_range or (0.03, 0.97)
+        self._check_grid_range(grid_range)
+
         # if you dont pass a grid, build one.
         if not grid:
             grid = self.data_set.generate_grid(feature_ids,
@@ -119,7 +121,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
         #in the event of a regressor, this will be one
         #otherwise, itll be the number of columns in the predictor
-        n_classes = predict_fn(examples)[:, np.newaxis].shape[-1]
+        #n_classes = predict_fn(examples)[:, np.newaxis].shape[-1]
         n_features = len(feature_ids)
 
         grid_expanded = np.array(list(product(*grid)))
@@ -160,12 +162,12 @@ class PartialDependence(BaseGlobalInterpretation):
 
         return pd.DataFrame(pdps)
 
-    def plot_partial_dependence(self, feature_ids, predict_fn,class_id = None,
+    def plot_partial_dependence(self, feature_ids, predict_fn, class_id=None,
                                 grid=None, grid_resolution=100,
-                                grid_range=(0.03, 0.97), sample=False,
+                                grid_range=None, sample=False,
                                 sampling_strategy='uniform-over-similarity-ranks',
-                                n_samples=5000, bin_count=50, samples_per_bin=10
-                                ,with_variance = False):
+                                n_samples=5000, bin_count=50, samples_per_bin=10,
+                                with_variance=False):
 
         """
         Computes partial_dependence of a set of variables. Essentially approximates
@@ -233,17 +235,17 @@ class PartialDependence(BaseGlobalInterpretation):
         # we handle this? currently each class will get its own figure
 
         pdp = self.partial_dependence(feature_ids, predict_fn,
-                                     grid=grid, grid_resolution=grid_resolution,
-                                     grid_range=grid_range, sample=sample,
-                                     sampling_strategy=sampling_strategy,
-                                     n_samples=n_samples, bin_count=bin_count,
-                                     samples_per_bin=samples_per_bin)
+                                      grid=grid, grid_resolution=grid_resolution,
+                                      grid_range=grid_range, sample=sample,
+                                      sampling_strategy=sampling_strategy,
+                                      n_samples=n_samples, bin_count=bin_count,
+                                      samples_per_bin=samples_per_bin)
 
-        ax = self._plot_pdp_from_df(feature_ids, pdp, with_variance = with_variance)
+        ax = self._plot_pdp_from_df(feature_ids, pdp, with_variance=with_variance)
         return ax
 
 
-    def _plot_pdp_from_df(self, feature_ids, pdp, with_variance = False):
+    def _plot_pdp_from_df(self, feature_ids, pdp, with_variance=False):
 
         colors = cycle(COLORS)
         var_count = len(feature_ids)
@@ -267,7 +269,7 @@ class PartialDependence(BaseGlobalInterpretation):
         val_regex = re.compile(val_col_pattern)
         val_columns = filter(val_regex.match, columns)
 
-        n_figs = len(mean_columns)
+        #n_figs = len(mean_columns)
         figure_list, axis_list = [], []
 
         if var_count == 1:
@@ -292,7 +294,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
                 data = pdp.set_index(feature_name)
                 plane = data[mean_col]
-                plane.plot(ax=ax, color = color)
+                plane.plot(ax=ax, color=color)
 
                 if with_variance:
                     upper_plane = plane + data[sd_col]
@@ -320,11 +322,11 @@ class PartialDependence(BaseGlobalInterpretation):
                 axis_list.append(ax)
                 color = colors.next()
                 ax.plot_trisurf(pdp[feature1].values, pdp[feature2].values,
-                            pdp[mean_col].values, alpha=.5, color = color)
+                                pdp[mean_col].values, alpha=.5, color=color)
                 ax.set_xlabel(feature1)
                 ax.set_ylabel(feature2)
                 class_name = self._mean_column_name_to_class(mean_col)
-                ax.set_zlabel("Predicted ".format(class_name))
+                ax.set_zlabel("Predicted {}".format(class_name))
                 handles, labels = ax.get_legend_handles_labels()
                 ax.legend(handles, labels)
 
@@ -362,3 +364,9 @@ class PartialDependence(BaseGlobalInterpretation):
         else:
             #should we raise here?
             return ""
+
+    @staticmethod
+    def _check_grid_range(grid_range):
+        assert len(grid_range) == 2, "grid range must have 2 elements"
+        assert all([i >= 0 and i <= 1 for i in grid_range]),\
+            "elements of grid range must be between 0 and 1"

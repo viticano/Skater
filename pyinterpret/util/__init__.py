@@ -1,3 +1,4 @@
+"""Includes kernels, static type/properties for package"""
 from .kernels import rbf_kernel
 from .static_types import return_data_type, StaticTypes, ModelTypes, OutputTypes
 

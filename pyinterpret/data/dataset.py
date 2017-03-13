@@ -90,7 +90,7 @@ class DataSet(object):
         feature_id_warning = "Must pass in feature ids contained in DataSet.feature_ids"
         assert all(feature_id in self.feature_ids for feature_id in feature_ids), feature_id_warning
 
-        grid_range = map(lambda x: x * 100, grid_range)
+        grid_range = [x * 100 for x in grid_range]
         bins = np.linspace(*grid_range, num=grid_resolution)
         grid = []
         for feature_id in feature_ids:

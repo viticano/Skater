@@ -1,7 +1,6 @@
 """Model class."""
 
 import abc
-import requests
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from ..util.static_types import StaticTypes, return_data_type
@@ -74,10 +73,7 @@ class Model(object):
             self.n_classes = self.output_shape[1]
             example_output = outputs[0][0]
             self.output_var_type = return_data_type(example_output)
-            if self.output_var_type == StaticTypes.output_types.float:
-                self.probability = True
-            else:
-                self.probability = False
+            self.probability = (self.output_var_type == StaticTypes.output_types.float)
         else:
             raise ValueError("Unsupported model type, output dim = 3")
 
@@ -85,9 +81,11 @@ class Model(object):
 
     @staticmethod
     def classifier_prediction_to_encoded_output(output):
+        """Call this method when model returns a 1D array of
+        predicted classes. The output is one hot encoded version"""
         label_encoder = LabelEncoder()
         _labels = label_encoder.fit_transform(output)[:, np.newaxis]
-        class_names = label_encoder.classes_.tolist()
+        #class_names = label_encoder.classes_.tolist()
 
         onehot_encoder = OneHotEncoder()
         output = onehot_encoder.fit_transform(_labels).todense()
@@ -96,14 +94,12 @@ class Model(object):
 
 
     def return_formatter_func(self):
-        if self.model_type == StaticTypes.model_types.regressor:
-            return lambda x: x
-
-        if self.model_type == StaticTypes.model_types.classifier:
-            if self.probability == True:
-                return lambda x: x
-            elif self.probability == False:
-                return self.classifier_prediction_to_encoded_output
+        """In the event that the predict func returns 1D array of predictions,
+        then this returns a formatter to convert outputs to a 2D one hot encoded
+        array."""
+        #Note this expression below assumptions (not probability) evaluates to false if
+        #and only if the model does not return probabilities. If unknown, should be true
+        if self.model_type == StaticTypes.model_types.classifier and not self.probability:
+            return self.classifier_prediction_to_encoded_output
         else:
             return lambda x: x
-

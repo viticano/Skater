@@ -24,5 +24,5 @@ class ModelInterpreter(object):
         self.interpreter.consider(training_data, index=index, feature_names=feature_names)
 
     def build_annotated_model(self, prediction_function):
+        """returns pyinterpret.model.InMemoryModel"""
         return self.interpreter.build_annotated_model(prediction_function)
-

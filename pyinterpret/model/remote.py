@@ -1,3 +1,5 @@
+"Subclass of Model for deployed models"
+import requests
 from .model import Model
 
 class DeployModel(Model):
@@ -15,7 +17,7 @@ class DeployModel(Model):
             This function will run on outputs before returning
             results to interpretation objects.
         """
-        super(WebModel, self).__init__(self)
+        super(DeployModel, self).__init__(self)
         self.uri = uri
         self.parse_function = parse_function or self.default_parser
 
@@ -26,7 +28,9 @@ class DeployModel(Model):
 
     def predict(self, request_body, **kwargs):
         if self.__confirm_server_is_healthy(self.uri):
-            output = self.parse_function(requests.get(self.uri, data=request_body, **kwargs).content)
+            output = self.parse_function(
+                requests.get(self.uri, data=request_body, **kwargs).content
+            )
             return output
         else:
             raise ValueError("Server is not running.")

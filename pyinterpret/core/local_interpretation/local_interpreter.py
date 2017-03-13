@@ -18,11 +18,10 @@ class LocalInterpreter(BaseLocalInterpretation):
     """Contains all methods for LIME style interpretations"""
 
     def _ds_explain(self, data_row, predict_fn, similarity_method='local-affinity-scaling',
-                sample=False, n_samples=5000,
-                sampling_strategy='uniform-over-similarity-ranks',
-
-                distance_metric='euclidean', kernel_width=None,
-                explainer_model=LinearRegression):
+                    sample=False, n_samples=5000,
+                    sampling_strategy='uniform-over-similarity-ranks',
+                    distance_metric='euclidean', kernel_width=None,
+                    explainer_model=LinearRegression):
 
         """For performing Local interpretable model explanation. Creates a sample of data
         around of point, passing these points through your prediction function. This
@@ -84,21 +83,20 @@ class LocalInterpreter(BaseLocalInterpretation):
                                                               data_row)
         elif similarity_method == 'unscaled-kernel-substitution':
             weights = self._get_weights_via_kernel_subtitution(neighborhood,
-                                                              data_row,
-                                                              kernel_width,
-                                                              distance_metric)
+                                                               data_row,
+                                                               kernel_width,
+                                                               distance_metric)
         elif similarity_method == 'scaled-kernel-substitution':
             weights = self._get_weights_kernel_tranformation_of_scaled_euclidean_distance(neighborhood,
-                                                                                         data_row,
-                                                                                         kernel_width,
-                                                                                         distance_metric)
+                                                                                          data_row,
+                                                                                          kernel_width,
+                                                                                          distance_metric)
         elif similarity_method == 'local-affinity-scaling':
             weights = self._get_weights_via_local_scaling_weights(neighborhood,
-                                                                 data_row,
-                                                                 distance_metric)
+                                                                  data_row,
+                                                                  distance_metric)
         else:
             raise ValueError("{} is not a valid similarity method".format(similarity_method))
-
 
         predictions = predict_fn(neighborhood)
         explainer_model.fit(neighborhood, predictions, sample_weight=weights)
@@ -110,9 +108,9 @@ class LocalInterpreter(BaseLocalInterpretation):
 
     @staticmethod
     def _get_weights_kernel_tranformation_of_scaled_euclidean_distance(neighborhood,
-                                                                      point,
-                                                                      kernel_width,
-                                                                      distance_metric):
+                                                                       point,
+                                                                       kernel_width,
+                                                                       distance_metric):
         """This method scales data, then computes distance metric, then passes
         through kernel"""
 
@@ -182,13 +180,3 @@ class LocalInterpreter(BaseLocalInterpretation):
     @staticmethod
     def _check_neighborhood(neighborhood):
         assert isinstance(neighborhood, (np.ndarray, pd.DataFrame))
-
-    def _check_explainer_model_pre_train(self, explainer_model):
-        assert hasattr(explainer_model, 'fit'), "Model needs to have a fit method "
-
-    def _check_explainer_model_post_train(self, explainer_model):
-        assert hasattr(explainer_model, 'coef_'), "Model needs to have coefficients to explain "
-
-    def _check_neighborhood(self, neighborhood):
-        assert isinstance(neighborhood, (np.ndarray, pd.DataFrame))
-
