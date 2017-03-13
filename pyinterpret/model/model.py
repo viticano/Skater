@@ -43,13 +43,13 @@ class Model(object):
         outputs = self(inputs)
         self.output_shape = outputs.shape
         if len(self.output_shape) == 1:
-            print "shape is 1"
+            #print "shape is 1"
             self.output_shape = (None,)
             # the predict function is either a continuous prediction,
             # or a most-likely classification
             example_output = outputs[0]
             self.output_var_type = return_data_type(example_output)
-            print "output type: {}".format(self.output_var_type)
+            #print "output type: {}".format(self.output_var_type)
             if self.output_var_type == StaticTypes.output_types.string:
                 # the prediction is yield groups as strings, as in a classification model
                 self.model_type = StaticTypes.model_types.classifier
