@@ -69,8 +69,8 @@ class TestData(unittest.TestCase):
     def test_generate_grid_1_variable(self):
         """Ensures generate grid works with 1 variable"""
         array_1d = np.random.normal(0, 1, size=self.n)
-        data_set = DataSet(array_1d, feature_names=self.feature_names, index=self.index)
-        grid = data_set.generate_grid(self.feature_names[0:1], grid_resolution=100)
+        data_set = DataSet(array_1d)
+        grid = data_set.generate_grid(data_set.feature_ids[0:1], grid_resolution=100)
         assert grid.shape == (1, 100)
 
     def test_generate_grid_2_variables(self):
