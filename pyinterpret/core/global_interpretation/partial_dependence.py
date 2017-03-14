@@ -112,12 +112,11 @@ class PartialDependence(BaseGlobalInterpretation):
         self._check_dataset(data_sample)
 
         predict_fn = self.build_annotated_model(predict_fn)
-        examples = data_sample.iloc[:5].values
-        predict_fn.check_output_signature(examples)
+        predict_fn.check_output_signature(data_sample.values)
 
         #in the event of a regressor, this will be one
         #otherwise, itll be the number of columns in the predictor
-        n_classes = predict_fn(examples)[:, np.newaxis].shape[-1]
+        n_classes = predict_fn.n_classes
         n_features = len(feature_ids)
 
         grid_expanded = np.array(list(product(*grid)))
@@ -273,14 +272,6 @@ class PartialDependence(BaseGlobalInterpretation):
         if var_count == 1:
             feature_name = val_columns[0]
 
-            # f, axes = plt.subplots(n_figs)
-            # figure_list.append(f)
-            # if n_figs == 1:
-            #     axes_cycle = cycle([axes])
-            # else:
-            #     axes_cycle = cycle(axes)
-            # ax = axes_cycle.next()
-
             for mean_col in mean_columns:
 
                 class_name = self._mean_column_name_to_class(mean_col)
@@ -311,7 +302,6 @@ class PartialDependence(BaseGlobalInterpretation):
 
         elif var_count == 2:
             feature1, feature2 = val_columns
-
             for mean_col in mean_columns:
                 f = plt.figure()
                 ax = f.add_subplot(111, projection='3d')
@@ -321,6 +311,14 @@ class PartialDependence(BaseGlobalInterpretation):
                 color = colors.next()
                 ax.plot_trisurf(pdp[feature1].values, pdp[feature2].values,
                                 pdp[mean_col].values, alpha=.5, color=color)
+                if with_variance:
+                    var_color = colors.next()
+                    ax.plot_trisurf(pdp[feature1].values, pdp[feature2].values,
+                                    (pdp[mean_col] + pdp[sd_col]).values, alpha=.2,
+                                    color=var_color)
+                    ax.plot_trisurf(pdp[feature1].values, pdp[feature2].values,
+                                    (pdp[mean_col] - pdp[sd_col]).values, alpha=.2,
+                                    color=var_color)
                 ax.set_xlabel(feature1)
                 ax.set_ylabel(feature2)
                 class_name = self._mean_column_name_to_class(mean_col)

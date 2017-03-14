@@ -54,16 +54,22 @@ class Model(object):
                 # the prediction is yield groups as strings, as in a classification model
                 self.model_type = StaticTypes.model_types.classifier
                 self.probability = False
+                self.n_classes = len(np.unique(outputs))
 
             elif self.output_var_type == StaticTypes.output_types.int:
                 # the prediction is yield groups as integers, as in a classification model
                 self.model_type = StaticTypes.model_types.classifier
                 self.probability = False
+                self.n_classes = len(np.unique(outputs))
 
             elif self.output_var_type == StaticTypes.output_types.float:
-                # the prediction is yield groups, as in a classification model
+                # the prediction returning 1D continuous values
+                # this is not a stable method
+                # technically, you could classify things as
+                # something like 0.0 and 1.0
+                # perhaps it would be better if counted unique values?
                 self.model_type = StaticTypes.model_types.regressor
-                self.n_classes = StaticTypes.not_applicable
+                self.n_classes = 1
                 self.probability = StaticTypes.not_applicable
             else:
                 pass  # default unknowns will take care of this
