@@ -3,6 +3,7 @@
 import abc
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+from sklearn.utils.multiclass import type_of_target
 
 from ..util.static_types import StaticTypes, return_data_type
 from ..util.logger import build_logger
@@ -89,40 +90,48 @@ class Model(object):
         outputs = self(examples)
         self.input_shape = examples.shape
         self.output_shape = outputs.shape
-        if len(self.output_shape) == 1:
-            # the predict function is either a continuous prediction,
-            # or a most-likely classification
-            example_output = outputs[0]
-            self.output_var_type = return_data_type(example_output)
-            if self.output_var_type in (StaticTypes.output_types.string,
-                                        StaticTypes.output_types.int):
-                # the prediction is yield groups as strings or ints,
-                # as in a classification model
-                self.model_type = StaticTypes.model_types.classifier
-                self.probability = False
-                self.n_classes = len(np.unique(outputs))
 
-            elif self.output_var_type == StaticTypes.output_types.float:
-                # the prediction returning 1D continuous values
-                # this is not a stable method
-                # technically, you could classify things as
-                # something like 0.0 and 1.0
-                # perhaps it would be better if counted unique values?
-                self.model_type = StaticTypes.model_types.regressor
-                self.n_classes = 1
-                self.probability = StaticTypes.not_applicable
-                self.logger.warn("Inferring model type to be a regressor"
-                                 "due to 1D array of floats")
-            else:
-                pass  # default unknowns will take care of this
-        elif len(self.output_shape) == 2:
+        ndim = len(outputs.shape)
+        if ndim > 2:
+            raise ValueError("Unsupported model type, output dim = {}".format(ndim))
+
+        try:
+            #continuous, binary, continuous multioutput, multiclass, multilabel-indicator
+            self.output_type = type_of_target(outputs)
+        except:
+            self.output_type = False
+
+        if self.output_type == 'continuous':
+            self.model_type = StaticTypes.model_types.regressor
+            self.n_classes = 1
+            self.probability = StaticTypes.not_applicable
+
+        elif self.output_type == 'multiclass':
             self.model_type = StaticTypes.model_types.classifier
-            self.n_classes = self.output_shape[1]
-            example_output = outputs[0][0]
-            self.output_var_type = return_data_type(example_output)
-            self.probability = (self.output_var_type == StaticTypes.output_types.float)
+            self.probability = False
+            self.n_classes = len(np.unique)
+
+        elif self.output_type == 'continuous-multioutput':
+            self.model_type = StaticTypes.model_types.classifier
+            self.probability = True
+            self.n_classes = outputs.shape[1]
+
+        elif self.output_type == 'binary':
+            self.model_type = StaticTypes.model_types.classifier
+            self.probability = False
+            self.n_classes = 2
+
+        elif self.output_type == 'multilabel-indicator':
+            self.model_type = StaticTypes.model_types.classifier
+            self.probability = False
+            self.n_classes = outputs.shape[1]
+
         else:
-            raise ValueError("Unsupported model type, output dim = 3")
+            err_msg = "Could not infer model type"
+            self.logger.debug("Inputs: {}".format(examples))
+            self.logger.debug("Outputs: {}".format(outputs))
+            self.logger.debug("sklearn response: {}".format(self.output_type))
+            exceptions.ModelError(err_msg)
 
         self.formatter = self.return_transformer_func()
 
