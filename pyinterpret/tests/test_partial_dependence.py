@@ -5,43 +5,45 @@ from scipy.stats import norm
 from scipy.special import expit
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from functools import partial
+import sys
+import argparse
 
 from pyinterpret.core.explanations import Interpretation
 from pyinterpret.util import exceptions
 
 class TestPartialDependence(unittest.TestCase):
-    def __init__(self, *args, **kwargs):
-        super(TestPartialDependence, self).__init__(*args, **kwargs)
-        self.build_data()
-        self.build_regressor()
-        self.build_classifier()
-
-    @staticmethod
-    def feature_column_name_formatter(columnname):
-        return "val_{}".format(columnname)
-
-    def build_data(self, n=1000, seed=1, dim=3):
-        self.seed = seed
-        self.n = n
-        self.dim = dim
+    def setUp(self):
+        self.parser = create_parser()
+        args = self.parser.parse_args()
+        debug = args.debug
+        self.seed = args.seed
+        self.n = args.n
+        self.dim = args.dim
         self.features = [str(i) for i in range(self.dim)]
         self.X = norm.rvs(0, 1, size=(self.n, self.dim), random_state=self.seed)
         self.B = np.array([-10.1, 2.2, 6.1])
         self.y = np.dot(self.X, self.B)
         self.y_as_int = np.round(expit(self.y))
-        self.interpreter = Interpretation(log_level=10)
+        self.y_as_string = np.array([str(i) for i in self.y_as_int])
+        if debug:
+            self.interpreter = Interpretation(log_level=10)
+        else:
+            self.interpreter = Interpretation(log_level=30)
         self.interpreter.load_data(self.X, feature_names=self.features)
 
-    def build_regressor(self):
         self.regressor = LinearRegression()
         self.regressor.fit(self.X, self.y)
         self.regressor_predict_fn = self.regressor.predict
-
-    def build_classifier(self):
         self.classifier = LogisticRegression()
         self.classifier.fit(self.X, self.y_as_int)
         self.classifier_predict_fn = self.classifier.predict
         self.classifier_predict_proba_fn = self.classifier.predict_proba
+        self.string_classifier = LogisticRegression()
+        self.string_classifier.fit(self.X, self.y_as_string)
+
+    @staticmethod
+    def feature_column_name_formatter(columnname):
+        return "val_{}".format(columnname)
 
     def test_pdp_with_default_sampling(self):
         coefs = self.interpreter.partial_dependence.partial_dependence([self.features[0]],
@@ -101,26 +103,51 @@ class TestPartialDependence(unittest.TestCase):
         self.assertRaises(exceptions.MalformedGridRangeError, pdp_func)
 
     def test_pdp_1d_classifier_no_proba(self):
-        coefs = self.interpreter.partial_dependence.plot_partial_dependence(self.features[:1],
+        coefs = self.interpreter.partial_dependence.partial_dependence(self.features[:1],
                                                                        self.classifier_predict_fn,
                                                                        grid_resolution=10)
 
     def test_pdp_2d_classifier_no_proba(self):
-        coefs = self.interpreter.partial_dependence.plot_partial_dependence(self.features[:2],
+        coefs = self.interpreter.partial_dependence.partial_dependence(self.features[:2],
                                                                             self.classifier_predict_fn,
                                                                             grid_resolution=10)
 
     def test_pdp_1d_classifier_with_proba(self):
-        coefs = self.interpreter.partial_dependence.plot_partial_dependence(self.features[:1],
+        coefs = self.interpreter.partial_dependence.partial_dependence(self.features[:1],
                                                                             self.classifier_predict_proba_fn,
                                                                             grid_resolution=10)
 
     def test_pdp_2d_classifier_with_proba(self):
-        coefs = self.interpreter.partial_dependence.plot_partial_dependence(self.features[:2],
+        coefs = self.interpreter.partial_dependence.partial_dependence(self.features[:2],
                                                                             self.classifier_predict_proba_fn,
                                                                             grid_resolution=10)
 
+    def test_pdp_1d_string_classifier_no_proba(self):
+        coefs = self.interpreter.partial_dependence.partial_dependence(self.features[:1],
+                                                                       self.string_classifier.predict,
+                                                                       grid_resolution=10)
+
+    def test_pdp_1d_string_classifier_with_proba(self):
+        coefs = self.interpreter.partial_dependence.partial_dependence(self.features[:1],
+                                                                       self.string_classifier.predict_proba,
+                                                                       grid_resolution=10)
+
     #TODO: Add tests for various kinds of kwargs like sampling for pdp funcs
 
+def arg_parse(args):
+    parser = create_parser()
+    return parser.parse_args(args)
+
+def create_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--debug', action='store_true')
+    parser.add_argument('--seed', default=1, type=int)
+    parser.add_argument('--n', default=1000, type=int)
+    parser.add_argument('--dim', default=3, type=int)
+    return parser
+
 if __name__ == '__main__':
-    unittest.main()
+    parser = create_parser()
+    args = parser.parse_args()
+    unit_argv = [sys.argv[0]] + args.debug
+    unittest.main(argv=unit_argv)

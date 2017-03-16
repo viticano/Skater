@@ -24,3 +24,8 @@ i = Interpretation()
 i.load_data(regressor_X)
 i.partial_dependence.plot_partial_dependence([feature_id1, feature_id2],regressor.predict)
 ```
+
+### Testing
+```
+python pyinterpret/tests/test_all.py --debug --n=1000 --dim=3 --seed=1
+```
