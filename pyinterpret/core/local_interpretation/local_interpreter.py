@@ -70,7 +70,7 @@ class LocalInterpreter(BaseLocalInterpretation):
         explainer_model = explainer_model()
 
         self._check_explainer_model_pre_train(explainer_model)
-        predict_fn = self.build_annotated_model(predict_fn)
+        predict_fn = self.build_annotated_model(predict_fn, examples=self.data_set.data.values)
 
         # data that has been sampled
         neighborhood = self.interpreter.data_set.generate_sample(strategy=sampling_strategy,

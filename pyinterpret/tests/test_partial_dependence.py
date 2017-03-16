@@ -6,10 +6,10 @@ from scipy.special import expit
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from functools import partial
 import sys
-import argparse
 
 from pyinterpret.core.explanations import Interpretation
 from pyinterpret.util import exceptions
+from pyinterpret.tests.arg_parser import arg_parse, create_parser
 
 class TestPartialDependence(unittest.TestCase):
     def setUp(self):
@@ -133,18 +133,6 @@ class TestPartialDependence(unittest.TestCase):
                                                                        grid_resolution=10)
 
     #TODO: Add tests for various kinds of kwargs like sampling for pdp funcs
-
-def arg_parse(args):
-    parser = create_parser()
-    return parser.parse_args(args)
-
-def create_parser():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--debug', action='store_true')
-    parser.add_argument('--seed', default=1, type=int)
-    parser.add_argument('--n', default=1000, type=int)
-    parser.add_argument('--dim', default=3, type=int)
-    return parser
 
 if __name__ == '__main__':
     parser = create_parser()
