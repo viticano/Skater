@@ -2,10 +2,12 @@
 import requests
 from .model import Model
 
-class DeployModel(Model):
+
+class DeployedModel(Model):
     """Model that gets predictions from a deployed model"""
     def __init__(self, uri, parse_function=None):
-        """This model can be called by making http requests
+        """
+        This model can be called by making http requests
         to the passed in uri.
 
         Parameters
@@ -17,7 +19,7 @@ class DeployModel(Model):
             This function will run on outputs before returning
             results to interpretation objects.
         """
-        super(DeployModel, self).__init__(self)
+        super(DeployedModel, self).__init__(self)
         self.uri = uri
         self.parse_function = parse_function or self.default_parser
 
