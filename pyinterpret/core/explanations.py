@@ -1,64 +1,114 @@
+"""Interpretation Class"""
+
 from .global_interpretation.partial_dependence import PartialDependence
 from .local_interpretation.local_interpreter import LocalInterpreter
 from ..data.dataset import DataSet
-from ..model.model import InMemoryModel
+from ..model.local import InMemoryModel
+from ..util.logger import build_logger
 
 
-# Create based on class name:
 class Interpretation(object):
-    '''
-    Returns an interpretation class.
+    """
+    Interpretation class. Before calling interpretation subclasses like partial
+    dependence, one must call Interpretation.load_data().
 
-    Parameters:
-    -----------
-        interpretation_type(string): pdp, lime
-
-    Returns:
+    Attributes:
     ----------
-        interpretation subclass
-    '''
+    data_set: pyinterpret.data.DataSet
+        Pyinterpret's data abstraction layer. All interactions with data goes through
+         this object.
 
-    def __init__(self):
+    local_interpreter: pyinterpret.core.local_interpreter.LocalInterpreter
+        Contains methods for interpreting single prediction. Currently exposes the lime
+        library.
+
+    global_interpreter: pyinterpret.core.global_interpreter.GlobalInterpreter
+        Contains methods for evaluating a model over entire regions of the domain. Currently
+        exposes partial dependency
+
+
+    Examples:
+    ----------
+
+    from pyinterpret.core.explanations import Interpretation
+    interpreter = Interpretation()
+    interpreter.load_data(X, feature_ids = ['a','b'])
+    interpreter.partial_dependence([feature_id1, feature_id2], regressor.predict)
+    """
+
+    def __init__(self, log_level=30):
+        """
+        Attaches local and global interpretations
+        to Interpretation object.
+
+        Parameters:
+        -----------
+        log_level: int
+            Logger Verbosity, see https://docs.python.org/2/library/logging.html
+            for details.
+
+        """
+        self._log_level = log_level
+        self.logger = build_logger(log_level, __name__)
         self.local_interpreter = LocalInterpreter(self)
         self.partial_dependence = PartialDependence(self)
         self.data_set = None
 
-    def consider(self, training_data, feature_names=None, index=None):
-        """Creates a DataSet object from inputs, ties to interpretation object.
+    def load_data(self, training_data, feature_names=None, index=None):
+        """
+        Creates a DataSet object from inputs, ties to interpretation object.
         This will be exposed to all submodules.
 
         Parameters
         ----------
-        training_data(numpy.ndarray, pandas.DataFrame):
+        training_data: numpy.ndarray, pandas.DataFrame
             the dataset. can be 1D or 2D
 
-        feature_names(array-type):
+        feature_names: array-type
             names to call features.
 
-        index(array-type):
+        index: array-type
             names to call rows.
 
-        """
-        self.data_set = DataSet(training_data, feature_names=feature_names, index=index)
 
-    def build_annotated_model(self, prediction_function):
-        """returns a callable model that has annotations.
+        Returns
+        ---------
+            None
+        """
+
+        self.logger.info("Loading Data")
+        self.data_set = DataSet(training_data,
+                                feature_names=feature_names,
+                                index=index,
+                                log_level=self._log_level)
+        self.logger.info("Data loaded")
+        self.logger.debug("Data shape: {}".format(self.data_set.data.shape))
+        self.logger.debug("Dataset Feature_ids: {}".format(self.data_set.feature_ids))
+        #self.local_interpreter._build_lime_explainers()
+
+    def build_annotated_model(self, prediction_function, examples=None):
+        """
+        Returns a callable model that has annotations.
         Uses examples from the Interpreter's dataset if available
 
         Parameters
         ----------
-        prediction_function(callable):
+        prediction_function: callable
             function to generate predictions
+
+        examples: np.ndarray or pd.DataFrame
+            The examples to use when calling InMemoryModel.check_output_types(examples).
+
 
         Returns
         ----------
-        pyinterpret.model.Model type.
+        annotated_model: pyinterpret.model.InMemoryModel
         """
-        if self.data_set:
-            examples = self.data_set.generate_sample(sample=True,
-                                                                 n_samples_from_dataset=5,
-                                                                 strategy='random-choice')
-        else:
-            examples = None
-        annotated_model = InMemoryModel(prediction_function, examples=examples)
+
+        if examples is None:
+            self.logger.warn('Model will not be annotated, no examples provided.')
+
+        annotated_model = InMemoryModel(prediction_function,
+                                        examples=examples,
+                                        log_level=self._log_level)
         return annotated_model

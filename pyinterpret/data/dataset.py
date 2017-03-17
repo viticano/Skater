@@ -4,12 +4,17 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_distances
 
+from ..util.logger import build_logger
+from ..util import exceptions
 
 class DataSet(object):
     """Module for passing around data to interpretation objects"""
-    def __init__(self, data, feature_names=None, index=None):
+
+    def __init__(self, data, feature_names=None, index=None, log_level = 30):
         """
-        The abtraction around using, accessing, sampling data for interpretation purposes.
+        The abstraction around using, accessing, sampling data for interpretation purposes.
+        Used by interpretation objects to grab data, collect samples, and handle
+        feature names and row indices.
 
         Parameters
         ----------
@@ -17,44 +22,53 @@ class DataSet(object):
             feature_names: iterable of feature names
             index: iterable of row names
 
-
         """
-        assert isinstance(data, (np.ndarray, pd.DataFrame)), 'Data needs to be a numpy array'
+
+        # create logger
+        self._log_level = log_level
+        self.logger = build_logger(log_level, __name__)
+
+        if not isinstance(data, (np.ndarray, pd.DataFrame)):
+            err_msg = 'expected data to be a numpy array or pandas dataframe but got ' \
+                      '{}'.format(type(data))
+            raise exceptions.DataSetError(err_msg)
 
         ndim = len(data.shape)
+        self.logger.debug("__init__ data.shape: {}".format(data.shape))
 
         if ndim == 1:
             data = data[:, np.newaxis]
 
         elif ndim >= 3:
-            raise ValueError("Data needs to be 1 or 2 dimensions, yours is {}".format(ndim))
+            err_msg = "Expected data to be 1 or 2 dimensions, " \
+                      "Data.shape: {}".format(ndim)
+            raise exceptions.DataSetError(err_msg)
 
         self.n_rows, self.dim = data.shape
+        self.logger.debug("after transform data.shape: {}".format(data.shape))
 
         if isinstance(data, pd.DataFrame):
-            if not feature_names:
+            if feature_names is None:
                 feature_names = list(data.columns.values)
             if not index:
                 index = list(data.index.values)
             self.feature_ids = feature_names
             self.index = index
-            self.data = pd.DataFrame(data, columns=self.feature_ids, index=self.index)
-
 
         elif isinstance(data, np.ndarray):
-            if not feature_names:
+            if feature_names is None:
                 feature_names = range(self.dim)
             if not index:
                 index = range(self.n_rows)
             self.feature_ids = feature_names
             self.index = index
-            self.data = pd.DataFrame(data, columns=self.feature_ids, index=self.index)
 
         else:
             raise ValueError("Currently we only support pandas dataframes and numpy arrays"
                              "If you would like support for additional data structures let us "
                              "know!")
 
+        self.data = pd.DataFrame(data, columns=self.feature_ids, index=self.index)
         self.metastore = None
 
     def generate_grid(self, feature_ids, grid_resolution=100, grid_range=(.05, .95)):
@@ -81,27 +95,36 @@ class DataSet(object):
                                 There are as many columns as specified by grid_resolution
         """
 
-        grid_range_warning = "Grid range values must be between 0 and 1"
-        assert all(i >= 0 and i <= 1 for i in grid_range), grid_range_warning
+        if not all(i >= 0 and i <= 1 for i in grid_range):
+            err_msg = "Grid range values must be between 0 and 1 but got:" \
+                                 "{}".format(grid_range)
+            raise exceptions.MalformedGridRangeError(err_msg)
 
-        grid_resolution_warning = "Grid resolute must be a positive integer"
-        assert isinstance(grid_resolution, int) and grid_resolution > 0, grid_resolution_warning
+        if not isinstance(grid_resolution, int) and grid_resolution > 0:
+            err_msg = "Grid resolution {} is not a positive integer".format(grid_resolution)
+            raise exceptions.MalformedGridRangeError(err_msg)
 
-        feature_id_warning = "Must pass in feature ids contained in DataSet.feature_ids"
-        assert all(feature_id in self.feature_ids for feature_id in feature_ids), feature_id_warning
+        if not all(feature_id in self.feature_ids for feature_id in feature_ids):
+            missing_features = []
+            for feature_id in feature_ids:
+                if feature_id not in self.feature_ids:
+                    missing_features.append(feature_id)
+            err_msg = "Feature ids {} not found in DataSet.feature_ids".format(missing_features)
+            raise KeyError(err_msg)
 
-        grid_range = map(lambda x: x * 100, grid_range)
+        grid_range = [x * 100 for x in grid_range]
         bins = np.linspace(*grid_range, num=grid_resolution)
         grid = []
         for feature_id in feature_ids:
             vals = np.percentile(self[feature_id], bins)
             grid.append(vals)
-        return np.array(grid)
+        grid = np.array(grid)
+        self.logger.info('Generated grid of shape {}'.format(grid.shape))
+        return grid
 
     def _build_metastore(self, bin_count):
 
         n_rows = self.data.shape[0]
-
         medians = np.median(self.data.values, axis=0).reshape(1, self.dim)
 
         # how far each data point is from the global median
@@ -114,7 +137,6 @@ class DataSet(object):
         round_to = n_rows / float(bin_count)
         rounder_func = lambda x: int(round_to * round(float(x) / round_to))
         ranks_rounded = map(rounder_func, ranks)
-
         ranks_rounded = np.array([round(x, 2) for x in ranks / ranks.max()])
         return {
             'median': medians,
@@ -127,8 +149,10 @@ class DataSet(object):
         }
 
     def __getitem__(self, key):
-        invalid_key = "The key {} is not the set of feature_ids {}".format(*[key, self.feature_ids])
-        assert key in self.feature_ids, invalid_key
+
+        if not key in self.feature_ids:
+            err_msg = "The key {} is not the set of feature_ids {}".format(*[key, self.feature_ids])
+            raise KeyError(err_msg)
         return self.data.__getitem__(key)
 
     def __setitem__(self, key, newval):
@@ -136,7 +160,7 @@ class DataSet(object):
 
     def generate_sample(self, sample=True, strategy='random-choice', n_samples_from_dataset=1000,
                         replace=True, samples_per_bin=10, bin_count=50):
-        '''
+        """
         Method for generating data from the dataset.
 
         Parameters:
@@ -156,7 +180,17 @@ class DataSet(object):
                 of samples to take from each discrete rank.
 
 
-        '''
+        """
+
+        arg_dict = {
+            'sample':sample,
+            'strategy':strategy,
+            'n_samples_from_dataset':n_samples_from_dataset,
+            'replace':replace,
+            'samples_per_bin':samples_per_bin,
+            'bin_count':bin_count
+        }
+        self.logger.debug("Generating sample with args:\n {}".format(arg_dict))
 
         if not sample:
             return self.data
