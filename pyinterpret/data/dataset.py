@@ -12,7 +12,7 @@ class DataSet(object):
 
     def __init__(self, data, feature_names=None, index=None, log_level = 30):
         """
-        The abtraction around using, accessing, sampling data for interpretation purposes.
+        The abstraction around using, accessing, sampling data for interpretation purposes.
         Used by interpretation objects to grab data, collect samples, and handle
         feature names and row indices.
 

@@ -19,7 +19,7 @@ class DeployedModel(Model):
             This function will run on outputs before returning
             results to interpretation objects.
         """
-        super(DeployedModel, self).__init__(self)
+        super(DeployedModel, self).__init__()
         self.uri = uri
         self.parse_function = parse_function or self.default_parser
 

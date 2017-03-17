@@ -133,7 +133,7 @@ class Model(object):
             self.logger.debug("sklearn response: {}".format(self.output_type))
             exceptions.ModelError(err_msg)
 
-        self.formatter = self.return_transformer_func()
+        self.formatter = self.transformer_func_factory()
 
         reports = self.model_report(examples)
         for report in reports:
@@ -165,7 +165,7 @@ class Model(object):
         output = np.squeeze(np.asarray(output))
         return output
 
-    def return_transformer_func(self):
+    def transformer_func_factory(self):
         """
         In the event that the predict func returns 1D array of predictions,
         then this returns a formatter to convert outputs to a 2D one hot encoded
@@ -174,7 +174,7 @@ class Model(object):
         For instance, if:
             predict_fn(data) -> ['apple','banana']
         then
-            transformer = Model.return_transformer_func()
+            transformer = Model.transformer_func_factory()
             transformer(predict_fn(data)) -> [[1, 0], [0, 1]]
 
         Returns

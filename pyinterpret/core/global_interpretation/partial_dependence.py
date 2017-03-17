@@ -180,9 +180,6 @@ class PartialDependence(BaseGlobalInterpretation):
         #cartesian product of grid
         grid_expanded = np.array(list(product(*grid)))
 
-        # id_grid = np.array([range(grid_resolution) for _ in range(n_features)])
-        # id_grid_expanded = np.array(list(product(*id_grid)))
-
         # pandas dataframe
         data_sample_mutable = data_sample.copy()
 
@@ -196,8 +193,6 @@ class PartialDependence(BaseGlobalInterpretation):
         for i in range(grid_expanded.shape[0]):
             pdp = {}
             new_row = grid_expanded[i]
-            # row_id = id_grid_expanded[i]
-            # row_id = tuple(row_id.tolist())
             for feature_idx, feature_id in enumerate(feature_ids):
                 data_sample_mutable[feature_id] = new_row[feature_idx]
 
@@ -215,7 +210,7 @@ class PartialDependence(BaseGlobalInterpretation):
                     mean_col = 'mean_class_{}'.format(class_i)
                     pdp[mean_col] = mean_prediction[class_i]
                     # we can return 1 sd since its a common variance across classes
-                    # this line is currently redudant, as in it gets executed multiple times
+                    # this line is currently redundant, as in it gets executed multiple times
                     pdp['sd'] = std_prediction[class_i]
             else:
                 pdp['mean'] = mean_prediction

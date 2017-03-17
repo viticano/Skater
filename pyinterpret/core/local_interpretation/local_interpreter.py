@@ -2,20 +2,21 @@
 
 import numpy as np
 import pandas as pd
-from  sklearn import metrics
+from sklearn import metrics
 from sklearn.linear_model import LinearRegression
-
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import NearestNeighbors
+from functools import partial
+
 from ...util.kernels import rbf_kernel
-
-
 from .base import BaseLocalInterpretation
+from ..model_interpreter import ModelInterpreter
 
 
 class LocalInterpreter(BaseLocalInterpretation):
-
-    """Contains all methods for LIME style interpretations"""
+    """
+    Contains all methods for LIME style interpretations
+    """
 
     def _ds_explain(self, data_row, predict_fn, similarity_method='local-affinity-scaling',
                     sample=False, n_samples=5000,
@@ -167,7 +168,6 @@ class LocalInterpreter(BaseLocalInterpretation):
         affinities = np.exp((-1 * (distances ** 2)) / (point_sigma[0] * population_sigmas))\
             .reshape(-1)
         return affinities
-
 
     @staticmethod
     def _check_explainer_model_pre_train(explainer_model):
