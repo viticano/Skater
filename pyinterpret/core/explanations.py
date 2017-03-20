@@ -36,7 +36,7 @@ class Interpretation(object):
     interpreter.partial_dependence([feature_id1, feature_id2], regressor.predict)
     """
 
-    def __init__(self, log_level=30):
+    def __init__(self, log_level=build_logger.WARNING):
         """
         Attaches local and global interpretations
         to Interpretation object.
