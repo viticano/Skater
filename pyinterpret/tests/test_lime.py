@@ -1,66 +1,106 @@
 import unittest
 
 import numpy as np
+import pandas as pd
+from numpy.testing import assert_array_equal
 from scipy.special import expit
-from scipy.stats import norm
-from sklearn.linear_model import LinearRegression, LogisticRegression
-
-from pyinterpret.core.explanations import Interpretation
+from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
+from pyinterpret.data.dataset import DataSet
+from pyinterpret.core.local_interpretation.lime.lime_tabular import LimeTabularExplainer
 
 
 class TestLime(unittest.TestCase):
+    """
+    Test imported lime package
+    """
     def __init__(self, *args, **kwargs):
+        """Inherit unit test and build data for testing"""
         super(TestLime, self).__init__(*args, **kwargs)
-        self.build_data()
-        self.build_regressor()
-        self.build_classifier()
+        self.setup()
 
-    def build_data(self, n=1000, seed=1, dim=3):
-        self.seed = seed
-        self.n = n
+    def setup(self, n=100, dim=3):
+        """
+        Build data for testing
+        :param n:
+        :param dim:
+        :return:
+        """
         self.dim = dim
-        self.X = norm.rvs(0, 1, size=(self.n, self.dim), random_state=self.seed)
-        self.B = np.array([-10.1, 2.2, 6.1])
-        self.y = np.dot(self.X, self.B)
-        self.y_as_prob = expit(self.y)
-        self.y_as_ints = np.array([np.random.choice((0, 1), p=(1 - prob, prob)) for prob in self.y_as_prob.reshape(-1)])
+        self.n = n
+        self.feature_names = ['x{}'.format(i) for i in range(self.dim)]
+        self.index = ['{}'.format(i) for i in range(self.n)]
+        self.X = np.random.normal(0, 5, size=(self.n, self.dim))
+        self.B = np.random.normal(0, 5, size = self.dim)
+        self.y = np.dot(self.X, self.B) + np.random.normal(0, 5, size=self.n)
+        self.y_for_classifier = np.round(expit(self.y))
+        self.example = self.X[0]
 
 
-    def build_regressor(self):
-        self.regressor = LinearRegression()
-        self.regressor.fit(self.X, self.y)
-        self.regressor_predict_fn = self.regressor.predict
-        self.regressor_point = self.X[0]
+    def test_regression_with_feature_names(self):
+        """
+        Ensure lime.lime_tabular works when predict_fn = regressor.predict
+        and feature names are passed
+        :return:
+        """
+        regressor = GradientBoostingRegressor()
+        regressor.fit(self.X, self.y)
+        interpretor = LimeTabularExplainer(self.X, feature_names=self.feature_names)
+        interpretor.explain_regressor_instance(self.example, regressor.predict)
 
-    def build_classifier(self):
-        self.classifier = LogisticRegression()
-        self.classifier.fit(self.X, self.y_as_ints)
-        self.classifier_predict_fn = self.classifier.predict_proba
-        self.classifier_point = self.X[0]
+    def test_regression_without_feature_names(self):
+        """
+        Ensure lime.lime_tabular works when predict_fn = regressor.predict
+        and feature names are NOT passed
+        :return:
+        """
+        regressor = GradientBoostingRegressor()
+        regressor.fit(self.X, self.y)
+        interpretor = LimeTabularExplainer(self.X)
+        interpretor.explain_regressor_instance(self.example, regressor.predict)
 
-    def test_lime_regression_coefs_are_close(self, epsilon=1):
-        interpreter = Interpretation()
-        interpreter.consider(self.X)
-        coefs = interpreter.lime.lime_ds(self.regressor_point, self.regressor_predict_fn)
+    def test_classifier_no_proba_without_feature_names(self):
+        """
+        Ensure lime.lime_tabular works when predict_fn = classifier.predict
+        and feature names are NOT passed
+        :return:
+        """
+        classifier = GradientBoostingClassifier()
+        classifier.fit(self.X, self.y_for_classifier)
+        interpretor = LimeTabularExplainer(self.X)
+        interpretor.explain_instance(self.example, classifier.predict)
 
-        coefs_are_close_warning = "Lime coefficients  for regressions model are not close to true values for trivial case"
-        coefs_are_close = all(abs(coefs - self.B) < epsilon)
-        if not coefs_are_close:
-            coefs_are_close_warning += "True Coefs: {}".format(self.B)
-            coefs_are_close_warning += "Estimated Coefs: {}".format(coefs)
-            self.fail(coefs_are_close_warning)
+    def test_classifier_with_proba_without_feature_names(self):
+        """
+        Ensure lime.lime_tabular works when predict_fn = classifier.predict_proba
+        and feature names are NOT passed
+        :return:
+        """
+        classifier = GradientBoostingClassifier()
+        classifier.fit(self.X, self.y_for_classifier)
+        interpretor = LimeTabularExplainer(self.X)
+        interpretor.explain_instance(self.example, classifier.predict_proba)
 
-    def test_lime_classifier_coefs_correct_sign(self):
-        interpreter = Interpretation()
-        interpreter.consider(self.X)
-        neg_coefs, pos_coefs = interpreter.lime.lime_ds(self.classifier_point, self.classifier_predict_fn)
+    def test_classifier_no_proba_with_feature_names(self):
+        """
+        Ensure lime.lime_tabular works when predict_fn = classifier.predict
+        and feature names are passed
+        :return:
+        """
+        classifier = GradientBoostingClassifier()
+        classifier.fit(self.X, self.y_for_classifier)
+        interpretor = LimeTabularExplainer(self.X, feature_names=self.feature_names)
+        interpretor.explain_instance(self.example, classifier.predict)
 
-        coefs_are_correct_sign_warning = "Lime coefficients for classifier model are not correct sign for trivial case"
-        coefs_are_correct_sign = all(np.sign(pos_coefs) == np.sign(self.B))
-        if not coefs_are_correct_sign:
-            coefs_are_correct_sign_warning += "True Coefs: {}".format(self.B)
-            coefs_are_correct_sign_warning += "Estimated Coefs: {}".format(pos_coefs)
-            self.fail(coefs_are_correct_sign_warning)
+    def test_classifier_with_proba_with_feature_names(self):
+        """
+        Ensure lime.lime_tabular works when predict_fn = classifier.predict_proba
+        and feature names are passed
+        :return:
+        """
+        classifier = GradientBoostingClassifier()
+        classifier.fit(self.X, self.y_for_classifier)
+        interpretor = LimeTabularExplainer(self.X, feature_names=self.feature_names)
+        interpretor.explain_instance(self.example, classifier.predict_proba)
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,3 +1,3 @@
-from .lime import Lime
+from .local_interpreter import LocalInterpreter
 
-__all__ = [Lime]
+__all__ = ['LocalInterpreter']

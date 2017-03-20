@@ -1,7 +1,4 @@
-
 language: python
-
-#dist: trusty
 
 python:
   - "2.7"
@@ -13,17 +10,19 @@ virtualenv:
 
 before_install:
  - sudo apt-get build-dep python-scipy
- - pip install scipy
-# - sudo apt-get install -qq python-numpy python-scipy
+ - sudo pip install scipy
+ # - sudo apt-get install -qq python-numpy python-scipy
 
 # command to install dependencies
-install: 
-  - pip install -r requirements.txt
-  - pip install -e .
-  - python -c "import scipy" #make sure that scipy is OK before anything else
+install:
+  - sudo python setup.py install
+  # make sure that scipy is OK before anything else
+  - python -c "import scipy"
+  - python -c "import numpy"
+  - python -c "import lime"
 
 # command to run tests
-script: . travis.sh
+script: . run_test.sh
 branches:
   only:
     - master
