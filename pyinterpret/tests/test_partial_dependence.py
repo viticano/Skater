@@ -135,7 +135,5 @@ class TestPartialDependence(unittest.TestCase):
     #TODO: Add tests for various kinds of kwargs like sampling for pdp funcs
 
 if __name__ == '__main__':
-    parser = create_parser()
-    args = parser.parse_args()
-    unit_argv = [sys.argv[0]] + args.debug
-    unittest.main(argv=unit_argv)
+    runner = unittest.TextTestRunner(verbosity=2)
+    runner.run(unittest.makeSuite(TestPartialDependence))
