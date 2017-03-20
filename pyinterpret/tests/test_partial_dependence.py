@@ -36,7 +36,7 @@ class TestPartialDependence(unittest.TestCase):
         # y_as_string = array['0.0', '0.0', '0.0', '0.0', '1.0', '1.0', '0.0', '0.0', '0.0', ... ]
 
         if debug:
-            self.interpreter = Interpretation(log_level=logging.DEBUG)
+            self.interpreter = Interpretation(log_level=build_logger.DEBUG)
         else:
             self.interpreter = Interpretation() # default level is WARNING
         self.interpreter.load_data(self.X, feature_names=self.features)
