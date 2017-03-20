@@ -1,22 +1,20 @@
 import unittest
 
 import numpy as np
-import logging
 from scipy.stats import norm
 from scipy.special import expit
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from functools import partial
-import sys
 
 from pyinterpret.core.explanations import Interpretation
 from pyinterpret.util import exceptions
-from pyinterpret.tests.arg_parser import arg_parse, create_parser
+from pyinterpret.tests.arg_parser import create_parser
+from pyinterpret.util.logger import build_logger
 
 class TestPartialDependence(unittest.TestCase):
 
     def setUp(self):
-        self.parser = create_parser()
-        args = self.parser.parse_args()
+        args = create_parser().parse_args()
         debug = args.debug
         self.seed = args.seed
         self.n = args.n
