@@ -102,5 +102,7 @@ class TestLime(unittest.TestCase):
         interpretor = LimeTabularExplainer(self.X, feature_names=self.feature_names)
         interpretor.explain_instance(self.example, classifier.predict_proba)
 
+
 if __name__ == '__main__':
-    unittest.main()
+    runner = unittest.TextTestRunner(verbosity=2)
+    runner.run(unittest.makeSuite(TestLime))
