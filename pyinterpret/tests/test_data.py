@@ -21,7 +21,7 @@ class TestData(unittest.TestCase):
         self.dim = 3
         self.n = 8
 
-        X = np.array([
+        self.X = np.array([
             [0, 0, 0],
             [0, 0, 1],
             [0, 1, 0],
@@ -34,7 +34,6 @@ class TestData(unittest.TestCase):
 
         self.feature_names = ['x{}'.format(i) for i in range(self.dim)]
         self.index = ['{}'.format(i) for i in range(self.n)]
-        self.X = np.random.normal(0, 5, size=(self.n, self.dim))
 
         if debug:
             self.log_level = 10
