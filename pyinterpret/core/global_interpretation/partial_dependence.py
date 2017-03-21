@@ -427,9 +427,9 @@ class PartialDependence(BaseGlobalInterpretation):
         if not isinstance(grid, np.ndarray):
             err_msg = "Grid of type {} must be a numpy array".format(type(grid))
             raise exceptions.MalformedGridError(err_msg)
-        if len(grid.shape) != 2:
-            err_msg = "Grid of shape {} not 2D".format(grid.shape)
-            raise exceptions.MalformedGridError(grid)
+        # if len(grid.shape) != 2:
+        #     err_msg = "Grid of shape {} not 2D".format(grid.shape)
+        #     raise exceptions.MalformedGridError(grid)
 
         if len(feature_ids) != grid.shape[0]:
             err_msg = "Given {0} features, there must be {1} rows in grid" \
@@ -437,13 +437,12 @@ class PartialDependence(BaseGlobalInterpretation):
                                                   len(feature_ids),
                                                   grid.shape[0])
             raise exceptions.MalformedGridError(err_msg)
-
-        if grid_resolution != grid.shape[1]:
-            err_msg = "Given {0} grid resolution, there must be {1} columns in grid" \
-                      "but {2} were found".format(grid_resolution,
-                                                  grid_resolution,
-                                                  grid.shape[1])
-            raise exceptions.MalformedGridError(err_msg)
+        # if grid_resolution != grid.shape[1]:
+        #     err_msg = "Given {0} grid resolution, there must be {1} columns in grid" \
+        #               "but {2} were found".format(grid_resolution,
+        #                                           grid_resolution,
+        #                                           grid.shape[1])
+        #     raise exceptions.MalformedGridError(err_msg)
 
     @staticmethod
     def _check_dataset_type(dataset):
