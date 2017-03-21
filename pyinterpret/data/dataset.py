@@ -133,19 +133,21 @@ class DataSet(object):
         # the percentile distance of each datapoint to the global median
         # dist_percentiles = map(lambda i: int(stats.percentileofscore(dists, i)), dists)
 
-        ranks = pd.Series(dists).rank().values
-        round_to = n_rows / float(bin_count)
-        rounder_func = lambda x: int(round_to * round(float(x) / round_to))
-        ranks_rounded = map(rounder_func, ranks)
-        ranks_rounded = np.array([round(x, 2) for x in ranks / ranks.max()])
+        bins = np.linspace(0, 100, num=bin_count + 1)
+        unique_dists = np.unique(dists)
+
+        if len(unique_dists) > 1:
+            ranks_rounded = pd.qcut(dists, bins / 100, labels=False)
+            unique_ranks = np.unique(ranks_rounded)
+        else:
+            ranks_rounded = np.ones(n_rows)
+            unique_ranks = np.ones(1)
         return {
             'median': medians,
             'dists': dists,
             'n_rows': n_rows,
-            # 'dist_percentiles': dist_percentiles,
-            'ranks': ranks,
-            'ranks_rounded': ranks_rounded,
-            'round_to': round_to
+            'unique_ranks': unique_ranks,
+            'ranks_rounded': ranks_rounded
         }
 
     def __getitem__(self, key):
@@ -208,13 +210,13 @@ class DataSet(object):
             metastore = self._build_metastore(bin_count)
 
             data_distance_ranks = metastore['ranks_rounded']
-            round_to = metastore['round_to']
             n_rows = metastore['n_rows']
+            unique_ranks = metastore['unique_ranks']
 
             samples = []
-            for i in range(bin_count):
-                j = (i * round_to) / n_rows
-                idx = np.where(data_distance_ranks == j)[0]
+
+            for rank in unique_ranks:
+                idx = np.where(data_distance_ranks == rank)[0]
                 if idx.any():
                     new_samples = np.random.choice(idx, replace=True, size=samples_per_bin)
                     samples.extend(self.data.loc[new_samples].values)
