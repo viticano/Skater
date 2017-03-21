@@ -149,11 +149,17 @@ class PartialDependence(BaseGlobalInterpretation):
         # if you dont pass a grid, build one.
         grid = np.array(grid)
         if not grid.any():
+            # Currently, if a given feature only has two unique values
+            # then the grid will only include those two. Otherwise itll take the percentile
+            # range according with grid_resolution bins.
+            # sklearn however just returns the all unique values if the number of unique
+            # values is less then grid resolution.
+            # TODO: evaluate cases when len(unique(feature))==2
             grid = self.data_set.generate_grid(feature_ids,
                                                grid_resolution=grid_resolution,
                                                grid_range=grid_range)
         else:
-            if len(grid.shape) == 1:
+            if len(grid.shape) == 1 and not hasattr(grid[0], "__iter__"):
                 grid = grid[:, np.newaxis].T
                 grid_resolution = grid.shape[1]
 
@@ -427,9 +433,6 @@ class PartialDependence(BaseGlobalInterpretation):
         if not isinstance(grid, np.ndarray):
             err_msg = "Grid of type {} must be a numpy array".format(type(grid))
             raise exceptions.MalformedGridError(err_msg)
-        # if len(grid.shape) != 2:
-        #     err_msg = "Grid of shape {} not 2D".format(grid.shape)
-        #     raise exceptions.MalformedGridError(grid)
 
         if len(feature_ids) != grid.shape[0]:
             err_msg = "Given {0} features, there must be {1} rows in grid" \
@@ -437,12 +440,6 @@ class PartialDependence(BaseGlobalInterpretation):
                                                   len(feature_ids),
                                                   grid.shape[0])
             raise exceptions.MalformedGridError(err_msg)
-        # if grid_resolution != grid.shape[1]:
-        #     err_msg = "Given {0} grid resolution, there must be {1} columns in grid" \
-        #               "but {2} were found".format(grid_resolution,
-        #                                           grid_resolution,
-        #                                           grid.shape[1])
-        #     raise exceptions.MalformedGridError(err_msg)
 
     @staticmethod
     def _check_dataset_type(dataset):
