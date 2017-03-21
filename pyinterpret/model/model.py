@@ -218,3 +218,6 @@ class Model(object):
         reports.append("Input Shape: {} \n".format(self.input_shape))
         reports.append("Probability: {} \n".format(self.probability))
         return reports
+
+# todo: add subclasses for classifier and regression, with class names given
+# on init for classifier
