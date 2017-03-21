@@ -116,7 +116,13 @@ class DataSet(object):
         bins = np.linspace(*grid_range, num=grid_resolution)
         grid = []
         for feature_id in feature_ids:
-            vals = np.percentile(self[feature_id], bins)
+            data = self[feature_id]
+            uniques = np.unique(data)
+            if len(uniques) ==2:
+                vals = uniques.copy()
+                print "Using {}".format(vals)
+            else:
+                vals = np.percentile(self[feature_id], bins)
             grid.append(vals)
         grid = np.array(grid)
         self.logger.info('Generated grid of shape {}'.format(grid.shape))
