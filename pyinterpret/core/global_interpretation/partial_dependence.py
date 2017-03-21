@@ -43,7 +43,7 @@ class PartialDependence(BaseGlobalInterpretation):
             the names/ids of the features for which we compute partial dependence.
             Note that the algorithm's complexity scales exponentially with additional
             features, so generally one should only look at one or two features at a
-            time. These feature ids must be avaiable in the class's associated DataSet.
+            time. These feature ids must be available in the class's associated DataSet.
 
             As of now, we only support looking at 1 or 2 features at a time.
 
@@ -62,7 +62,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
             are acceptable use cases. Output types need to be 1D or 2D numpy arrays.
 
-            Supports classification, multiclass classification, and regression.
+            Supports classification, multi-class classification, and regression.
 
         grid(numpy.ndarray):
             2 dimensional array on which we fix values of features. Note this is
@@ -110,6 +110,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                         "use case where you'd like to look at 3 simultaneously" \
                                         ", please let us know."
             raise exceptions.TooManyFeaturesError(too_many_features_err_msg)
+
         if len(feature_ids) == 0:
             empty_features_err_msg = "Feature ids must have non-zero length"
             raise exceptions.EmptyFeatureListError(empty_features_err_msg)
@@ -124,6 +125,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                            "before running this method."
             raise exceptions.DataSetNotLoadedError(load_data_not_called_err_msg)
 
+        # TODO: This we can change easily to functional style
         missing_feature_ids = []
         for feature_id in feature_ids:
             if feature_id not in self.data_set.feature_ids:
