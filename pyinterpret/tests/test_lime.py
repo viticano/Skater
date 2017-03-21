@@ -5,6 +5,8 @@ import pandas as pd
 from numpy.testing import assert_array_equal
 from scipy.special import expit
 from sklearn.linear_model import LinearRegression, LogisticRegression
+from functools import partial
+
 from pyinterpret.data.dataset import DataSet
 from pyinterpret.core.local_interpretation.lime.lime_tabular import LimeTabularExplainer
 
@@ -49,6 +51,7 @@ class TestLime(unittest.TestCase):
         self.classifier.fit(self.X, self.y_for_classifier)
 
         self.model_regressor = LinearRegression()
+        print len(np.unique(self.y_for_classifier))
 
 
     def test_regression_with_feature_names(self):
@@ -78,7 +81,8 @@ class TestLime(unittest.TestCase):
         """
 
         interpretor = LimeTabularExplainer(self.X)
-        assert interpretor.explain_instance(self.example, self.classifier.predict)
+        interpretor_func = partial(interpretor.explain_instance, *[self.example, self.classifier.predict])
+        self.assertRaises(NotImplementedError, interpretor_func)
 
     def test_classifier_with_proba_without_feature_names(self):
         """
@@ -98,7 +102,8 @@ class TestLime(unittest.TestCase):
         """
 
         interpretor = LimeTabularExplainer(self.X, feature_names=self.feature_names)
-        assert interpretor.explain_instance(self.example, self.classifier.predict)
+        interpretor_func = partial(interpretor.explain_instance, *[self.example, self.classifier.predict])
+        self.assertRaises(NotImplementedError, interpretor_func)
 
     def test_classifier_with_proba_with_feature_names(self):
         """
