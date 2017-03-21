@@ -59,9 +59,10 @@ class TestPartialDependence(unittest.TestCase):
 
 
     def test_pdp_with_default_sampling(self):
-        coefs = self.interpreter.partial_dependence.partial_dependence([self.features[0]],
+        pdp_df = self.interpreter.partial_dependence.partial_dependence([self.features[0]],
                                                                        self.regressor_predict_fn,
                                                                        sample=True)
+        self.assertEquals(pdp_df.shape, (100, 3)) # default grid resolution is 100
 
 
     def test_pdp_regression_coefs_are_close_1d(self, epsilon=1):

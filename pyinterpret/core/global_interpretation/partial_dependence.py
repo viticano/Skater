@@ -186,7 +186,6 @@ class PartialDependence(BaseGlobalInterpretation):
         data_sample_mutable = data_sample.copy()
 
         pdps = []
-
         if grid_expanded.shape[0] <= 0:
             empty_grid_expanded_err_msg = "Must have at least 1 pdp value" \
                                           "grid shape: {}".format(grid_expanded.shape)
@@ -217,7 +216,6 @@ class PartialDependence(BaseGlobalInterpretation):
             else:
                 pdp['mean'] = mean_prediction
                 pdp['sd'] = std_prediction
-
             pdps.append(pdp)
 
         self._pdp_metadata['val_cols'] = ['val_{}'.format(i) for i in feature_ids]
@@ -236,6 +234,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
         self.interpreter.logger.debug("PDP df metadata: {}".format(self._pdp_metadata))
         return pd.DataFrame(pdps)
+
 
     def plot_partial_dependence(self, feature_ids, predict_fn, class_id=None,
                                 grid=None, grid_resolution=100,
