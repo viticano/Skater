@@ -9,7 +9,6 @@ from functools import partial
 from pyinterpret.core.explanations import Interpretation
 from pyinterpret.util import exceptions
 from pyinterpret.tests.arg_parser import create_parser
-from pyinterpret.util.logger import build_logger
 
 class TestPartialDependence(unittest.TestCase):
 
@@ -36,9 +35,9 @@ class TestPartialDependence(unittest.TestCase):
         # y_as_string = array['0.0', '0.0', '0.0', '0.0', '1.0', '1.0', '0.0', '0.0', '0.0', ... ]
 
         if debug:
-            self.interpreter = Interpretation(log_level=build_logger.DEBUG)
+            self.interpreter = Interpretation(log_level='DEBUG')
         else:
-            self.interpreter = Interpretation() # default level is WARNING
+            self.interpreter = Interpretation() # default level is 'WARNING'
         self.interpreter.load_data(self.X, feature_names=self.features)
 
         self.regressor = LinearRegression()
