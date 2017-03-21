@@ -27,6 +27,7 @@ class PartialDependence(BaseGlobalInterpretation):
             'val_cols':[]
         }
 
+
     def partial_dependence(self, feature_ids, predict_fn, grid=None, grid_resolution=100,
                            grid_range=None, sample=False,
                            sampling_strategy='uniform-over-similarity-ranks',
@@ -145,7 +146,6 @@ class PartialDependence(BaseGlobalInterpretation):
                 raise exceptions.MalformedGridRangeError(err_msg)
 
         self._check_grid_range(grid_range)
-
         self._pdp_metadata = self._build_fresh_metadata_dict()
 
         # if you dont pass a grid, build one.
@@ -171,6 +171,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                                     n_samples_from_dataset=n_samples,
                                                     samples_per_bin=samples_per_bin,
                                                     bin_count=bin_count)
+
 
         self.interpreter.logger.debug("Shape of sampled data: {}".format(data_sample.shape))
         #TODO: Add check for non-empty data

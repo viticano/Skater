@@ -4,6 +4,7 @@ import numpy as np
 from scipy.stats import norm
 from scipy.special import expit
 from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.ensemble import GradientBoostingClassifier
 from functools import partial
 
 from pyinterpret.core.explanations import Interpretation
@@ -34,6 +35,13 @@ class TestPartialDependence(unittest.TestCase):
         # y_as_int = array[ 0.,  0.,  0.,  0.,  1.,  1.,  0.,  0.,  0.,  1.,  1.,  1.,  1., ...]
         # y_as_string = array['0.0', '0.0', '0.0', '0.0', '1.0', '1.0', '0.0', '0.0', '0.0', ... ]
 
+
+        # Another set of input
+        # toy sample
+        self.sample_x = np.array([[-2, -1], [-1, -1], [-1, -2], [1, 1], [1, 2], [2, 1]])
+        self.sample_y = np.array([-1, -1, -1, 1, 1, 1])
+        self.sample_feature_name = [str(i) for i in range(self.sample_x.shape[1])]
+
         if debug:
             self.interpreter = Interpretation(log_level='DEBUG')
         else:
@@ -63,6 +71,32 @@ class TestPartialDependence(unittest.TestCase):
                                                                        self.regressor_predict_fn,
                                                                        sample=True)
         self.assertEquals(pdp_df.shape, (100, 3)) # default grid resolution is 100
+
+
+    def test_partial_dependence_binary_classification(self):
+        # In the default implementation of pdp on sklearn, there is an approx. done
+        # if the number of unique values for a feature space < grid_resolution specified.
+        # For now, we have decided to not have that approximation. In V2, we will be benchmarking for
+        # performance as well. Around that time we will revisit the same.
+        # Reference: https://github.com/scikit-learn/scikit-learn/blob/4d9a12d175a38f2bcb720389ad2213f71a3d7697/sklearn/ensemble/tests/test_partial_dependence.py
+        # TODO: check on the feature space approximation (V2)
+        # Test partial dependence for classifier
+        clf = GradientBoostingClassifier(n_estimators=10, random_state=1)
+        clf.fit(self.sample_x, self.sample_y)
+        classifier_predict_fn = clf.predict_proba
+        interpreter = Interpretation()
+        interpreter.load_data(np.array(self.sample_x), self.sample_feature_name)
+        pdp_df = interpreter.partial_dependence.partial_dependence(['0'], classifier_predict_fn,
+                                                                  grid_resolution=5, sample=True)
+        self.assertEquals(pdp_df.shape[0], 5)
+
+        # now with our own grid
+        ud_grid = np.unique(self.sample_x[:, 0])
+        # input: array([-2, -1,  1,  2])
+        # the returned grid should have only 4 values as specified by the user
+        pdp_df = interpreter.partial_dependence.partial_dependence(['0'], classifier_predict_fn,
+                                                                   grid=ud_grid, sample=True)
+        self.assertEquals(pdp_df.shape[0], 4)
 
 
     def test_pdp_regression_coefs_are_close_1d(self, epsilon=1):
@@ -161,7 +195,8 @@ class TestPartialDependence(unittest.TestCase):
                                                                        self.string_classifier.predict_proba,
                                                                        grid_resolution=10)
 
+
     #TODO: Add tests for various kinds of kwargs like sampling for pdp funcs
 if __name__ == '__main__':
-    runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(unittest.makeSuite(TestPartialDependence))
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestPartialDependence)
+    unittest.TextTestRunner(verbosity=2).run(suite)
