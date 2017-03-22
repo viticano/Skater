@@ -120,7 +120,6 @@ class DataSet(object):
             uniques = np.unique(data)
             if len(uniques) ==2:
                 vals = uniques.copy()
-                print "Using {}".format(vals)
             else:
                 vals = np.percentile(self[feature_id], bins)
             grid.append(vals)

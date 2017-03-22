@@ -198,13 +198,15 @@ class PartialDependence(BaseGlobalInterpretation):
                                           "grid shape: {}".format(grid_expanded.shape)
             raise exceptions.MalformedGridError(empty_grid_expanded_err_msg)
 
+        n_classes = self._predict_fn.n_classes
+
         for i in range(grid_expanded.shape[0]):
             pdp = {}
             new_row = grid_expanded[i]
             for feature_idx, feature_id in enumerate(feature_ids):
                 data_sample_mutable[feature_id] = new_row[feature_idx]
-
             predictions = self._predict_fn(data_sample_mutable.values)
+
             mean_prediction = np.mean(predictions, axis=0)
             std_prediction = np.std(predictions, axis=0)
 
@@ -212,17 +214,20 @@ class PartialDependence(BaseGlobalInterpretation):
                 val_col = 'val_{}'.format(feature_id)
                 pdp[val_col] = new_row[feature_idx]
 
-            # if predict_fn.n_classes not in (StaticTypes.unknown, StaticTypes.not_applicable):
-            if isinstance(mean_prediction, np.ndarray):
+            if n_classes == 1:
+                pdp['mean'] = mean_prediction
+                pdp['sd'] = std_prediction
+            elif n_classes == 2:
+                mean_col = 'mean_class_{}'.format(1)
+                pdp[mean_col] = mean_prediction[-1]
+                pdp['sd'] = std_prediction[-1]
+            else:
                 for class_i in range(mean_prediction.shape[0]):
                     mean_col = 'mean_class_{}'.format(class_i)
                     pdp[mean_col] = mean_prediction[class_i]
                     # we can return 1 sd since its a common variance across classes
                     # this line is currently redundant, as in it gets executed multiple times
                     pdp['sd'] = std_prediction[class_i]
-            else:
-                pdp['mean'] = mean_prediction
-                pdp['sd'] = std_prediction
             pdps.append(pdp)
 
         self._pdp_metadata['val_cols'] = ['val_{}'.format(i) for i in feature_ids]
@@ -332,7 +337,8 @@ class PartialDependence(BaseGlobalInterpretation):
         ax = self._plot_pdp_from_df(feature_ids, pdp, with_variance=with_variance)
         return ax
 
-    def _plot_pdp_from_df(self, feature_ids, pdp, with_variance=False, plot_title=None):
+    def _plot_pdp_from_df(self, feature_ids, pdp, with_variance=False,
+                          plot_title=None, disable_offset=True):
         n_features = len(feature_ids)
 
         mean_columns = self._pdp_metadata['pdp_cols'].values()
@@ -344,7 +350,7 @@ class PartialDependence(BaseGlobalInterpretation):
             feature_name = val_columns[0]
             return self._2d_pdp_plot(pdp, feature_name, self._pdp_metadata,
                                      with_variance=with_variance,
-                                     plot_title=plot_title)
+                                     plot_title=plot_title, disable_offset=disable_offset)
 
         elif n_features == 2:
             feature1, feature2 = val_columns
@@ -353,12 +359,16 @@ class PartialDependence(BaseGlobalInterpretation):
                                      plot_title=plot_title)
 
     def _2d_pdp_plot(self, pdp, feature_name, pdp_metadata,
-                     with_variance=False, plot_title=None):
+                     with_variance=False, plot_title=None, disable_offset=True):
         colors = cycle(COLORS)
         figure_list, axis_list = [], []
 
         class_col_pairs = pdp_metadata['pdp_cols'].items()
         sd_col = pdp_metadata['sd_col']
+
+        # if there are just 2 classes, pick the last one.
+        if len(class_col_pairs) == 2:
+            class_col_pairs = [class_col_pairs[-1]]
 
         for class_name, mean_col in class_col_pairs:
 
@@ -372,31 +382,54 @@ class PartialDependence(BaseGlobalInterpretation):
 
             data = pdp.set_index(feature_name)
             plane = data[mean_col]
-            plane.plot(ax=ax, color=color)
 
-            if with_variance:
-                upper_plane = plane + data[sd_col]
-                lower_plane = plane - data[sd_col]
-                ax.fill_between(data.index.values,
-                                lower_plane.values,
-                                upper_plane.values,
-                                alpha=.2,
-                                color=color)
+            # if binary feature, then len(pdp) == 2 -> barchart
+            if self._is_feature_binary(pdp, mean_col):
+                if with_variance:
+                    error = data[sd_col]
+                else:
+                    error = None
+                plane.plot(kind='bar', ax=ax, color=color, yerr=error)
+            else:
+                plane.plot(ax=ax, color=color)
+                if with_variance:
+                    upper_plane = plane + data[sd_col]
+                    lower_plane = plane - data[sd_col]
+                    ax.fill_between(data.index.values,
+                                    lower_plane.values,
+                                    upper_plane.values,
+                                    alpha=.2,
+                                    color=color)
+
             if plot_title:
                 ax.set_title(plot_title)
             ax.set_ylabel('Predicted {}'.format(class_name))
             ax.set_xlabel(feature_name)
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(handles, labels)
+            if disable_offset:
+                ax.ticklabel_format(useOffset=False)
+
         return figure_list, axis_list
 
+    def _is_feature_binary(self, pdp, feature):
+        data = pdp[feature].values
+        if len(np.unique(data)) == 2:
+            return True
+        else:
+            return False
+
     def _3d_pdp_plot(self, pdp, feature1, feature2, pdp_metadata,
-                     with_variance=False, plot_title=None):
+                     with_variance=False, plot_title=None, disable_offset=True):
         colors = cycle(COLORS)
         figure_list, axis_list = [], []
 
         class_col_pairs = pdp_metadata['pdp_cols'].items()
         sd_col = pdp_metadata['sd_col']
+
+        #if there are just 2 classes, pick the last one.
+        if len(class_col_pairs) == 2:
+            class_col_pairs = [class_col_pairs[-1]]
 
         for class_name, mean_col in class_col_pairs:
             f = plt.figure()
@@ -422,6 +455,8 @@ class PartialDependence(BaseGlobalInterpretation):
             ax.set_zlabel("Predicted {}".format(class_name))
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(handles, labels)
+            if disable_offset:
+                ax.ticklabel_format(useOffset=False)
 
         return figure_list, axis_list
 
