@@ -196,13 +196,15 @@ class PartialDependence(BaseGlobalInterpretation):
                                           "grid shape: {}".format(grid_expanded.shape)
             raise exceptions.MalformedGridError(empty_grid_expanded_err_msg)
 
+        n_classes = self._predict_fn.n_classes
+
         for i in range(grid_expanded.shape[0]):
             pdp = {}
             new_row = grid_expanded[i]
             for feature_idx, feature_id in enumerate(feature_ids):
                 data_sample_mutable[feature_id] = new_row[feature_idx]
-
             predictions = self._predict_fn(data_sample_mutable.values)
+
             mean_prediction = np.mean(predictions, axis=0)
             std_prediction = np.std(predictions, axis=0)
 
@@ -210,18 +212,29 @@ class PartialDependence(BaseGlobalInterpretation):
                 val_col = 'val_{}'.format(feature_id)
                 pdp[val_col] = new_row[feature_idx]
 
-            # if predict_fn.n_classes not in (StaticTypes.unknown, StaticTypes.not_applicable):
-            if isinstance(mean_prediction, np.ndarray):
+            if n_classes == 1:
+                pdp['mean'] = mean_prediction
+                pdp['sd'] = std_prediction
+            elif n_classes == 2:
+                try:
+                    mean_col = 'mean_class_{}'.format(1)
+                    pdp[mean_col] = mean_prediction[-1]
+                    pdp['sd'] = std_prediction[-1]
+                except:
+                    print mean_prediction
+                    print type(mean_prediction)
+                    print predictions.shape
+                    print n_classes
+                    print self._predict_fn.model_type
+                    print self._predict_fn.probability
+                    raise ValueError
+            else:
                 for class_i in range(mean_prediction.shape[0]):
                     mean_col = 'mean_class_{}'.format(class_i)
                     pdp[mean_col] = mean_prediction[class_i]
                     # we can return 1 sd since its a common variance across classes
                     # this line is currently redundant, as in it gets executed multiple times
                     pdp['sd'] = std_prediction[class_i]
-            else:
-                pdp['mean'] = mean_prediction
-                pdp['sd'] = std_prediction
-
             pdps.append(pdp)
 
         self._pdp_metadata['val_cols'] = ['val_{}'.format(i) for i in feature_ids]
