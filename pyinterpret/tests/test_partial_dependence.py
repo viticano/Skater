@@ -131,24 +131,18 @@ class TestPartialDependence(unittest.TestCase):
 
 
 
-    def test_pdp_regression_coefs_are_close_1d(self, epsilon=1):
-        coefs = self.interpreter.partial_dependence.partial_dependence([self.features[0]],
+    def test_pdp_regression_coefs_closeness(self, epsilon=1):
+        pdp_df = self.interpreter.partial_dependence.partial_dependence([self.features[0]],
                                                                        self.regressor_predict_fn)
         val_col = self.feature_column_name_formatter(self.features[0])
-        y = np.array(coefs['mean'])
-        x = np.array(coefs[val_col])[:, np.newaxis]
-        pdp_reg = LinearRegression()
-        pdp_reg.fit(x, y)
-        self.interpreter.logger.debug("PDP coefs: {}".format(pdp_reg.coef_))
-        self.interpreter.logger.debug("PDP coef shape: {}".format(pdp_reg.coef_.shape))
-        coef = pdp_reg.coef_[0]
-        coefs_are_close_warning = "Lime coefficients for regressions model are not " \
-                                  "close to true values for trivial case"
-        coefs_are_close = abs(coef - self.B[0]) < epsilon
-        if not coefs_are_close:
-            coefs_are_close_warning += "True Coefs: {}".format(self.B[self.features[0]])
-            coefs_are_close_warning += "Estimated Coefs: {}".format(coef)
-            self.fail(coefs_are_close_warning)
+        y = np.array(pdp_df['mean'])
+        x = np.array(pdp_df[val_col])[:, np.newaxis]
+        regressor = LinearRegression()
+        regressor.fit(x, y)
+        self.interpreter.logger.debug("Regressor coefs: {}".format(regressor.coef_))
+        self.interpreter.logger.debug("Regressor coef shape: {}".format(regressor.coef_.shape))
+        coef = regressor.coef_[0]
+        self.assertTrue(abs(coef - self.B[0]) < epsilon, True)
 
 
     def test_2D_pdp(self):
