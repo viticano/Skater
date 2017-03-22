@@ -218,18 +218,9 @@ class PartialDependence(BaseGlobalInterpretation):
                 pdp['mean'] = mean_prediction
                 pdp['sd'] = std_prediction
             elif n_classes == 2:
-                try:
-                    mean_col = 'mean_class_{}'.format(1)
-                    pdp[mean_col] = mean_prediction[-1]
-                    pdp['sd'] = std_prediction[-1]
-                except:
-                    print mean_prediction
-                    print type(mean_prediction)
-                    print predictions.shape
-                    print n_classes
-                    print self._predict_fn.model_type
-                    print self._predict_fn.probability
-                    raise ValueError
+                mean_col = 'mean_class_{}'.format(1)
+                pdp[mean_col] = mean_prediction[-1]
+                pdp['sd'] = std_prediction[-1]
             else:
                 for class_i in range(mean_prediction.shape[0]):
                     mean_col = 'mean_class_{}'.format(class_i)
