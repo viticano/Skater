@@ -5,6 +5,7 @@ from scipy.stats import norm
 from scipy.special import expit
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.ensemble import GradientBoostingClassifier
+from sklearn import datasets
 from functools import partial
 
 from pyinterpret.core.explanations import Interpretation
@@ -37,7 +38,7 @@ class TestPartialDependence(unittest.TestCase):
 
 
         # Another set of input
-        # toy sample
+        # sample data
         self.sample_x = np.array([[-2, -1], [-1, -1], [-1, -2], [1, 1], [1, 2], [2, 1]])
         self.sample_y = np.array([-1, -1, -1, 1, 1, 1])
         self.sample_feature_name = [str(i) for i in range(self.sample_x.shape[1])]
@@ -97,6 +98,37 @@ class TestPartialDependence(unittest.TestCase):
         pdp_df = interpreter.partial_dependence.partial_dependence(['0'], classifier_predict_fn,
                                                                    grid=ud_grid, sample=True)
         self.assertEquals(pdp_df.shape[0], 4)
+
+
+    def test_partial_dependence_multiclass(self):
+        # Iris data classes: ['setosa', 'versicolor', 'virginica']
+        iris = datasets.load_iris()
+        #1. Using GB Classifier
+        clf = GradientBoostingClassifier(n_estimators=10, random_state=1)
+        clf.fit(iris.data, iris.target)
+        classifier_predict_fn = clf.predict_proba
+        interpreter = Interpretation()
+        interpreter.load_data(iris.data, iris.feature_names)
+        pdp_df = interpreter.partial_dependence.partial_dependence([iris.feature_names[0]], classifier_predict_fn,
+                                                                   grid_resolution=25, sample=True)
+
+        expected_feature_name = 'val_sepal length (cm)'
+        self.assertEquals(expected_feature_name, pdp_df.columns[4])
+        self.assertEquals(pdp_df.shape, (25, 5))
+
+        #2. Using SVC
+        from sklearn import svm
+        # With SVC, predict_proba is supported only if probability flag is enabled, by default it is false
+        clf = svm.SVC(probability=True)
+        clf.fit(iris.data, iris.target)
+        classifier_predict_fn = clf.predict_proba
+        interpreter = Interpretation()
+        interpreter.load_data(iris.data, iris.feature_names)
+        pdp_df = interpreter.partial_dependence.partial_dependence([iris.feature_names[0]], classifier_predict_fn,
+                                                                   grid_resolution=25, sample=True)
+        self.assertEquals(expected_feature_name, pdp_df.columns[4])
+        self.assertEquals(pdp_df.shape, (25, 5))
+
 
 
     def test_pdp_regression_coefs_are_close_1d(self, epsilon=1):
