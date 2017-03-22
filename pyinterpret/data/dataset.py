@@ -29,7 +29,7 @@ class DataSet(object):
         self.logger = build_logger(log_level, __name__)
 
         if not isinstance(data, (np.ndarray, pd.DataFrame)):
-            err_msg = 'expected data to be a numpy array or pandas dataframe but got ' \
+            err_msg = 'Invalid Data: expected data to be a numpy array or pandas dataframe but got ' \
                       '{}'.format(type(data))
             raise exceptions.DataSetError(err_msg)
 
@@ -40,7 +40,7 @@ class DataSet(object):
             data = data[:, np.newaxis]
 
         elif ndim >= 3:
-            err_msg = "Expected data to be 1 or 2 dimensions, " \
+            err_msg = "Invalid Data: expected data to be 1 or 2 dimensions, " \
                       "Data.shape: {}".format(ndim)
             raise exceptions.DataSetError(err_msg)
 
@@ -64,7 +64,7 @@ class DataSet(object):
             self.index = index
 
         else:
-            raise ValueError("Currently we only support pandas dataframes and numpy arrays"
+            raise ValueError("Invalid: currently we only support pandas dataframes and numpy arrays"
                              "If you would like support for additional data structures let us "
                              "know!")
 

@@ -145,11 +145,21 @@ class TestPartialDependence(unittest.TestCase):
         self.assertTrue(abs(coef - self.B[0]) < epsilon, True)
 
 
+    def test_pdp_inputs(self):
+        clf = GradientBoostingClassifier(n_estimators=10, random_state=1)
+        clf.fit(self.sample_x, self.sample_y)
+        classifier_predict_fn = clf.predict_proba
+        interpreter = Interpretation()
+
+        self.assertRaisesRegexp(Exception, "Invalid Data", interpreter.load_data, None, self.sample_feature_name)
+
+
     def test_2D_pdp(self):
         coefs = self.interpreter.partial_dependence.partial_dependence(self.features[:2],
                                                                        self.regressor_predict_fn,
                                                                        grid_resolution=10,
                                                                        sample=True)
+
 
     def test_plot_1D_pdp(self):
         coefs = self.interpreter.partial_dependence.plot_partial_dependence([self.features[0]],
