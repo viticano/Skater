@@ -13,9 +13,10 @@ from ...util import exceptions
 COLORS = ['#328BD5', '#404B5A', '#3EB642', '#E04341', '#8665D0']
 plt.rcParams['figure.autolayout'] = True
 
-
 class PartialDependence(BaseGlobalInterpretation):
     """Contains methods for partial dependence. Subclass of BaseGlobalInterpretation"""
+
+    __all__ = ['partial_dependence', 'plot_partial_dependence']
 
     _pdp_metadata = {}
     _predict_fn = None
@@ -106,7 +107,6 @@ class PartialDependence(BaseGlobalInterpretation):
             total samples = bin_count * samples per bin.
 
         """
-
         if len(feature_ids) >= 3:
             too_many_features_err_msg = "Pass in at most 2 features for pdp. If you have a " \
                                         "use case where you'd like to look at 3 simultaneously" \
@@ -244,7 +244,6 @@ class PartialDependence(BaseGlobalInterpretation):
             self._pdp_metadata['pdp_cols'] = {0:'mean'}
 
         self._pdp_metadata['sd_col'] = 'sd'
-
         self.interpreter.logger.debug("PDP df metadata: {}".format(self._pdp_metadata))
         return pd.DataFrame(pdps)
 
@@ -322,6 +321,25 @@ class PartialDependence(BaseGlobalInterpretation):
 
         plot_title(string):
             title for pdp plots
+
+        Examples
+        --------
+        >>> from sklearn.ensemble import GradientBoostingRegressor
+        >>> from sklearn.datasets.california_housing import fetch_california_housing
+        >>> cal_housing = fetch_california_housing()
+        # split 80/20 train-test
+        >>> x_train, x_test, y_train, y_test = train_test_split(cal_housing.data, cal_housing.target, test_size=0.2, random_state=1)
+        >>> names = cal_housing.feature_names
+
+        >>> print("Training the estimator...")
+        >>> estimator = GradientBoostingRegressor(n_estimators=10, max_depth=4, learning_rate=0.1, loss='huber', random_state=1)
+        >>> estimator.fit(x_train, y_train)
+        >>> from pyinterpret.core.explanations import Interpretation
+        >>> interpreter = Interpretation()
+        >>> print("Feature name: {}".format(names))
+        >>> interpreter.load_data(X_train, feature_names=names)
+        >>> print("Input feature name: {}".format[names[1], names[5]])
+        >>> interpreter.partial_dependence.plot_partial_dependence([names[1], names[5]], clf.predict, n_samples=100)
 
         """
 
