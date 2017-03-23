@@ -377,6 +377,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                      with_variance=with_variance,
                                      plot_title=plot_title)
 
+
     def _2d_pdp_plot(self, pdp, feature_name, pdp_metadata,
                      with_variance=False, plot_title=None, disable_offset=True):
         colors = cycle(COLORS)
@@ -430,12 +431,14 @@ class PartialDependence(BaseGlobalInterpretation):
                 ax.yaxis.set_major_formatter(ScalarFormatter())
         return figure_list, axis_list
 
+
     def _is_feature_binary(self, pdp, feature):
         data = pdp[feature].values
         if len(np.unique(data)) == 2:
             return True
         else:
             return False
+
 
     def _3d_pdp_plot(self, pdp, feature1, feature2, pdp_metadata,
                      with_variance=False, plot_title=None, disable_offset=True):
@@ -479,9 +482,11 @@ class PartialDependence(BaseGlobalInterpretation):
                 ax.yaxis.set_major_formatter(formatter)
         return figure_list, axis_list
 
+
     def partial_dependency_sklearn(self):
         """Uses sklearn's implementation"""
         raise NotImplementedError("Not yet included")
+
 
     @staticmethod
     def _check_grid(grid, feature_ids, grid_resolution):
@@ -497,6 +502,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                                   grid.shape[0])
             raise exceptions.MalformedGridError(err_msg)
 
+
     @staticmethod
     def _check_dataset_type(dataset):
         """
@@ -507,6 +513,7 @@ class PartialDependence(BaseGlobalInterpretation):
         if not isinstance(dataset, pd.DataFrame):
             err_msg = "Dataset.data must be a pandas.dataframe"
             raise exceptions.DataSetError(err_msg)
+
 
     @staticmethod
     def _check_grid_range(grid_range):
