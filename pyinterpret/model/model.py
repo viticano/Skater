@@ -111,7 +111,7 @@ class Model(object):
         elif self.output_type == 'multiclass':
             self.model_type = StaticTypes.model_types.classifier
             self.probability = False
-            self.n_classes = len(np.unique)
+            self.n_classes = len(np.unique(outputs))
 
         elif self.output_type == 'continuous-multioutput':
             self.model_type = StaticTypes.model_types.classifier
