@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.ticker import ScalarFormatter
 
 from .base import BaseGlobalInterpretation
 from ...util.static_types import StaticTypes
@@ -408,8 +409,7 @@ class PartialDependence(BaseGlobalInterpretation):
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(handles, labels)
             if disable_offset:
-                ax.ticklabel_format(useOffset=False)
-
+                ax.yaxis.set_major_formatter(ScalarFormatter())
         return figure_list, axis_list
 
     def _is_feature_binary(self, pdp, feature):
@@ -456,8 +456,9 @@ class PartialDependence(BaseGlobalInterpretation):
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(handles, labels)
             if disable_offset:
-                ax.ticklabel_format(useOffset=False)
-
+                formatter = ScalarFormatter(useMathText=True)
+                formatter.set_scientific(False)
+                ax.yaxis.set_major_formatter(formatter)
         return figure_list, axis_list
 
     def partial_dependency_sklearn(self):
