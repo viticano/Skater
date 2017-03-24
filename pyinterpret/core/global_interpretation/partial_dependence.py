@@ -5,6 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.ticker import ScalarFormatter
+import concurrent.futures
 
 from .base import BaseGlobalInterpretation
 from ...util.static_types import StaticTypes
@@ -28,6 +29,37 @@ class PartialDependence(BaseGlobalInterpretation):
             'sd_col':'',
             'val_cols':[]
         }
+
+
+    def compute_pd(self, index, grid_expanded, number_of_classes, feature_ids, data_sample_mutable):
+        pdp = {}
+        new_row = grid_expanded[index]
+        for feature_idx, feature_id in enumerate(feature_ids):
+            data_sample_mutable[feature_id] = new_row[feature_idx]
+        predictions = self._predict_fn(data_sample_mutable.values)
+
+        mean_prediction = np.mean(predictions, axis=0)
+        std_prediction = np.std(predictions, axis=0)
+
+        for feature_idx, feature_id in enumerate(feature_ids):
+            val_col = 'val_{}'.format(feature_id)
+            pdp[val_col] = new_row[feature_idx]
+
+        if n_classes == 1:
+            pdp['mean'] = mean_prediction
+            pdp['sd'] = std_prediction
+        elif n_classes == 2:
+            mean_col = 'mean_class_{}'.format(1)
+            pdp[mean_col] = mean_prediction[-1]
+            pdp['sd'] = std_prediction[-1]
+        else:
+            for class_i in range(mean_prediction.shape[0]):
+                mean_col = 'mean_class_{}'.format(class_i)
+                pdp[mean_col] = mean_prediction[class_i]
+                # we can return 1 sd since its a common variance across classes
+                # this line is currently redundant, as in it gets executed multiple times
+                pdp['sd'] = std_prediction[class_i]
+        return pdp
 
 
     def partial_dependence(self, feature_ids, predict_fn, grid=None, grid_resolution=100,
@@ -140,7 +172,7 @@ class PartialDependence(BaseGlobalInterpretation):
             raise KeyError(missing_feature_id_err_msg)
 
         if grid_range is None:
-            grid_range = (.03, 0.97)
+            grid_range = (.05, 0.95)
         else:
             if not hasattr(grid_range, "__iter__"):
                 err_msg = "Grid range {} needs to be an iterable".format(grid_range)
@@ -179,7 +211,6 @@ class PartialDependence(BaseGlobalInterpretation):
                                                     samples_per_bin=samples_per_bin,
                                                     bin_count=bin_count)
 
-
         self.interpreter.logger.debug("Shape of sampled data: {}".format(data_sample.shape))
         #TODO: Add check for non-empty data
 
@@ -201,50 +232,30 @@ class PartialDependence(BaseGlobalInterpretation):
 
         n_classes = self._predict_fn.n_classes
 
+        # import functools
+        # with concurrent.futures.ProcessPoolExecutor() as executor:
+        #     for pd_row in executor.map(functools.partial(compute_pd, grid_expanded,
+        #                                               number_of_classes, feature_ids, data_sample_mutable),
+        #                             [i for i in range(grid_expanded.shape[0])]):
+        #         pdps.append(pd_row)
+
         for i in range(grid_expanded.shape[0]):
-            pdp = {}
-            new_row = grid_expanded[i]
-            for feature_idx, feature_id in enumerate(feature_ids):
-                data_sample_mutable[feature_id] = new_row[feature_idx]
-            predictions = self._predict_fn(data_sample_mutable.values)
+             pdps.append(self.compute_pd(grid_expanded, number_of_classes, feature_ids, data_sample_mutable))
 
-            mean_prediction = np.mean(predictions, axis=0)
-            std_prediction = np.std(predictions, axis=0)
-
-            for feature_idx, feature_id in enumerate(feature_ids):
-                val_col = 'val_{}'.format(feature_id)
-                pdp[val_col] = new_row[feature_idx]
-
-            if n_classes == 1:
-                pdp['mean'] = mean_prediction
-                pdp['sd'] = std_prediction
-            elif n_classes == 2:
-                mean_col = 'mean_class_{}'.format(1)
-                pdp[mean_col] = mean_prediction[-1]
-                pdp['sd'] = std_prediction[-1]
-            else:
-                for class_i in range(mean_prediction.shape[0]):
-                    mean_col = 'mean_class_{}'.format(class_i)
-                    pdp[mean_col] = mean_prediction[class_i]
-                    # we can return 1 sd since its a common variance across classes
-                    # this line is currently redundant, as in it gets executed multiple times
-                    pdp['sd'] = std_prediction[class_i]
-            pdps.append(pdp)
-
-        self._pdp_metadata['val_cols'] = ['val_{}'.format(i) for i in feature_ids]
+        #self._pdp_metadata['val_cols'] = ['val_{}'.format(i) for i in feature_ids]
 
         # Local variable referenced possible before definition can be diregarded
         # since we assert that grid_expanded.shape must be > 0
-        if isinstance(mean_prediction, np.ndarray):
-            classes = range(mean_prediction.shape[0])
-            self._pdp_metadata['pdp_cols'] = {
-                class_i: "mean_class_{}".format(class_i) for class_i in classes
-                }
-        else:
-            self._pdp_metadata['pdp_cols'] = {0:'mean'}
-
-        self._pdp_metadata['sd_col'] = 'sd'
-        self.interpreter.logger.debug("PDP df metadata: {}".format(self._pdp_metadata))
+        # if isinstance(mean_prediction, np.ndarray):
+        #     classes = range(mean_prediction.shape[0])
+        #     self._pdp_metadata['pdp_cols'] = {
+        #         class_i: "mean_class_{}".format(class_i) for class_i in classes
+        #         }
+        # else:
+        #     self._pdp_metadata['pdp_cols'] = {0:'mean'}
+        #
+        # self._pdp_metadata['sd_col'] = 'sd'
+        # self.interpreter.logger.debug("PDP df metadata: {}".format(self._pdp_metadata))
         return pd.DataFrame(pdps)
 
 
@@ -322,7 +333,7 @@ class PartialDependence(BaseGlobalInterpretation):
         plot_title(string):
             title for pdp plots
 
-        Examples
+        Example
         --------
         >>> from sklearn.ensemble import GradientBoostingRegressor
         >>> from sklearn.datasets.california_housing import fetch_california_housing
@@ -345,7 +356,6 @@ class PartialDependence(BaseGlobalInterpretation):
 
         # in the event that a user wants a 3D pdp with multiple classes, how should
         # we handle this? currently each class will get its own figure
-
         pdp = self.partial_dependence(feature_ids, predict_fn,
                                       grid=grid, grid_resolution=grid_resolution,
                                       grid_range=grid_range, sample=sample,
