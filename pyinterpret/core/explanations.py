@@ -2,6 +2,7 @@
 
 from .global_interpretation.partial_dependence import PartialDependence
 from .local_interpretation.local_interpreter import LocalInterpreter
+from .global_interpretation.feature_importance import FeatureImportance
 from ..data.dataset import DataSet
 from ..model.local import InMemoryModel
 from ..util.logger import build_logger
@@ -52,6 +53,7 @@ class Interpretation(object):
         self.logger = build_logger(log_level, __name__)
         self.local_interpreter = LocalInterpreter(self)
         self.partial_dependence = PartialDependence(self)
+        self.feature_importance = FeatureImportance(self)
         self.data_set = None
 
     def load_data(self, training_data, feature_names=None, index=None):

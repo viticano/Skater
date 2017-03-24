@@ -226,3 +226,22 @@ class DataSet(object):
                     new_samples = np.random.choice(idx, replace=True, size=samples_per_bin)
                     samples.extend(self.data.loc[new_samples].values)
             return pd.DataFrame(samples, columns=self.feature_ids)
+
+    def generate_column_sample(self, feature_id, n_samples=None, method='random-choice'):
+        if method == 'random-choice':
+            return self._generate_column_sample_random_choice(feature_id, n_samples=n_samples)
+
+    def _generate_column_sample_random_choice(self, feature_id, n_samples=None):
+        return np.random.choice(self[feature_id].values, size=n_samples)
+
+    def _generate_column_sample_stratified(self, feature_id, n_samples=None):
+        """
+        Tries to capture all relevant regions of space, relative to how many samples are allowed.
+        :param feature_id:
+        :param n_samples:
+        :return:
+        """
+        pass
+
+    def _generate_column_sample_modeled(self, feature_id, n_samples=None):
+        pass
