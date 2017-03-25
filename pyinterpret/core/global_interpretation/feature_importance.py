@@ -103,7 +103,6 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         """
 
-
         predict_fn = self.build_annotated_model(predict_fn, examples=self.data_set.values)
 
         importances = {}
@@ -111,6 +110,8 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         n = raw_predictions.shape[0]
 
+        # instead of copying the whole dataset, should we copy a column, change column values,
+        # revert column back to copy?
         for feature_id in self.data_set.feature_ids:
             X_mutable = self.data_set.data.copy()
             X_mutable[feature_id] = self.data_set.generate_column_sample(feature_id, n_samples=n, method='random-choice')
