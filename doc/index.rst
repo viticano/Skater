@@ -10,6 +10,8 @@ Welcome to pyinterpret's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   includeme
+
 .. automodule:: pyinterpret
     :members:
 
