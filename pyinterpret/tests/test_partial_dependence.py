@@ -148,9 +148,7 @@ class TestPartialDependence(unittest.TestCase):
     def test_pdp_inputs(self):
         clf = GradientBoostingClassifier(n_estimators=10, random_state=1)
         clf.fit(self.sample_x, self.sample_y)
-        classifier_predict_fn = clf.predict_proba
         interpreter = Interpretation()
-
         self.assertRaisesRegexp(Exception, "Invalid Data", interpreter.load_data, None, self.sample_feature_name)
 
 
