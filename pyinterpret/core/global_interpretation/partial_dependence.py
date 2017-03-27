@@ -22,9 +22,10 @@ def compute_pd(index, model_fn, grid_expanded, number_of_classes, feature_ids, i
     # pandas dataframe
     data_sample = input_data.copy()
     pdp = {}
-    new_row = grid_expanded[index]
+    # new_row = grid_expanded[index]
     for feature_idx, feature_id in enumerate(feature_ids):
         data_sample[feature_id] = new_row[feature_idx]
+
     predictions = model_fn(data_sample.values)
 
     mean_prediction = np.mean(predictions, axis=0)
@@ -255,7 +256,7 @@ class PartialDependence(BaseGlobalInterpretation):
         #                                                  n_classes, feature_ids, data_sample_mutable),
         #                             [i for i in range(grid_expanded.shape[0])]):
         p = Pool(4)
-        for pd_row in p.map(functools.partial(compute_pd, model_fn=model_fn,
+        for pd_row in p.map(functools.partial(compute_pd, model_fn=predict_fn,
                                               grid_expanded=grid_expanded, number_of_classes=n_classes, feature_ids=feature_ids,
                                               input_data=data_sample), [i for i in range(grid_expanded.shape[0])]):
             pdps.append(pd_row)
