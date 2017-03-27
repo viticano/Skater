@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>&lt;no title&gt; &mdash; pyinterpret 1 documentation</title>
+  <title>![layout](../master/PyInterpret.png?raw=true) &mdash; pyinterpret 1 documentation</title>
   
 
   
@@ -89,7 +89,8 @@
             
             
               <!-- Local TOC -->
-              <div class="local-toc"><ul class="simple">
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">![layout](../master/PyInterpret.png?raw=true)</a></li>
 </ul>
 </div>
             
@@ -134,7 +135,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>&lt;no title&gt;</li>
+      <li>![layout](../master/PyInterpret.png?raw=true)</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -153,7 +154,55 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  
+  <p># PyInterpret
+##### Master: ![Build Status-master](<a class="reference external" href="https://api.travis-ci.com/repositories/datascienceinc/model-interpretation.svg?token=okdWYn5kDgeoCPJZGPEz&amp;branch=master">https://api.travis-ci.com/repositories/datascienceinc/model-interpretation.svg?token=okdWYn5kDgeoCPJZGPEz&amp;branch=master</a>)
+###Layout</p>
+<div class="section" id="layout-master-pyinterpret-png-raw-true">
+<h1>![layout](../master/PyInterpret.png?raw=true)<a class="headerlink" href="#layout-master-pyinterpret-png-raw-true" title="Permalink to this headline">¶</a></h1>
+<p>### Dev Installation
+<code class="docutils literal"><span class="pre">`</span>
+<span class="pre">git</span> <span class="pre">clone</span> <span class="pre">git&#64;github.com:datascienceinc/PyInterpret.git</span>
+<span class="pre">cd</span> <span class="pre">PyInterpret</span>
+<span class="pre">sudo</span> <span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span>
+<span class="pre">`</span></code></p>
+<p>### Prod Installation (platform)
+Requires that pip.conf is configured with pypi.datascience.com credentials.</p>
+<p><code class="docutils literal"><span class="pre">`</span>
+<span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pyinterpret</span>
+<span class="pre">`</span></code></p>
+<p>### Use this kind of this stuff to do cool stuff.</p>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a>`
+import numpy as np
+from scipy.stats import norm</p>
+<p>#gen some data
+B = np.random.normal(0, 10, size = 3)
+X = np.random.normal(0,10, size=(1000, 3))
+feature_names = [&#8220;feature_{}&#8221;.format(i) for i in xrange(3)]
+e = norm(0, 5)
+y = np.dot(X, B) + e.rvs(1000)
+example = X[0]</p>
+<p>#model it
+from sklearn.ensemble import RandomForestRegressor
+regressor = RandomForestRegressor()
+regressor.fit(X, y)</p>
+<p>#partial dependence
+from pyinterpret.core.explanations import Interpretation
+i = Interpretation()
+i.load_data(X, feature_names = feature_names)
+i.partial_dependence.plot_partial_dependence([feature_names[0], feature_names[1]],</p>
+<blockquote>
+<div>regressor.predict)</div></blockquote>
+<p>#local interpretation
+from pyinterpret.core.local_interpretation.lime.lime_tabular import LimeTabularExplainer
+explainer = LimeTabularExplainer(X, feature_names = feature_names)
+explainer.explain_instance(example,  regressor.predict).show_in_notebook()</p>
+<p><a href="#id3"><span class="problematic" id="id4">``</span></a><a href="#id5"><span class="problematic" id="id6">`</span></a></p>
+<p>### Testing
+<code class="docutils literal"><span class="pre">`</span>
+<span class="pre">python</span> <span class="pre">pyinterpret/tests/test_all.py</span> <span class="pre">--debug</span> <span class="pre">--n=1000</span> <span class="pre">--dim=3</span> <span class="pre">--seed=1</span>
+<span class="pre">`</span></code></p>
+</div>
+
 
            </div>
            <div class="articleComments">
