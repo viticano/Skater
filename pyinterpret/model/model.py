@@ -47,6 +47,8 @@ class Model(object):
         self.input_shape = StaticTypes.unknown
         self.probability = StaticTypes.unknown
         self.formatter = lambda x: x
+        self.label_encoder = LabelEncoder()
+        self.one_hot_encoder = OneHotEncoder()
 
     @abc.abstractmethod
     def predict(self, *args, **kwargs):
@@ -109,7 +111,7 @@ class Model(object):
         elif self.output_type == 'multiclass':
             self.model_type = StaticTypes.model_types.classifier
             self.probability = False
-            self.n_classes = len(np.unique)
+            self.n_classes = len(np.unique(outputs))
 
         elif self.output_type == 'continuous-multioutput':
             self.model_type = StaticTypes.model_types.classifier
@@ -133,14 +135,13 @@ class Model(object):
             self.logger.debug("sklearn response: {}".format(self.output_type))
             exceptions.ModelError(err_msg)
 
-        self.formatter = self.transformer_func_factory()
+        self.formatter = self.transformer_func_factory(outputs)
 
         reports = self.model_report(examples)
         for report in reports:
             self.logger.debug(report)
 
-    @staticmethod
-    def predict_function_transformer(output):
+    def predict_function_transformer(self, output):
         """
         Call this method when model returns a 1D array of
         predicted classes. The output is one hot encoded version.
@@ -156,16 +157,16 @@ class Model(object):
             The one hot encoded outputs of predict_fn
         """
 
-        label_encoder = LabelEncoder()
-        _labels = label_encoder.fit_transform(output)[:, np.newaxis]
+        _labels = self.label_encoder.transform(output)[:, np.newaxis]
         # class_names = label_encoder.classes_.tolist()
 
-        onehot_encoder = OneHotEncoder()
-        output = onehot_encoder.fit_transform(_labels).todense()
+        self.logger.debug("Using transforming function. Found {} classes".format(len(self.label_encoder.classes_)))
+        self.logger.debug("Label shape: {}".format(len(_labels.shape)))
+        output = self.one_hot_encoder.transform(_labels).todense()
         output = np.squeeze(np.asarray(output))
         return output
 
-    def transformer_func_factory(self):
+    def transformer_func_factory(self, outputs):
         """
         In the event that the predict func returns 1D array of predictions,
         then this returns a formatter to convert outputs to a 2D one hot encoded
@@ -186,6 +187,11 @@ class Model(object):
         # Note this expression below assumptions (not probability) evaluates to false if
         # and only if the model does not return probabilities. If unknown, should be true
         if self.model_type == StaticTypes.model_types.classifier and not self.probability:
+            #fit label encoder
+            self.logger.debug("Label encoder fit on examples of shape: {}".format(outputs.shape))
+            labels = self.label_encoder.fit_transform(outputs)[:, np.newaxis]
+            self.logger.debug("Onehot encoder fit on examples of shape: {}".format(labels.shape))
+            self.one_hot_encoder.fit(labels)
             return self.predict_function_transformer
         else:
             return lambda x: x
@@ -218,3 +224,6 @@ class Model(object):
         reports.append("Input Shape: {} \n".format(self.input_shape))
         reports.append("Probability: {} \n".format(self.probability))
         return reports
+
+# todo: add subclasses for classifier and regression, with class names given
+# on init for classifier
