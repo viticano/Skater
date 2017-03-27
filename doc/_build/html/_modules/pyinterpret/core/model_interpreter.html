@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyinterpret.core.model_interpreter &#8212; pyinterpret 1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pyinterpret.core.model_interpreter</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Base ModelInterpreter class. submodules like lime and partial dependence&quot;</span>
+<span class="sd">must have these methods&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="ModelInterpreter"><a class="viewcode-back" href="../../../index.html#pyinterpret.core.model_interpreter.ModelInterpreter">[docs]</a><span class="k">class</span> <span class="nc">ModelInterpreter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base Interpreter class. Common methods include loading a dataset and type setting.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interpreter</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span> <span class="o">=</span> <span class="n">interpreter</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data_set</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;data_set routes to the Interpreter&#39;s dataset&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">data_set</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_types</span><span class="p">():</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s">&#39;partial_dependence&#39;</span><span class="p">,</span> <span class="s">&#39;lime&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="ModelInterpreter.load_data"><a class="viewcode-back" href="../../../index.html#pyinterpret.core.model_interpreter.ModelInterpreter.load_data">[docs]</a>    <span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">training_data</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;.consider routes to Interpreter&#39;s .consider&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">consider</span><span class="p">(</span><span class="n">training_data</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="n">feature_names</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ModelInterpreter.build_annotated_model"><a class="viewcode-back" href="../../../index.html#pyinterpret.core.model_interpreter.ModelInterpreter.build_annotated_model">[docs]</a>    <span class="k">def</span> <span class="nf">build_annotated_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction_function</span><span class="p">,</span> <span class="n">examples</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        returns pyinterpret.model.InMemoryModel</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            prediction_function(callable):</span>
+<span class="sd">                the machine learning model &quot;prediction&quot; function to explain, such that</span>
+<span class="sd">                predictions = predict_fn(data).</span>
+
+<span class="sd">                For instance:</span>
+<span class="sd">                    from sklearn.ensemble import RandomForestClassier</span>
+<span class="sd">                    rf = RandomForestClassier()</span>
+<span class="sd">                    rf.fit(X,y)</span>
+<span class="sd">                    Interpreter.build_annotated_model(rf.predict)</span>
+<span class="sd">            examples(np.ndarray):</span>
+<span class="sd">                Examples to pass through the prediction_function to make inferences</span>
+<span class="sd">                about what it outputs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">build_annotated_model</span><span class="p">(</span><span class="n">prediction_function</span><span class="p">,</span> <span class="n">examples</span><span class="o">=</span><span class="n">examples</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Aaron Kramer and Pramit Choudhary.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
