@@ -17,11 +17,13 @@ plt.rcParams['figure.autolayout'] = True
 
 
 def compute_pd(index, model_fn, grid_expanded, number_of_classes, feature_ids, input_data):
+    # pandas dataframe
+    data_sample = input_data.copy()
     pdp = {}
     new_row = grid_expanded[index]
     for feature_idx, feature_id in enumerate(feature_ids):
-        input_data[feature_id] = new_row[feature_idx]
-    predictions = model_fn(input_data.values)
+        data_sample[feature_id] = new_row[feature_idx]
+    predictions = model_fn(data_sample.values)
 
     mean_prediction = np.mean(predictions, axis=0)
     std_prediction = np.std(predictions, axis=0)
@@ -237,9 +239,6 @@ class PartialDependence(BaseGlobalInterpretation):
         #cartesian product of grid
         grid_expanded = np.array(list(product(*grid)))
 
-        # pandas dataframe
-        data_sample_mutable = data_sample.copy()
-
         pdps = []
         if grid_expanded.shape[0] <= 0:
             empty_grid_expanded_err_msg = "Must have at least 1 pdp value" \
@@ -247,7 +246,6 @@ class PartialDependence(BaseGlobalInterpretation):
             raise exceptions.MalformedGridError(empty_grid_expanded_err_msg)
 
         n_classes = self._predict_fn.n_classes
-
         model_fn = self._predict_fn
         import functools
         # with concurrent.futures.ProcessPoolExecutor() as executor:
@@ -257,7 +255,7 @@ class PartialDependence(BaseGlobalInterpretation):
         p = Pool(4)
         for pd_row in p.map(functools.partial(compute_pd, model_fn=model_fn,
                                               grid_expanded=grid_expanded, number_of_classes=n_classes, feature_ids=feature_ids,
-                                              input_data=data_sample_mutable), [i for i in range(grid_expanded.shape[0])]):
+                                              input_data=data_sample), [i for i in range(grid_expanded.shape[0])]):
             pdps.append(pd_row)
 
         # for i in range(grid_expanded.shape[0]):
