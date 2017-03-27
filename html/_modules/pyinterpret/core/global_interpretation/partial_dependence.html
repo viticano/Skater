@@ -1,0 +1,786 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyinterpret.core.global_interpretation.partial_dependence &#8212; pyinterpret 1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pyinterpret.core.global_interpretation.partial_dependence</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Partial Dependence class&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">product</span><span class="p">,</span> <span class="n">cycle</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="k">import</span> <span class="n">Axes3D</span>
+<span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="k">import</span> <span class="n">ScalarFormatter</span>
+<span class="kn">from</span> <span class="nn">matplotlib.axes._subplots</span> <span class="k">import</span> <span class="n">Axes</span> <span class="k">as</span> <span class="n">mpl_axes</span>
+
+<span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="n">BaseGlobalInterpretation</span>
+<span class="kn">from</span> <span class="nn">...util.static_types</span> <span class="k">import</span> <span class="n">StaticTypes</span>
+<span class="kn">from</span> <span class="nn">...util</span> <span class="k">import</span> <span class="n">exceptions</span>
+<span class="kn">from</span> <span class="nn">...util.kernels</span> <span class="k">import</span> <span class="n">flatten</span>
+
+<span class="n">COLORS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;#328BD5&#39;</span><span class="p">,</span> <span class="s">&#39;#404B5A&#39;</span><span class="p">,</span> <span class="s">&#39;#3EB642&#39;</span><span class="p">,</span> <span class="s">&#39;#E04341&#39;</span><span class="p">,</span> <span class="s">&#39;#8665D0&#39;</span><span class="p">]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s">&#39;figure.autolayout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="k">True</span>
+
+
+<div class="viewcode-block" id="PartialDependence"><a class="viewcode-back" href="../../../../index.html#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence">[docs]</a><span class="k">class</span> <span class="nc">PartialDependence</span><span class="p">(</span><span class="n">BaseGlobalInterpretation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Contains methods for partial dependence. Subclass of BaseGlobalInterpretation&quot;&quot;&quot;</span>
+
+    <span class="n">_pdp_metadata</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">_predict_fn</span> <span class="o">=</span> <span class="k">None</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_build_fresh_metadata_dict</span><span class="p">():</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s">&#39;pdp_cols&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s">&#39;sd_col&#39;</span><span class="p">:</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+            <span class="s">&#39;val_cols&#39;</span><span class="p">:[]</span>
+        <span class="p">}</span>
+
+
+<div class="viewcode-block" id="PartialDependence.partial_dependence"><a class="viewcode-back" href="../../../../index.html#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence">[docs]</a>    <span class="k">def</span> <span class="nf">partial_dependence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_ids</span><span class="p">,</span> <span class="n">predict_fn</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                           <span class="n">grid_range</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="k">False</span><span class="p">,</span>
+                           <span class="n">sampling_strategy</span><span class="o">=</span><span class="s">&#39;uniform-over-similarity-ranks&#39;</span><span class="p">,</span>
+                           <span class="n">n_samples</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">bin_count</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">samples_per_bin</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes partial_dependence of a set of variables. Essentially approximates</span>
+<span class="sd">        the partial partial_dependence of the predict_fn with respect to the variables</span>
+<span class="sd">        passed.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        feature_ids(list):</span>
+<span class="sd">            the names/ids of the features for which we compute partial dependence.</span>
+<span class="sd">            Note that the algorithm&#39;s complexity scales exponentially with additional</span>
+<span class="sd">            features, so generally one should only look at one or two features at a</span>
+<span class="sd">            time. These feature ids must be available in the class&#39;s associated DataSet.</span>
+
+<span class="sd">            As of now, we only support looking at 1 or 2 features at a time.</span>
+
+<span class="sd">        predict_fn(function):</span>
+<span class="sd">            the machine learning model &quot;prediction&quot; function to explain, such that</span>
+<span class="sd">            predictions = predict_fn(data).</span>
+
+<span class="sd">            For instance:</span>
+<span class="sd">            from sklearn.ensemble import RandomForestClassier</span>
+<span class="sd">            rf = RandomForestClassier()</span>
+<span class="sd">            rf.fit(X,y)</span>
+
+<span class="sd">            partial_dependence(feature_ids, rf.predict)</span>
+<span class="sd">            or</span>
+<span class="sd">            partial_dependence(feature_ids, rf.predict_proba)</span>
+
+<span class="sd">            are acceptable use cases. Output types need to be 1D or 2D numpy arrays.</span>
+
+<span class="sd">            Supports classification, multi-class classification, and regression.</span>
+
+<span class="sd">        grid(numpy.ndarray):</span>
+<span class="sd">            2 dimensional array on which we fix values of features. Note this is</span>
+<span class="sd">            determined automatically if not given based on the percentiles of the</span>
+<span class="sd">            dataset.</span>
+
+<span class="sd">        grid_resolution(int):</span>
+<span class="sd">            how many unique values to include in the grid. If the percentile range</span>
+<span class="sd">            is 5% to 95%, then that range will be cut into &lt;grid_resolution&gt;</span>
+<span class="sd">            equally size bins.</span>
+
+<span class="sd">        grid_range(tuple):</span>
+<span class="sd">            the percentile extrama to consider. 2 element tuple, increasing, bounded</span>
+<span class="sd">            between 0 and 1.</span>
+
+<span class="sd">        sample(Bool):</span>
+<span class="sd">            Whether to sample from the original dataset.</span>
+
+<span class="sd">        sampling_strategy(string):</span>
+<span class="sd">            If sampling, which approach to take. See DataSet.generate_sample for</span>
+<span class="sd">            details.</span>
+
+<span class="sd">        n_samples(int):</span>
+<span class="sd">            The number of samples to use from the original dataset. Note this is</span>
+<span class="sd">            only active if sample = True and sampling strategy = &#39;uniform&#39;. If</span>
+<span class="sd">            using &#39;uniform-over-similarity-ranks&#39;, use samples per bin</span>
+
+<span class="sd">        bin_count(int):</span>
+<span class="sd">            The number of bins to use when using the similarity based sampler. Note</span>
+<span class="sd">            this is only active if sample = True and</span>
+<span class="sd">            sampling_strategy = &#39;uniform-over-similarity-ranks&#39;.</span>
+<span class="sd">            total samples = bin_count * samples per bin.</span>
+
+<span class="sd">        samples_per_bin(int):</span>
+<span class="sd">            The number of samples to collect for each bin within the sampler. Note</span>
+<span class="sd">            this is only active if sample = True and</span>
+<span class="sd">            sampling_strategy = &#39;uniform-over-similarity-ranks&#39;. If using</span>
+<span class="sd">            sampling_strategy = &#39;uniform&#39;, use n_samples.</span>
+<span class="sd">            total samples = bin_count * samples per bin.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">too_many_features_err_msg</span> <span class="o">=</span> <span class="s">&quot;Pass in at most 2 features for pdp. If you have a &quot;</span> \
+                                        <span class="s">&quot;use case where you&#39;d like to look at 3 simultaneously&quot;</span> \
+                                        <span class="s">&quot;, please let us know.&quot;</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">TooManyFeaturesError</span><span class="p">(</span><span class="n">too_many_features_err_msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">empty_features_err_msg</span> <span class="o">=</span> <span class="s">&quot;Feature ids must have non-zero length&quot;</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">EmptyFeatureListError</span><span class="p">(</span><span class="n">empty_features_err_msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">):</span>
+            <span class="n">duplicate_features_error_msg</span> <span class="o">=</span> <span class="s">&quot;feature_ids cannot contain duplicate values&quot;</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">DuplicateFeaturesError</span><span class="p">(</span><span class="n">duplicate_features_error_msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_set</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+            <span class="n">load_data_not_called_err_msg</span> <span class="o">=</span> <span class="s">&quot;self.interpreter.data_set not found. &quot;</span> \
+                                           <span class="s">&quot;Please call Interpretation.load_data &quot;</span> \
+                                           <span class="s">&quot;before running this method.&quot;</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">DataSetNotLoadedError</span><span class="p">(</span><span class="n">load_data_not_called_err_msg</span><span class="p">)</span>
+
+        <span class="c"># TODO: This we can change easily to functional style</span>
+        <span class="n">missing_feature_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">feature_id</span> <span class="ow">in</span> <span class="n">feature_ids</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">feature_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_set</span><span class="o">.</span><span class="n">feature_ids</span><span class="p">:</span>
+                <span class="n">missing_feature_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">feature_id</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">missing_feature_ids</span><span class="p">:</span>
+            <span class="n">missing_feature_id_err_msg</span> <span class="o">=</span> <span class="s">&quot;Features {0} not found in &quot;</span> \
+                                         <span class="s">&quot;Interpretation.data_set.feature_ids&quot;</span> \
+                                         <span class="s">&quot;{1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">missing_feature_ids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_set</span><span class="o">.</span><span class="n">feature_ids</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">missing_feature_id_err_msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">grid_range</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+            <span class="n">grid_range</span> <span class="o">=</span> <span class="p">(</span><span class="o">.</span><span class="mi">03</span><span class="p">,</span> <span class="mf">0.97</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">grid_range</span><span class="p">,</span> <span class="s">&quot;__iter__&quot;</span><span class="p">):</span>
+                <span class="n">err_msg</span> <span class="o">=</span> <span class="s">&quot;Grid range {} needs to be an iterable&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">grid_range</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MalformedGridRangeError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_grid_range</span><span class="p">(</span><span class="n">grid_range</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pdp_metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_fresh_metadata_dict</span><span class="p">()</span>
+
+        <span class="c"># if you dont pass a grid, build one.</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">grid</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="c"># Currently, if a given feature only has two unique values</span>
+            <span class="c"># then the grid will only include those two. Otherwise itll take the percentile</span>
+            <span class="c"># range according with grid_resolution bins.</span>
+            <span class="c"># sklearn however just returns the all unique values if the number of unique</span>
+            <span class="c"># values is less then grid resolution.</span>
+            <span class="c"># TODO: evaluate cases when len(unique(feature))==2</span>
+            <span class="n">grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_set</span><span class="o">.</span><span class="n">generate_grid</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">,</span>
+                                               <span class="n">grid_resolution</span><span class="o">=</span><span class="n">grid_resolution</span><span class="p">,</span>
+                                               <span class="n">grid_range</span><span class="o">=</span><span class="n">grid_range</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s">&quot;__iter__&quot;</span><span class="p">):</span>
+                <span class="n">grid</span> <span class="o">=</span> <span class="n">grid</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+                <span class="n">grid_resolution</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Grid shape used for pdp: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Grid resolution for pdp: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">grid_resolution</span><span class="p">))</span>
+
+        <span class="c"># make sure data_set module is giving us correct data structure</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_grid</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">feature_ids</span><span class="p">,</span> <span class="n">grid_resolution</span><span class="p">)</span>
+
+        <span class="c"># generate data</span>
+        <span class="n">data_sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_set</span><span class="o">.</span><span class="n">generate_sample</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="n">sampling_strategy</span><span class="p">,</span>
+                                                    <span class="n">sample</span><span class="o">=</span><span class="n">sample</span><span class="p">,</span>
+                                                    <span class="n">n_samples_from_dataset</span><span class="o">=</span><span class="n">n_samples</span><span class="p">,</span>
+                                                    <span class="n">samples_per_bin</span><span class="o">=</span><span class="n">samples_per_bin</span><span class="p">,</span>
+                                                    <span class="n">bin_count</span><span class="o">=</span><span class="n">bin_count</span><span class="p">)</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Shape of sampled data: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data_sample</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="c">#TODO: Add check for non-empty data</span>
+
+        <span class="c"># make sure data_set module is giving us correct data structure</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_dataset_type</span><span class="p">(</span><span class="n">data_sample</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_predict_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_annotated_model</span><span class="p">(</span><span class="n">predict_fn</span><span class="p">,</span> <span class="n">examples</span><span class="o">=</span><span class="n">data_sample</span><span class="p">)</span>
+
+        <span class="c">#cartesian product of grid</span>
+        <span class="n">grid_expanded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">grid</span><span class="p">)))</span>
+
+        <span class="c"># pandas dataframe</span>
+        <span class="n">data_sample_mutable</span> <span class="o">=</span> <span class="n">data_sample</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">pdps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">grid_expanded</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">empty_grid_expanded_err_msg</span> <span class="o">=</span> <span class="s">&quot;Must have at least 1 pdp value&quot;</span> \
+                                          <span class="s">&quot;grid shape: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">grid_expanded</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MalformedGridError</span><span class="p">(</span><span class="n">empty_grid_expanded_err_msg</span><span class="p">)</span>
+
+        <span class="n">n_classes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_fn</span><span class="o">.</span><span class="n">n_classes</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">grid_expanded</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">pdp</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">new_row</span> <span class="o">=</span> <span class="n">grid_expanded</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">feature_idx</span><span class="p">,</span> <span class="n">feature_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">):</span>
+                <span class="n">data_sample_mutable</span><span class="p">[</span><span class="n">feature_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_row</span><span class="p">[</span><span class="n">feature_idx</span><span class="p">]</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_fn</span><span class="p">(</span><span class="n">data_sample_mutable</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+            <span class="n">mean_prediction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">std_prediction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">feature_idx</span><span class="p">,</span> <span class="n">feature_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">):</span>
+                <span class="n">val_col</span> <span class="o">=</span> <span class="s">&#39;val_{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">feature_id</span><span class="p">)</span>
+                <span class="n">pdp</span><span class="p">[</span><span class="n">val_col</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_row</span><span class="p">[</span><span class="n">feature_idx</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">n_classes</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">pdp</span><span class="p">[</span><span class="s">&#39;mean&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean_prediction</span>
+                <span class="n">pdp</span><span class="p">[</span><span class="s">&#39;sd&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">std_prediction</span>
+            <span class="k">elif</span> <span class="n">n_classes</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">mean_col</span> <span class="o">=</span> <span class="s">&#39;mean_class_{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">pdp</span><span class="p">[</span><span class="n">mean_col</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean_prediction</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">pdp</span><span class="p">[</span><span class="s">&#39;sd&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">std_prediction</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">class_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mean_prediction</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                    <span class="n">mean_col</span> <span class="o">=</span> <span class="s">&#39;mean_class_{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">class_i</span><span class="p">)</span>
+                    <span class="n">pdp</span><span class="p">[</span><span class="n">mean_col</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean_prediction</span><span class="p">[</span><span class="n">class_i</span><span class="p">]</span>
+                    <span class="c"># we can return 1 sd since its a common variance across classes</span>
+                    <span class="c"># this line is currently redundant, as in it gets executed multiple times</span>
+                    <span class="n">pdp</span><span class="p">[</span><span class="s">&#39;sd&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">std_prediction</span><span class="p">[</span><span class="n">class_i</span><span class="p">]</span>
+            <span class="n">pdps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pdp</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pdp_metadata</span><span class="p">[</span><span class="s">&#39;val_cols&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;val_{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">feature_ids</span><span class="p">]</span>
+
+        <span class="c"># Local variable referenced possible before definition can be diregarded</span>
+        <span class="c"># since we assert that grid_expanded.shape must be &gt; 0</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mean_prediction</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">classes</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">mean_prediction</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pdp_metadata</span><span class="p">[</span><span class="s">&#39;pdp_cols&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">class_i</span><span class="p">:</span> <span class="s">&quot;mean_class_{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">class_i</span><span class="p">)</span> <span class="k">for</span> <span class="n">class_i</span> <span class="ow">in</span> <span class="n">classes</span>
+                <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pdp_metadata</span><span class="p">[</span><span class="s">&#39;pdp_cols&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span><span class="s">&#39;mean&#39;</span><span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pdp_metadata</span><span class="p">[</span><span class="s">&#39;sd_col&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;sd&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;PDP df metadata: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pdp_metadata</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">pdps</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PartialDependence.plot_partial_dependence"><a class="viewcode-back" href="../../../../index.html#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence">[docs]</a>    <span class="k">def</span> <span class="nf">plot_partial_dependence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_ids</span><span class="p">,</span> <span class="n">predict_fn</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="k">None</span><span class="p">,</span>
+                                <span class="n">grid</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                                <span class="n">grid_range</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="k">False</span><span class="p">,</span>
+                                <span class="n">sampling_strategy</span><span class="o">=</span><span class="s">&#39;uniform-over-similarity-ranks&#39;</span><span class="p">,</span>
+                                <span class="n">n_samples</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">bin_count</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">samples_per_bin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                                <span class="n">with_variance</span><span class="o">=</span><span class="k">False</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes partial_dependence of a set of variables. Essentially approximates</span>
+<span class="sd">        the partial partial_dependence of the predict_fn with respect to the variables</span>
+<span class="sd">        passed.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        feature_ids(list):</span>
+<span class="sd">            the names/ids of the features for which we compute partial dependence.</span>
+<span class="sd">            Note that the algorithm&#39;s complexity scales exponentially with additional</span>
+<span class="sd">            features, so generally one should only look at one or two features at a</span>
+<span class="sd">            time. These feature ids must be avaiable in the class&#39;s associated DataSet.</span>
+
+<span class="sd">            As of now, we only support looking at 1 or 2 features at a time.</span>
+
+<span class="sd">        predict_fn(function):</span>
+<span class="sd">            machine learning that takes data and returns an output. Acceptable output</span>
+<span class="sd">            formats are ????. Supports classification, multiclass classification,</span>
+<span class="sd">            and regression.</span>
+
+<span class="sd">        grid(numpy.ndarray):</span>
+<span class="sd">            2 dimensional array on which we fix values of features. Note this is</span>
+<span class="sd">            determined automatically if not given based on the percentiles of the</span>
+<span class="sd">            dataset.</span>
+
+<span class="sd">        grid_resolution(int):</span>
+<span class="sd">            how many unique values to include in the grid. If the percentile range</span>
+<span class="sd">            is 5% to 95%, then that range will be cut into &lt;grid_resolution&gt;</span>
+<span class="sd">            equally size bins.</span>
+
+<span class="sd">        grid_range(tuple):</span>
+<span class="sd">            the percentile extrama to consider. 2 element tuple, increasing, bounded</span>
+<span class="sd">            between 0 and 1.</span>
+
+<span class="sd">        sample(Bool):</span>
+<span class="sd">            Whether to sample from the original dataset.</span>
+
+<span class="sd">        sampling_strategy(string):</span>
+<span class="sd">            If sampling, which approach to take. See DataSet.generate_sample for</span>
+<span class="sd">            details.</span>
+
+<span class="sd">        n_samples(int):</span>
+<span class="sd">            The number of samples to use from the original dataset. Note this is</span>
+<span class="sd">            only active if sample = True and sampling strategy = &#39;uniform&#39;. If</span>
+<span class="sd">            using &#39;uniform-over-similarity-ranks&#39;, use samples per bin</span>
+
+<span class="sd">        bin_count(int):</span>
+<span class="sd">            The number of bins to use when using the similarity based sampler. Note</span>
+<span class="sd">            this is only active if sample = True and</span>
+<span class="sd">            sampling_strategy = &#39;uniform-over-similarity-ranks&#39;.</span>
+<span class="sd">            total samples = bin_count * samples per bin.</span>
+
+<span class="sd">        samples_per_bin(int):</span>
+<span class="sd">            The number of samples to collect for each bin within the sampler. Note</span>
+<span class="sd">            this is only active if sample = True and</span>
+<span class="sd">            sampling_strategy = &#39;uniform-over-similarity-ranks&#39;. If using</span>
+<span class="sd">            sampling_strategy = &#39;uniform&#39;, use n_samples.</span>
+<span class="sd">            total samples = bin_count * samples per bin.</span>
+
+<span class="sd">        with_variance(Bool):</span>
+<span class="sd">            whether to include pdp error bars in the plots. Currently disabled for 3D</span>
+<span class="sd">            plots for visibility. If you have a use case where you&#39;d like error bars for</span>
+<span class="sd">            3D pdp plots, let us know!</span>
+
+<span class="sd">        plot_title(string):</span>
+<span class="sd">            title for pdp plots</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># in the event that a user wants a 3D pdp with multiple classes, how should</span>
+        <span class="c"># we handle this? currently each class will get its own figure</span>
+
+        <span class="n">pdp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partial_dependence</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">,</span> <span class="n">predict_fn</span><span class="p">,</span>
+                                      <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">grid_resolution</span><span class="o">=</span><span class="n">grid_resolution</span><span class="p">,</span>
+                                      <span class="n">grid_range</span><span class="o">=</span><span class="n">grid_range</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="n">sample</span><span class="p">,</span>
+                                      <span class="n">sampling_strategy</span><span class="o">=</span><span class="n">sampling_strategy</span><span class="p">,</span>
+                                      <span class="n">n_samples</span><span class="o">=</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">bin_count</span><span class="o">=</span><span class="n">bin_count</span><span class="p">,</span>
+                                      <span class="n">samples_per_bin</span><span class="o">=</span><span class="n">samples_per_bin</span><span class="p">)</span>
+
+        <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_pdp_from_df</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">,</span> <span class="n">pdp</span><span class="p">,</span> <span class="n">with_variance</span><span class="o">=</span><span class="n">with_variance</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ax</span></div>
+
+    <span class="k">def</span> <span class="nf">_plot_pdp_from_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_ids</span><span class="p">,</span> <span class="n">pdp</span><span class="p">,</span> <span class="n">with_variance</span><span class="o">=</span><span class="k">False</span><span class="p">,</span>
+                          <span class="n">plot_title</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">disable_offset</span><span class="o">=</span><span class="k">True</span><span class="p">):</span>
+        <span class="n">n_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">)</span>
+
+        <span class="n">mean_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pdp_metadata</span><span class="p">[</span><span class="s">&#39;pdp_cols&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="n">val_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pdp_metadata</span><span class="p">[</span><span class="s">&#39;val_cols&#39;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Mean columns: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mean_columns</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">n_features</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">feature_name</span> <span class="o">=</span> <span class="n">val_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_2d_pdp_plot</span><span class="p">(</span><span class="n">pdp</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pdp_metadata</span><span class="p">,</span>
+                                     <span class="n">with_variance</span><span class="o">=</span><span class="n">with_variance</span><span class="p">,</span>
+                                     <span class="n">plot_title</span><span class="o">=</span><span class="n">plot_title</span><span class="p">,</span> <span class="n">disable_offset</span><span class="o">=</span><span class="n">disable_offset</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">n_features</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">feature1</span><span class="p">,</span> <span class="n">feature2</span> <span class="o">=</span> <span class="n">val_columns</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_3d_pdp_plot_turbo_booster</span><span class="p">(</span><span class="n">pdp</span><span class="p">,</span> <span class="n">feature1</span><span class="p">,</span> <span class="n">feature2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pdp_metadata</span><span class="p">,</span>
+                                     <span class="n">with_variance</span><span class="o">=</span><span class="n">with_variance</span><span class="p">,</span>
+                                     <span class="n">plot_title</span><span class="o">=</span><span class="n">plot_title</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_2d_pdp_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdp</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">pdp_metadata</span><span class="p">,</span>
+                     <span class="n">with_variance</span><span class="o">=</span><span class="k">False</span><span class="p">,</span> <span class="n">plot_title</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">disable_offset</span><span class="o">=</span><span class="k">True</span><span class="p">):</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">(</span><span class="n">COLORS</span><span class="p">)</span>
+        <span class="n">figure_list</span><span class="p">,</span> <span class="n">axis_list</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+
+        <span class="n">class_col_pairs</span> <span class="o">=</span> <span class="n">pdp_metadata</span><span class="p">[</span><span class="s">&#39;pdp_cols&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="n">sd_col</span> <span class="o">=</span> <span class="n">pdp_metadata</span><span class="p">[</span><span class="s">&#39;sd_col&#39;</span><span class="p">]</span>
+
+        <span class="c"># if there are just 2 classes, pick the last one.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">class_col_pairs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">class_col_pairs</span> <span class="o">=</span> <span class="p">[</span><span class="n">class_col_pairs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+
+        <span class="k">for</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">mean_col</span> <span class="ow">in</span> <span class="n">class_col_pairs</span><span class="p">:</span>
+
+            <span class="c"># if class_name is None:</span>
+            <span class="c">#     raise ValueError(&quot;Could not parse class name from {}&quot;.format(mean_col))</span>
+
+            <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">figure_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">axis_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">colors</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="n">pdp</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">feature_name</span><span class="p">)</span>
+            <span class="n">plane</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">mean_col</span><span class="p">]</span>
+
+            <span class="c"># if binary feature, then len(pdp) == 2 -&gt; barchart</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_feature_binary</span><span class="p">(</span><span class="n">pdp</span><span class="p">,</span> <span class="n">mean_col</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">with_variance</span><span class="p">:</span>
+                    <span class="n">error</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">sd_col</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">error</span> <span class="o">=</span> <span class="k">None</span>
+                <span class="n">plane</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s">&#39;bar&#39;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">error</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plane</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">with_variance</span><span class="p">:</span>
+                    <span class="n">upper_plane</span> <span class="o">=</span> <span class="n">plane</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="n">sd_col</span><span class="p">]</span>
+                    <span class="n">lower_plane</span> <span class="o">=</span> <span class="n">plane</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="n">sd_col</span><span class="p">]</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                                    <span class="n">lower_plane</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                                    <span class="n">upper_plane</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                                    <span class="n">alpha</span><span class="o">=.</span><span class="mi">2</span><span class="p">,</span>
+                                    <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">plot_title</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">plot_title</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;Predicted {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">class_name</span><span class="p">))</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">feature_name</span><span class="p">)</span>
+            <span class="n">handles</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_legend_handles_labels</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">handles</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">disable_offset</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">ScalarFormatter</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">flatten</span><span class="p">([</span><span class="n">figure_list</span><span class="p">,</span> <span class="n">axis_list</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_is_feature_binary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdp</span><span class="p">,</span> <span class="n">feature</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pdp</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">False</span>
+
+    <span class="k">def</span> <span class="nf">_3d_pdp_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdp</span><span class="p">,</span> <span class="n">feature1</span><span class="p">,</span> <span class="n">feature2</span><span class="p">,</span> <span class="n">pdp_metadata</span><span class="p">,</span>
+                     <span class="n">with_variance</span><span class="o">=</span><span class="k">False</span><span class="p">,</span> <span class="n">plot_title</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">disable_offset</span><span class="o">=</span><span class="k">True</span><span class="p">):</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">(</span><span class="n">COLORS</span><span class="p">)</span>
+        <span class="n">figure_list</span><span class="p">,</span> <span class="n">axis_list</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+
+        <span class="n">class_col_pairs</span> <span class="o">=</span> <span class="n">pdp_metadata</span><span class="p">[</span><span class="s">&#39;pdp_cols&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="n">sd_col</span> <span class="o">=</span> <span class="n">pdp_metadata</span><span class="p">[</span><span class="s">&#39;sd_col&#39;</span><span class="p">]</span>
+
+        <span class="c">#if there are just 2 classes, pick the last one.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">class_col_pairs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">class_col_pairs</span> <span class="o">=</span> <span class="p">[</span><span class="n">class_col_pairs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+
+        <span class="k">for</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">mean_col</span> <span class="ow">in</span> <span class="n">class_col_pairs</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s">&#39;3d&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">plot_title</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s">&quot;Partial Dependence&quot;</span><span class="p">)</span>
+            <span class="n">figure_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">axis_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">colors</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot_trisurf</span><span class="p">(</span><span class="n">pdp</span><span class="p">[</span><span class="n">feature1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">pdp</span><span class="p">[</span><span class="n">feature2</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                            <span class="n">pdp</span><span class="p">[</span><span class="n">mean_col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">with_variance</span><span class="p">:</span>
+                <span class="n">var_color</span> <span class="o">=</span> <span class="n">colors</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot_trisurf</span><span class="p">(</span><span class="n">pdp</span><span class="p">[</span><span class="n">feature1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">pdp</span><span class="p">[</span><span class="n">feature2</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                                <span class="p">(</span><span class="n">pdp</span><span class="p">[</span><span class="n">mean_col</span><span class="p">]</span> <span class="o">+</span> <span class="n">pdp</span><span class="p">[</span><span class="n">sd_col</span><span class="p">])</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">2</span><span class="p">,</span>
+                                <span class="n">color</span><span class="o">=</span><span class="n">var_color</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot_trisurf</span><span class="p">(</span><span class="n">pdp</span><span class="p">[</span><span class="n">feature1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">pdp</span><span class="p">[</span><span class="n">feature2</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                                <span class="p">(</span><span class="n">pdp</span><span class="p">[</span><span class="n">mean_col</span><span class="p">]</span> <span class="o">-</span> <span class="n">pdp</span><span class="p">[</span><span class="n">sd_col</span><span class="p">])</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">2</span><span class="p">,</span>
+                                <span class="n">color</span><span class="o">=</span><span class="n">var_color</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">feature1</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">feature2</span><span class="p">)</span>
+
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s">&quot;Predicted {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">class_name</span><span class="p">))</span>
+            <span class="n">handles</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_legend_handles_labels</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">handles</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">disable_offset</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">zaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">ScalarFormatter</span><span class="p">())</span>
+            <span class="c"># matplotlib increases x from left to right, flipping that</span>
+            <span class="c"># so the origin is front and center</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">invert_xaxis</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">flatten</span><span class="p">([</span><span class="n">figure_list</span><span class="p">,</span> <span class="n">axis_list</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_3d_pdp_plot_turbo_booster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdp</span><span class="p">,</span> <span class="n">feature1</span><span class="p">,</span> <span class="n">feature2</span><span class="p">,</span> <span class="n">pdp_metadata</span><span class="p">,</span>
+                     <span class="n">with_variance</span><span class="o">=</span><span class="k">False</span><span class="p">,</span> <span class="n">plot_title</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">disable_offset</span><span class="o">=</span><span class="k">True</span><span class="p">):</span>
+
+        <span class="n">class_col_pairs</span> <span class="o">=</span> <span class="n">pdp_metadata</span><span class="p">[</span><span class="s">&#39;pdp_cols&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="n">sd_col</span> <span class="o">=</span> <span class="n">pdp_metadata</span><span class="p">[</span><span class="s">&#39;sd_col&#39;</span><span class="p">]</span>
+
+        <span class="c">#if there are just 2 classes, pick the last one.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">class_col_pairs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">class_col_pairs</span> <span class="o">=</span> <span class="p">[</span><span class="n">class_col_pairs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+
+        <span class="n">feature_1_data</span> <span class="o">=</span> <span class="n">pdp</span><span class="p">[</span><span class="n">feature1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">feature_2_data</span> <span class="o">=</span> <span class="n">pdp</span><span class="p">[</span><span class="n">feature2</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
+        <span class="n">feature_1_is_binary</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">feature_1_data</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span>
+        <span class="n">feature_2_is_binary</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">feature_2_data</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">feature_1_is_binary</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">feature_2_is_binary</span><span class="p">:</span>
+            <span class="n">plot_objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_3d_full_mesh</span><span class="p">(</span><span class="n">pdp</span><span class="p">,</span> <span class="n">feature1</span><span class="p">,</span> <span class="n">feature2</span><span class="p">,</span>
+                                                   <span class="n">pdp_metadata</span><span class="p">,</span> <span class="n">class_col_pairs</span><span class="p">,</span>
+                                                   <span class="n">with_variance</span><span class="o">=</span><span class="n">with_variance</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">feature_1_is_binary</span> <span class="ow">and</span> <span class="n">feature_2_is_binary</span><span class="p">:</span>
+            <span class="c"># plot_objects = self._plot_2d_2_binary_feature(pdp, feature1, feature2,</span>
+            <span class="c">#                                               pdp_metadata, class_col_pairs,</span>
+            <span class="c">#                                               with_variance=with_variance)</span>
+            <span class="n">plot_objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_3d_full_mesh</span><span class="p">(</span><span class="n">pdp</span><span class="p">,</span> <span class="n">feature1</span><span class="p">,</span> <span class="n">feature2</span><span class="p">,</span>
+                                                   <span class="n">pdp_metadata</span><span class="p">,</span> <span class="n">class_col_pairs</span><span class="p">,</span>
+                                                   <span class="n">with_variance</span><span class="o">=</span><span class="n">with_variance</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c">#one feature is binary and one isnt.</span>
+            <span class="n">binary_feature</span><span class="p">,</span> <span class="n">non_binary_feature</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">feature_1_is_binary</span><span class="p">:</span> <span class="p">[</span><span class="n">feature1</span><span class="p">,</span> <span class="n">feature2</span><span class="p">],</span>
+                <span class="p">(</span><span class="ow">not</span> <span class="n">feature_1_is_binary</span><span class="p">):[</span><span class="n">feature2</span><span class="p">,</span> <span class="n">feature1</span><span class="p">]</span>
+            <span class="p">}[</span><span class="n">feature_1_is_binary</span><span class="p">]</span>
+
+            <span class="c"># plot_objects = self._plot_2d_1_binary_feature_and_1_continuous(pdp,</span>
+            <span class="c">#                                                                binary_feature,</span>
+            <span class="c">#                                                                non_binary_feature,</span>
+            <span class="c">#                                                                pdp_metadata,</span>
+            <span class="c">#                                                                )</span>
+            <span class="n">plot_objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_3d_full_mesh</span><span class="p">(</span><span class="n">pdp</span><span class="p">,</span>
+                                                   <span class="n">binary_feature</span><span class="p">,</span>
+                                                   <span class="n">non_binary_feature</span><span class="p">,</span>
+                                                   <span class="n">pdp_metadata</span><span class="p">,</span> <span class="n">class_col_pairs</span><span class="p">,</span>
+                                                   <span class="n">with_variance</span><span class="o">=</span><span class="n">with_variance</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">plot_objects</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">mpl_axes</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">disable_offset</span><span class="p">:</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">ScalarFormatter</span><span class="p">())</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">ScalarFormatter</span><span class="p">())</span>
+                <span class="k">if</span> <span class="n">plot_title</span><span class="p">:</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s">&quot;Partial Dependence&quot;</span><span class="p">)</span>
+                <span class="c"># matplotlib increases x from left to right, flipping that</span>
+                <span class="c"># so the origin is front and center</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">invert_xaxis</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">plot_objects</span>
+
+    <span class="k">def</span> <span class="nf">_plot_3d_full_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdp</span><span class="p">,</span> <span class="n">feature1</span><span class="p">,</span> <span class="n">feature2</span><span class="p">,</span>
+                           <span class="n">pdp_metadata</span><span class="p">,</span> <span class="n">class_col_pairs</span><span class="p">,</span>
+                           <span class="n">with_variance</span><span class="o">=</span><span class="k">False</span><span class="p">):</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">(</span><span class="n">COLORS</span><span class="p">)</span>
+        <span class="n">figure_list</span><span class="p">,</span> <span class="n">axis_list</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+
+        <span class="n">sd_col</span> <span class="o">=</span> <span class="n">pdp_metadata</span><span class="p">[</span><span class="s">&#39;sd_col&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">mean_col</span> <span class="ow">in</span> <span class="n">class_col_pairs</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s">&#39;3d&#39;</span><span class="p">)</span>
+            <span class="n">figure_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">axis_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">colors</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot_trisurf</span><span class="p">(</span><span class="n">pdp</span><span class="p">[</span><span class="n">feature1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">pdp</span><span class="p">[</span><span class="n">feature2</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                            <span class="n">pdp</span><span class="p">[</span><span class="n">mean_col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">with_variance</span><span class="p">:</span>
+                <span class="n">var_color</span> <span class="o">=</span> <span class="n">colors</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot_trisurf</span><span class="p">(</span><span class="n">pdp</span><span class="p">[</span><span class="n">feature1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">pdp</span><span class="p">[</span><span class="n">feature2</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                                <span class="p">(</span><span class="n">pdp</span><span class="p">[</span><span class="n">mean_col</span><span class="p">]</span> <span class="o">+</span> <span class="n">pdp</span><span class="p">[</span><span class="n">sd_col</span><span class="p">])</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">2</span><span class="p">,</span>
+                                <span class="n">color</span><span class="o">=</span><span class="n">var_color</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot_trisurf</span><span class="p">(</span><span class="n">pdp</span><span class="p">[</span><span class="n">feature1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">pdp</span><span class="p">[</span><span class="n">feature2</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                                <span class="p">(</span><span class="n">pdp</span><span class="p">[</span><span class="n">mean_col</span><span class="p">]</span> <span class="o">-</span> <span class="n">pdp</span><span class="p">[</span><span class="n">sd_col</span><span class="p">])</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">2</span><span class="p">,</span>
+                                <span class="n">color</span><span class="o">=</span><span class="n">var_color</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">feature1</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">feature2</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s">&quot;Predicted {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">class_name</span><span class="p">))</span>
+
+            <span class="n">handles</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_legend_handles_labels</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">handles</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">flatten</span><span class="p">([</span><span class="n">figure_list</span><span class="p">,</span> <span class="n">axis_list</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_plot_3d_2_binary_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdp</span><span class="p">,</span> <span class="n">feature1</span><span class="p">,</span> <span class="n">feature2</span><span class="p">,</span> <span class="n">pdp_metadata</span><span class="p">,</span>
+                                  <span class="n">class_col_pairs</span><span class="p">,</span> <span class="n">with_variance</span><span class="o">=</span><span class="k">False</span><span class="p">):</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">(</span><span class="n">COLORS</span><span class="p">)</span>
+        <span class="n">figure_list</span><span class="p">,</span> <span class="n">axis_list</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="n">sd_col</span> <span class="o">=</span> <span class="n">pdp_metadata</span><span class="p">[</span><span class="s">&#39;sd_col&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">mean_col</span> <span class="ow">in</span> <span class="n">class_col_pairs</span><span class="p">:</span>
+
+            <span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s">&#39;3d&#39;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">pdp</span><span class="p">[</span><span class="n">feature2</span><span class="p">]):</span>
+                <span class="n">filter_idx</span> <span class="o">=</span> <span class="n">pdp</span><span class="p">[</span><span class="n">feature2</span><span class="p">]</span> <span class="o">==</span> <span class="n">val</span>
+                <span class="n">pdp_vals</span> <span class="o">=</span> <span class="n">pdp</span><span class="p">[</span><span class="n">filter_idx</span><span class="p">][</span><span class="n">mean_col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+                <span class="n">x1</span> <span class="o">=</span> <span class="n">pdp</span><span class="p">[</span><span class="n">filter_idx</span><span class="p">][</span><span class="n">feature1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+                <span class="n">x2</span> <span class="o">=</span> <span class="n">pdp</span><span class="p">[</span><span class="n">filter_idx</span><span class="p">][</span><span class="n">feature2</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">pdp_vals</span><span class="p">)</span>
+
+            <span class="n">figure_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">axis_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">colors</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">feature1</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">feature2</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s">&quot;Predicted {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">class_name</span><span class="p">))</span>
+            <span class="n">handles</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_legend_handles_labels</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">handles</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">flatten</span><span class="p">([</span><span class="n">figure_list</span><span class="p">,</span> <span class="n">axis_list</span><span class="p">])</span>
+
+
+    <span class="k">def</span> <span class="nf">_plot_2d_2_binary_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdp</span><span class="p">,</span> <span class="n">feature1</span><span class="p">,</span> <span class="n">feature2</span><span class="p">,</span> <span class="n">pdp_metadata</span><span class="p">,</span>
+                                  <span class="n">class_col_pairs</span><span class="p">,</span> <span class="n">with_variance</span><span class="o">=</span><span class="k">False</span><span class="p">):</span>
+
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">(</span><span class="n">COLORS</span><span class="p">)</span>
+        <span class="n">figure_list</span><span class="p">,</span> <span class="n">axis_list</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="n">sd_col</span> <span class="o">=</span> <span class="n">pdp_metadata</span><span class="p">[</span><span class="s">&#39;sd_col&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">mean_col</span> <span class="ow">in</span> <span class="n">class_col_pairs</span><span class="p">:</span>
+
+            <span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">pdp</span><span class="p">[</span><span class="n">feature2</span><span class="p">]):</span>
+                <span class="n">color</span> <span class="o">=</span> <span class="n">colors</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+                <span class="n">filter_idx</span> <span class="o">=</span> <span class="n">pdp</span><span class="p">[</span><span class="n">feature2</span><span class="p">]</span> <span class="o">==</span> <span class="n">val</span>
+                <span class="n">pdp_vals</span> <span class="o">=</span> <span class="n">pdp</span><span class="p">[</span><span class="n">filter_idx</span><span class="p">][</span><span class="n">mean_col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+                <span class="n">x1</span> <span class="o">=</span> <span class="n">pdp</span><span class="p">[</span><span class="n">filter_idx</span><span class="p">][</span><span class="n">feature1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">pdp_vals</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                       <span class="n">label</span><span class="o">=</span><span class="s">&quot;{} = {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">feature2</span><span class="p">,</span> <span class="n">val</span><span class="p">],</span> <span class="n">align</span><span class="o">=</span><span class="s">&#39;center&#39;</span><span class="p">)</span>
+                       <span class="p">)</span>
+                <span class="k">if</span> <span class="n">with_variance</span><span class="p">:</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">pdp_vals</span><span class="p">,</span> <span class="n">yerr</span> <span class="o">=</span> <span class="n">pdp</span><span class="p">[</span><span class="n">filter_idx</span><span class="p">][</span><span class="n">sd_col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                                <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+
+                <span class="c"># if with_variance:</span>
+                <span class="c">#     upper_plane = pdp_vals + pdp[filter_idx][sd_col]</span>
+                <span class="c">#     lower_plane = pdp_vals - pdp[filter_idx][sd_col]</span>
+                <span class="c">#     ax.fill_between(x1,</span>
+                <span class="c">#                     lower_plane.values,</span>
+                <span class="c">#                     upper_plane.values,</span>
+                <span class="c">#                     alpha=.2,</span>
+                <span class="c">#                     color=color)</span>
+
+            <span class="n">figure_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">axis_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">colors</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">feature1</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&quot;Predicted {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">class_name</span><span class="p">))</span>
+            <span class="n">handles</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_legend_handles_labels</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">handles</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">flatten</span><span class="p">([</span><span class="n">figure_list</span><span class="p">,</span> <span class="n">axis_list</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_plot_2d_1_binary_feature_and_1_continuous</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdp</span><span class="p">,</span> <span class="n">binary_feature</span><span class="p">,</span>
+                                                   <span class="n">non_binary_feature</span><span class="p">,</span> <span class="n">pdp_metadata</span><span class="p">,</span>
+                                                   <span class="n">class_col_pairs</span><span class="p">,</span> <span class="n">with_variance</span><span class="o">=</span><span class="k">False</span><span class="p">):</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">(</span><span class="n">COLORS</span><span class="p">)</span>
+        <span class="n">figure_list</span><span class="p">,</span> <span class="n">axis_list</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="n">sd_col</span> <span class="o">=</span> <span class="n">pdp_metadata</span><span class="p">[</span><span class="s">&#39;sd_col&#39;</span><span class="p">]</span>
+
+        <span class="n">binary_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">pdp</span><span class="p">[</span><span class="n">binary_feature</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">mean_col</span> <span class="ow">in</span> <span class="n">class_col_pairs</span><span class="p">:</span>
+
+            <span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s">&#39;3d&#39;</span><span class="p">)</span>
+
+            <span class="n">figure_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">axis_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">colors</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+
+            <span class="n">ax</span><span class="o">.</span><span class="n">bar3d</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">pdp_data</span><span class="p">,</span>
+                     <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">feature1</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">feature2</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s">&quot;Predicted {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">class_name</span><span class="p">))</span>
+            <span class="n">handles</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_legend_handles_labels</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">handles</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">flatten</span><span class="p">([</span><span class="n">figure_list</span><span class="p">,</span> <span class="n">axis_list</span><span class="p">])</span>
+
+
+
+<div class="viewcode-block" id="PartialDependence.partial_dependency_sklearn"><a class="viewcode-back" href="../../../../index.html#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.partial_dependency_sklearn">[docs]</a>    <span class="k">def</span> <span class="nf">partial_dependency_sklearn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Uses sklearn&#39;s implementation&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;Not yet included&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_check_grid</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">feature_ids</span><span class="p">,</span> <span class="n">grid_resolution</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">err_msg</span> <span class="o">=</span> <span class="s">&quot;Grid of type {} must be a numpy array&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">grid</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MalformedGridError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">)</span> <span class="o">!=</span> <span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">err_msg</span> <span class="o">=</span> <span class="s">&quot;Given {0} features, there must be {1} rows in grid&quot;</span> \
+                      <span class="s">&quot;but {2} were found&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">),</span>
+                                                  <span class="nb">len</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">),</span>
+                                                  <span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MalformedGridError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_check_dataset_type</span><span class="p">(</span><span class="n">dataset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ensures that dataset is pandas dataframe</span>
+<span class="sd">        :param dataset:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+            <span class="n">err_msg</span> <span class="o">=</span> <span class="s">&quot;Dataset.data must be a pandas.dataframe&quot;</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">DataSetError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_check_grid_range</span><span class="p">(</span><span class="n">grid_range</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Tested by unit test, ensures grid range is between 0 and 1</span>
+<span class="sd">        :param grid_range (tuple)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_range</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">err_msg</span> <span class="o">=</span> <span class="s">&quot;Grid range {} must have 2 elements&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">grid_range</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MalformedGridRangeError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">grid_range</span><span class="p">]):</span>
+            <span class="n">err_msg</span> <span class="o">=</span> <span class="s">&quot;All elements of grid range {} &quot;</span> \
+                      <span class="s">&quot;must be between 0 and 1&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">grid_range</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MalformedGridRangeError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Aaron Kramer and Pramit Choudhary.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

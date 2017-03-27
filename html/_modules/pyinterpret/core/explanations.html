@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyinterpret.core.explanations &#8212; pyinterpret 1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pyinterpret.core.explanations</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Interpretation Class&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">.global_interpretation.partial_dependence</span> <span class="k">import</span> <span class="n">PartialDependence</span>
+<span class="kn">from</span> <span class="nn">.local_interpretation.local_interpreter</span> <span class="k">import</span> <span class="n">LocalInterpreter</span>
+<span class="kn">from</span> <span class="nn">..data.dataset</span> <span class="k">import</span> <span class="n">DataSet</span>
+<span class="kn">from</span> <span class="nn">..model.local</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
+<span class="kn">from</span> <span class="nn">..util.logger</span> <span class="k">import</span> <span class="n">build_logger</span>
+
+
+<div class="viewcode-block" id="Interpretation"><a class="viewcode-back" href="../../../index.html#pyinterpret.core.explanations.Interpretation">[docs]</a><span class="k">class</span> <span class="nc">Interpretation</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interpretation class. Before calling interpretation subclasses like partial</span>
+<span class="sd">    dependence, one must call Interpretation.load_data().</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data_set: pyinterpret.data.DataSet</span>
+<span class="sd">        Pyinterpret&#39;s data abstraction layer. All interactions with data goes through</span>
+<span class="sd">         this object.</span>
+
+<span class="sd">    local_interpreter: pyinterpret.core.local_interpreter.LocalInterpreter</span>
+<span class="sd">        Contains methods for interpreting single prediction. Currently exposes the lime</span>
+<span class="sd">        library.</span>
+
+<span class="sd">    global_interpreter: pyinterpret.core.global_interpreter.GlobalInterpreter</span>
+<span class="sd">        Contains methods for evaluating a model over entire regions of the domain. Currently</span>
+<span class="sd">        exposes partial dependency</span>
+
+
+<span class="sd">    Examples:</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    from pyinterpret.core.explanations import Interpretation</span>
+<span class="sd">    interpreter = Interpretation()</span>
+<span class="sd">    interpreter.load_data(X, feature_ids = [&#39;a&#39;,&#39;b&#39;])</span>
+<span class="sd">    interpreter.partial_dependence([feature_id1, feature_id2], regressor.predict)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="s">&#39;WARNING&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Attaches local and global interpretations</span>
+<span class="sd">        to Interpretation object.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        log_level: int</span>
+<span class="sd">            Logger Verbosity, see https://docs.python.org/2/library/logging.html</span>
+<span class="sd">            for details.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">=</span> <span class="n">log_level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">build_logger</span><span class="p">(</span><span class="n">log_level</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_interpreter</span> <span class="o">=</span> <span class="n">LocalInterpreter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partial_dependence</span> <span class="o">=</span> <span class="n">PartialDependence</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_set</span> <span class="o">=</span> <span class="k">None</span>
+
+<div class="viewcode-block" id="Interpretation.load_data"><a class="viewcode-back" href="../../../index.html#pyinterpret.core.explanations.Interpretation.load_data">[docs]</a>    <span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">training_data</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a DataSet object from inputs, ties to interpretation object.</span>
+<span class="sd">        This will be exposed to all submodules.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        training_data: numpy.ndarray, pandas.DataFrame</span>
+<span class="sd">            the dataset. can be 1D or 2D</span>
+
+<span class="sd">        feature_names: array-type</span>
+<span class="sd">            names to call features.</span>
+
+<span class="sd">        index: array-type</span>
+<span class="sd">            names to call rows.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        ---------</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Loading Data&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_set</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">(</span><span class="n">training_data</span><span class="p">,</span>
+                                <span class="n">feature_names</span><span class="o">=</span><span class="n">feature_names</span><span class="p">,</span>
+                                <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+                                <span class="n">log_level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Data loaded&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Data shape: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_set</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Dataset Feature_ids: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_set</span><span class="o">.</span><span class="n">feature_ids</span><span class="p">))</span></div>
+        <span class="c">#self.local_interpreter._build_lime_explainers()</span>
+
+<div class="viewcode-block" id="Interpretation.build_annotated_model"><a class="viewcode-back" href="../../../index.html#pyinterpret.core.explanations.Interpretation.build_annotated_model">[docs]</a>    <span class="k">def</span> <span class="nf">build_annotated_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction_function</span><span class="p">,</span> <span class="n">examples</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a callable model that has annotations.</span>
+<span class="sd">        Uses examples from the Interpreter&#39;s dataset if available</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        prediction_function: callable</span>
+<span class="sd">            function to generate predictions</span>
+
+<span class="sd">        examples: np.ndarray or pd.DataFrame</span>
+<span class="sd">            The examples to use when calling InMemoryModel.check_output_types(examples).</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        annotated_model: pyinterpret.model.InMemoryModel</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">examples</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;Model will not be annotated, no examples provided.&#39;</span><span class="p">)</span>
+
+        <span class="n">annotated_model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">prediction_function</span><span class="p">,</span>
+                                        <span class="n">examples</span><span class="o">=</span><span class="n">examples</span><span class="p">,</span>
+                                        <span class="n">log_level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">annotated_model</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Aaron Kramer and Pramit Choudhary.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
