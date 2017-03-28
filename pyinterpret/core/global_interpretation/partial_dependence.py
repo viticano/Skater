@@ -129,6 +129,10 @@ class PartialDependence(BaseGlobalInterpretation):
             is 5% to 95%, then that range will be cut into <grid_resolution>
             equally size bins.
 
+        n_jobs(int):
+            The number of CPUs to use to compute the PDs. -1 means 'all CPUs'.
+            Defaults to 1.
+
         grid_range(tuple):
             the percentile extrama to consider. 2 element tuple, increasing, bounded
             between 0 and 1.
@@ -248,10 +252,12 @@ class PartialDependence(BaseGlobalInterpretation):
             raise exceptions.MalformedGridError(empty_grid_expanded_err_msg)
 
         n_classes = self._predict_fn.n_classes
+        import pdb
+        pdb.set_trace()
         pdps = []
         import functools
-        p = Pool(n_jobs)
-        for pd_row in p.map(functools.partial(compute_pd, model_fn=predict_fn,
+        number_of_process = Pool(n_jobs)
+        for pd_row in number_of_process.map(functools.partial(compute_pd, model_fn=predict_fn,
                                               grid_expanded=grid_expanded, number_of_classes=n_classes, feature_ids=feature_ids,
                                               input_data=data_sample), [i for i in range(grid_expanded.shape[0])]):
             pdps.append(pd_row)
