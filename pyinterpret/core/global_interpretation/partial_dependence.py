@@ -47,7 +47,6 @@ def compute_pd(index, model_fn, grid_expanded, number_of_classes, feature_ids, i
             # we can return 1 sd since its a common variance across classes
             # this line is currently redundant, as in it gets executed multiple times
             pdp['sd'] = std_prediction[class_i]
-
     return pdp
 
 
@@ -73,8 +72,8 @@ class PartialDependence(BaseGlobalInterpretation):
         if self._predict_fn.n_classes > 1:
             classes = range(self._predict_fn.n_classes)
             self._pdp_metadata['pdp_cols'] = {
-                class_i: "mean_class_{}".format(class_i) for class_i in classes
-                }
+            class_i: "mean_class_{}".format(class_i) for class_i in classes
+            }
         else:
             self._pdp_metadata['pdp_cols'] = {0:'mean'}
 
