@@ -368,6 +368,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                       n_samples=n_samples, bin_count=bin_count,
                                       samples_per_bin=samples_per_bin, n_jobs=-1)
 
+        self.interpreter.logger.info("done computing pd, now plotting ...")
         ax = self._plot_pdp_from_df(feature_ids, pdp, with_variance=with_variance)
         return ax
 
