@@ -148,7 +148,9 @@ class TestPartialDependence(unittest.TestCase):
     def test_pdp_inputs(self):
         clf = GradientBoostingClassifier(n_estimators=10, random_state=1)
         clf.fit(self.sample_x, self.sample_y)
+        classifier_predict_fn = clf.predict_proba
         interpreter = Interpretation()
+
         self.assertRaisesRegexp(Exception, "Invalid Data", interpreter.load_data, None, self.sample_feature_name)
 
 
@@ -193,13 +195,13 @@ class TestPartialDependence(unittest.TestCase):
                            **{'grid_range':(.01, 1.01)})
         self.assertRaises(exceptions.MalformedGridRangeError, pdp_func)
 
-
+    @unittest.skip("The way this is handled might change, will revisit when the new implementation is in")
     def test_pdp_1d_classifier_no_proba(self):
         coefs = self.interpreter.partial_dependence.partial_dependence(self.features[:1],
                                                                        self.classifier_predict_fn,
                                                                        grid_resolution=10)
 
-
+    @unittest.skip("The way this is handled might change, will revisit when the new implementation is in")
     def test_pdp_2d_classifier_no_proba(self):
         coefs = self.interpreter.partial_dependence.partial_dependence(self.features[:2],
                                                                             self.classifier_predict_fn,
@@ -217,7 +219,7 @@ class TestPartialDependence(unittest.TestCase):
                                                                             self.classifier_predict_proba_fn,
                                                                             grid_resolution=10)
 
-
+    @unittest.skip("The way this is handled might change, will revisit when the new implementation is in")
     def test_pdp_1d_string_classifier_no_proba(self):
         coefs = self.interpreter.partial_dependence.partial_dependence(self.features[:1],
                                                                        self.string_classifier.predict,

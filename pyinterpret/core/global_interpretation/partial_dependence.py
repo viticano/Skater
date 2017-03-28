@@ -5,12 +5,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.ticker import ScalarFormatter
-import concurrent.futures
 from pathos.multiprocessing import ProcessingPool as Pool
 from matplotlib.axes._subplots import Axes as mpl_axes
 
 from .base import BaseGlobalInterpretation
-from ...util.static_types import StaticTypes
 from ...util import exceptions
 from ...util.kernels import flatten
 
@@ -23,6 +21,7 @@ def compute_pd(index, model_fn, grid_expanded, number_of_classes, feature_ids, i
     data_sample = input_data.copy()
     pdp = {}
     new_row = grid_expanded[index]
+
     for feature_idx, feature_id in enumerate(feature_ids):
         data_sample[feature_id] = new_row[feature_idx]
 
@@ -33,7 +32,6 @@ def compute_pd(index, model_fn, grid_expanded, number_of_classes, feature_ids, i
     for feature_idx, feature_id in enumerate(feature_ids):
         val_col = 'val_{}'.format(feature_id)
         pdp[val_col] = new_row[feature_idx]
-
 
     if number_of_classes == 1:
         pdp['mean'] = mean_prediction
@@ -50,20 +48,8 @@ def compute_pd(index, model_fn, grid_expanded, number_of_classes, feature_ids, i
             # this line is currently redundant, as in it gets executed multiple times
             pdp['sd'] = std_prediction[class_i]
 
-    # TODO: we need to address if this is needed at all
-    # Local variable referenced possible before definition can be diregarded
-    # since we assert that grid_expanded.shape must be > 0
-    # if isinstance(mean_prediction, np.ndarray):
-    #     classes = range(mean_prediction.shape[0])
-    #     self._pdp_metadata['pdp_cols'] = {
-    #         class_i: "mean_class_{}".format(class_i) for class_i in classes
-    #         }
-    # else:
-    #     self._pdp_metadata['pdp_cols'] = {0:'mean'}
-    #
-    # self._pdp_metadata['sd_col'] = 'sd'
-    # self.interpreter.logger.debug("PDP df metadata: {}".format(self._pdp_metadata))
     return pdp
+
 
 class PartialDependence(BaseGlobalInterpretation):
     """Contains methods for partial dependence. Subclass of BaseGlobalInterpretation"""
@@ -80,6 +66,20 @@ class PartialDependence(BaseGlobalInterpretation):
             'sd_col':'',
             'val_cols':[]
         }
+
+
+    def build_pd_meta_dict(self):
+        # TODO: we need to address if this is needed at all. There could be a better way to do this
+        if self._predict_fn.n_classes > 1:
+            classes = range(self._predict_fn.n_classes)
+            self._pdp_metadata['pdp_cols'] = {
+                class_i: "mean_class_{}".format(class_i) for class_i in classes
+                }
+        else:
+            self._pdp_metadata['pdp_cols'] = {0:'mean'}
+
+        self._pdp_metadata['sd_col'] = 'sd'
+        self.interpreter.logger.debug("PDP df metadata: {}".format(self._pdp_metadata))
 
 
     def partial_dependence(self, feature_ids, predict_fn, grid=None, grid_resolution=100, n_jobs=1,
@@ -227,7 +227,7 @@ class PartialDependence(BaseGlobalInterpretation):
         self.interpreter.logger.debug("Grid resolution for pdp: {}".format(grid_resolution))
 
         # make sure data_set module is giving us correct data structure
-        self._check_grid(grid, feature_ids, grid_resolution)
+        self._check_grid(grid, feature_ids)
 
         # generate data
         data_sample = self.data_set.generate_sample(strategy=sampling_strategy,
@@ -256,9 +256,11 @@ class PartialDependence(BaseGlobalInterpretation):
         import functools
         executor_instance = Pool(n_jobs) if n_jobs > 0 else Pool()
         for pd_row in executor_instance.map(functools.partial(compute_pd, model_fn=predict_fn,
-                                              grid_expanded=grid_expanded, number_of_classes=n_classes, feature_ids=feature_ids,
-                                              input_data=data_sample), [i for i in range(grid_expanded.shape[0])]):
+                                              grid_expanded=grid_expanded, number_of_classes=n_classes,
+                                              feature_ids=feature_ids, input_data=data_sample),
+                                            [i for i in range(grid_expanded.shape[0])]):
             pd_list.append(pd_row)
+        self.build_pd_meta_dict()
         return pd.DataFrame(pd_list)
 
 
@@ -369,6 +371,7 @@ class PartialDependence(BaseGlobalInterpretation):
         ax = self._plot_pdp_from_df(feature_ids, pdp, with_variance=with_variance)
         return ax
 
+
     def _plot_pdp_from_df(self, feature_ids, pdp, with_variance=False,
                           plot_title=None, disable_offset=True):
         n_features = len(feature_ids)
@@ -404,10 +407,8 @@ class PartialDependence(BaseGlobalInterpretation):
             class_col_pairs = [class_col_pairs[-1]]
 
         for class_name, mean_col in class_col_pairs:
-
             # if class_name is None:
             #     raise ValueError("Could not parse class name from {}".format(mean_col))
-
             f, ax = plt.subplots(1)
             figure_list.append(f)
             axis_list.append(ax)
@@ -496,6 +497,7 @@ class PartialDependence(BaseGlobalInterpretation):
             ax.invert_xaxis()
 
         return flatten([figure_list, axis_list])
+
 
     def _3d_pdp_plot_turbo_booster(self, pdp, feature1, feature2, pdp_metadata,
                      with_variance=False, plot_title=None, disable_offset=True):
@@ -588,6 +590,7 @@ class PartialDependence(BaseGlobalInterpretation):
             ax.legend(handles, labels)
         return flatten([figure_list, axis_list])
 
+
     def _plot_3d_2_binary_feature(self, pdp, feature1, feature2, pdp_metadata,
                                   class_col_pairs, with_variance=False):
         colors = cycle(COLORS)
@@ -618,7 +621,6 @@ class PartialDependence(BaseGlobalInterpretation):
 
     def _plot_2d_2_binary_feature(self, pdp, feature1, feature2, pdp_metadata,
                                   class_col_pairs, with_variance=False):
-
         colors = cycle(COLORS)
         figure_list, axis_list = [], []
         sd_col = pdp_metadata['sd_col']
@@ -636,9 +638,8 @@ class PartialDependence(BaseGlobalInterpretation):
                        label="{} = {}".format(*[feature2, val], align='center')
                        )
                 if with_variance:
-                    ax.errorbar(x1, pdp_vals, yerr = pdp[filter_idx][sd_col].values,
+                    ax.errorbar(x1, pdp_vals, yerr=pdp[filter_idx][sd_col].values,
                                 color=color)
-
                 # if with_variance:
                 #     upper_plane = pdp_vals + pdp[filter_idx][sd_col]
                 #     lower_plane = pdp_vals - pdp[filter_idx][sd_col]
@@ -692,8 +693,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
 
     @staticmethod
-    def _check_grid(grid, feature_ids, grid_resolution):
-
+    def _check_grid(grid, feature_ids):
         if not isinstance(grid, np.ndarray):
             err_msg = "Grid of type {} must be a numpy array".format(type(grid))
             raise exceptions.MalformedGridError(err_msg)
