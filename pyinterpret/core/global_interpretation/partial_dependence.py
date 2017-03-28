@@ -22,7 +22,7 @@ def compute_pd(index, model_fn, grid_expanded, number_of_classes, feature_ids, i
     # pandas dataframe
     data_sample = input_data.copy()
     pdp = {}
-    # new_row = grid_expanded[index]
+    new_row = grid_expanded[index]
     for feature_idx, feature_id in enumerate(feature_ids):
         data_sample[feature_id] = new_row[feature_idx]
 
@@ -82,7 +82,7 @@ class PartialDependence(BaseGlobalInterpretation):
         }
 
 
-    def partial_dependence(self, feature_ids, predict_fn, grid=None, grid_resolution=100,
+    def partial_dependence(self, feature_ids, predict_fn, grid=None, grid_resolution=100, n_jobs=1,
                            grid_range=None, sample=False,
                            sampling_strategy='uniform-over-similarity-ranks',
                            n_samples=5000, bin_count=50, samples_per_bin=10):
@@ -239,31 +239,22 @@ class PartialDependence(BaseGlobalInterpretation):
         self._check_dataset_type(data_sample)
         self._predict_fn = self.build_annotated_model(predict_fn, examples=data_sample)
 
-        #cartesian product of grid
+        # cartesian product of grid
         grid_expanded = np.array(list(product(*grid)))
 
-        pdps = []
         if grid_expanded.shape[0] <= 0:
             empty_grid_expanded_err_msg = "Must have at least 1 pdp value" \
                                           "grid shape: {}".format(grid_expanded.shape)
             raise exceptions.MalformedGridError(empty_grid_expanded_err_msg)
 
         n_classes = self._predict_fn.n_classes
-        model_fn = self._predict_fn
+        pdps = []
         import functools
-        # with concurrent.futures.ProcessPoolExecutor() as executor:
-        #     for pd_row in executor.map(functools.partial(compute_pd, model_fn, grid_expanded,
-        #                                                  n_classes, feature_ids, data_sample_mutable),
-        #                             [i for i in range(grid_expanded.shape[0])]):
-        p = Pool(4)
+        p = Pool(n_jobs)
         for pd_row in p.map(functools.partial(compute_pd, model_fn=predict_fn,
                                               grid_expanded=grid_expanded, number_of_classes=n_classes, feature_ids=feature_ids,
                                               input_data=data_sample), [i for i in range(grid_expanded.shape[0])]):
             pdps.append(pd_row)
-
-        # for i in range(grid_expanded.shape[0]):
-        #      pdps.append(PartialDependence.compute_pd(index=i, model_fn=self._predict_fn, grid_expanded=grid_expanded, number_of_classes=n_classes,
-        #                                  feature_ids=feature_ids, input_data=data_sample_mutable))
 
         return pd.DataFrame(pdps)
 
