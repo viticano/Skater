@@ -27,13 +27,13 @@ def compute_pd(index, model_fn, grid_expanded, number_of_classes, feature_ids, i
         data_sample[feature_id] = new_row[feature_idx]
 
     predictions = model_fn(data_sample.values)
-
     mean_prediction = np.mean(predictions, axis=0)
     std_prediction = np.std(predictions, axis=0)
 
     for feature_idx, feature_id in enumerate(feature_ids):
         val_col = 'val_{}'.format(feature_id)
         pdp[val_col] = new_row[feature_idx]
+
 
     if number_of_classes == 1:
         pdp['mean'] = mean_prediction
@@ -252,17 +252,14 @@ class PartialDependence(BaseGlobalInterpretation):
             raise exceptions.MalformedGridError(empty_grid_expanded_err_msg)
 
         n_classes = self._predict_fn.n_classes
-        import pdb
-        pdb.set_trace()
-        pdps = []
+        pd_list = []
         import functools
-        number_of_process = Pool(n_jobs)
-        for pd_row in number_of_process.map(functools.partial(compute_pd, model_fn=predict_fn,
+        executor_instance = Pool(n_jobs) if n_jobs > 0 else Pool()
+        for pd_row in executor_instance.map(functools.partial(compute_pd, model_fn=predict_fn,
                                               grid_expanded=grid_expanded, number_of_classes=n_classes, feature_ids=feature_ids,
                                               input_data=data_sample), [i for i in range(grid_expanded.shape[0])]):
-            pdps.append(pd_row)
-
-        return pd.DataFrame(pdps)
+            pd_list.append(pd_row)
+        return pd.DataFrame(pd_list)
 
 
     def plot_partial_dependence(self, feature_ids, predict_fn, class_id=None,
