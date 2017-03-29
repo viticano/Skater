@@ -6,15 +6,15 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.ticker import ScalarFormatter
 from matplotlib.axes._subplots import Axes as mpl_axes
+from matplotlib import cm
 
 from .base import BaseGlobalInterpretation
 from ...util.static_types import StaticTypes
 from ...util import exceptions
 from ...util.kernels import flatten
+from ...util.plotting import COLORS, ColorMap, coordinate_gradients_to_1d_colorscale, plot_2d_color_scale
 
-COLORS = ['#328BD5', '#404B5A', '#3EB642', '#E04341', '#8665D0']
 plt.rcParams['figure.autolayout'] = True
-
 
 class PartialDependence(BaseGlobalInterpretation):
     """Contains methods for partial dependence. Subclass of BaseGlobalInterpretation"""
@@ -357,7 +357,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
         elif n_features == 2:
             feature1, feature2 = val_columns
-            return self._3d_pdp_plot_turbo_booster(pdp, feature1, feature2, self._pdp_metadata,
+            return self._3d_pdp_plot(pdp, feature1, feature2, self._pdp_metadata,
                                      with_variance=with_variance,
                                      plot_title=plot_title)
 
@@ -381,7 +381,7 @@ class PartialDependence(BaseGlobalInterpretation):
             f, ax = plt.subplots(1)
             figure_list.append(f)
             axis_list.append(ax)
-            color = colors.next()
+            color = next(colors)
 
             data = pdp.set_index(feature_name)
             plane = data[mean_col]
@@ -423,55 +423,10 @@ class PartialDependence(BaseGlobalInterpretation):
 
     def _3d_pdp_plot(self, pdp, feature1, feature2, pdp_metadata,
                      with_variance=False, plot_title=None, disable_offset=True):
-        colors = cycle(COLORS)
-        figure_list, axis_list = [], []
 
         class_col_pairs = pdp_metadata['pdp_cols'].items()
-        sd_col = pdp_metadata['sd_col']
 
-        #if there are just 2 classes, pick the last one.
-        if len(class_col_pairs) == 2:
-            class_col_pairs = [class_col_pairs[-1]]
-
-        for class_name, mean_col in class_col_pairs:
-            f = plt.figure()
-            ax = f.add_subplot(111, projection='3d')
-            if plot_title:
-                ax.set_title("Partial Dependence")
-            figure_list.append(f)
-            axis_list.append(ax)
-            color = colors.next()
-            ax.plot_trisurf(pdp[feature1].values, pdp[feature2].values,
-                            pdp[mean_col].values, alpha=.5, color=color)
-            if with_variance:
-                var_color = colors.next()
-                ax.plot_trisurf(pdp[feature1].values, pdp[feature2].values,
-                                (pdp[mean_col] + pdp[sd_col]).values, alpha=.2,
-                                color=var_color)
-                ax.plot_trisurf(pdp[feature1].values, pdp[feature2].values,
-                                (pdp[mean_col] - pdp[sd_col]).values, alpha=.2,
-                                color=var_color)
-            ax.set_xlabel(feature1)
-            ax.set_ylabel(feature2)
-
-            ax.set_zlabel("Predicted {}".format(class_name))
-            handles, labels = ax.get_legend_handles_labels()
-            ax.legend(handles, labels)
-            if disable_offset:
-                ax.zaxis.set_major_formatter(ScalarFormatter())
-            # matplotlib increases x from left to right, flipping that
-            # so the origin is front and center
-            ax.invert_xaxis()
-
-        return flatten([figure_list, axis_list])
-
-    def _3d_pdp_plot_turbo_booster(self, pdp, feature1, feature2, pdp_metadata,
-                     with_variance=False, plot_title=None, disable_offset=True):
-
-        class_col_pairs = pdp_metadata['pdp_cols'].items()
-        sd_col = pdp_metadata['sd_col']
-
-        #if there are just 2 classes, pick the last one.
+        # if there are just 2 classes, pick the last one.
         if len(class_col_pairs) == 2:
             class_col_pairs = [class_col_pairs[-1]]
 
@@ -487,25 +442,19 @@ class PartialDependence(BaseGlobalInterpretation):
                                                    with_variance=with_variance)
 
         elif feature_1_is_binary and feature_2_is_binary:
-            # plot_objects = self._plot_2d_2_binary_feature(pdp, feature1, feature2,
-            #                                               pdp_metadata, class_col_pairs,
-            #                                               with_variance=with_variance)
+            # may want to call _plot_3d_2_binary_features
             plot_objects = self._plot_3d_full_mesh(pdp, feature1, feature2,
                                                    pdp_metadata, class_col_pairs,
                                                    with_variance=with_variance)
 
         else:
-            #one feature is binary and one isnt.
+            # one feature is binary and one isnt.
+            # may want to call _plot_2d_1_binary_feature_and_1_continuous
             binary_feature, non_binary_feature = {
                 feature_1_is_binary: [feature1, feature2],
                 (not feature_1_is_binary):[feature2, feature1]
             }[feature_1_is_binary]
 
-            # plot_objects = self._plot_2d_1_binary_feature_and_1_continuous(pdp,
-            #                                                                binary_feature,
-            #                                                                non_binary_feature,
-            #                                                                pdp_metadata,
-            #                                                                )
             plot_objects = self._plot_3d_full_mesh(pdp,
                                                    binary_feature,
                                                    non_binary_feature,
@@ -529,19 +478,27 @@ class PartialDependence(BaseGlobalInterpretation):
                            pdp_metadata, class_col_pairs,
                            with_variance=False):
         colors = cycle(COLORS)
+
         figure_list, axis_list = [], []
 
         sd_col = pdp_metadata['sd_col']
         for class_name, mean_col in class_col_pairs:
-            f = plt.figure()
-            ax = f.add_subplot(111, projection='3d')
-            figure_list.append(f)
+            gradient_x, gradient_y, X, Y, Z = self.compute_3d_gradients(pdp, mean_col, feature1, feature2)
+            color_gradient, xmin, xmax, ymin, ymax = coordinate_gradients_to_1d_colorscale(gradient_x, gradient_y)
+            plt.figure()
+            ax = plt.subplot2grid((3, 3), (0, 0), colspan=2, rowspan=3, projection='3d')
+            figure_list.append(ax.figure)
             axis_list.append(ax)
-            color = colors.next()
-            ax.plot_trisurf(pdp[feature1].values, pdp[feature2].values,
-                            pdp[mean_col].values, alpha=.5, color=color)
+            surface = ax.plot_surface(X, Y, Z, alpha=.7, facecolors=color_gradient, linewidth=0., rstride=1, cstride=1)
+
+            #add 2D color scale
+            ax_colors = plt.subplot2grid((3, 3), (1, 2), colspan=1, rowspan=1)
+            ax_colors = plot_2d_color_scale(xmin, xmax, ymin, ymax, ax=ax_colors)
+            ax_colors.set_xlabel("Local Impact {}".format(feature1))
+            ax_colors.set_ylabel("Local Impact {}".format(feature2))
+
             if with_variance:
-                var_color = colors.next()
+                var_color = next(colors)
                 ax.plot_trisurf(pdp[feature1].values, pdp[feature2].values,
                                 (pdp[mean_col] + pdp[sd_col]).values, alpha=.2,
                                 color=var_color)
@@ -556,7 +513,7 @@ class PartialDependence(BaseGlobalInterpretation):
             ax.legend(handles, labels)
         return flatten([figure_list, axis_list])
 
-    def _plot_3d_2_binary_feature(self, pdp, feature1, feature2, pdp_metadata,
+    def _plot_3d_2_binary_features(self, pdp, feature1, feature2, pdp_metadata,
                                   class_col_pairs, with_variance=False):
         colors = cycle(COLORS)
         figure_list, axis_list = [], []
@@ -575,7 +532,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
             figure_list.append(f)
             axis_list.append(ax)
-            color = colors.next()
+            color = next(colors)
             ax.set_xlabel(feature1)
             ax.set_ylabel(feature2)
             ax.set_zlabel("Predicted {}".format(class_name))
@@ -596,7 +553,7 @@ class PartialDependence(BaseGlobalInterpretation):
             ax = f.add_subplot(111)
 
             for val in np.unique(pdp[feature2]):
-                color = colors.next()
+                color = next(colors)
                 filter_idx = pdp[feature2] == val
                 pdp_vals = pdp[filter_idx][mean_col].values
                 x1 = pdp[filter_idx][feature1].values
@@ -618,7 +575,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
             figure_list.append(f)
             axis_list.append(ax)
-            color = colors.next()
+            color = next(colors)
             ax.set_xlabel(feature1)
             ax.set_ylabel("Predicted {}".format(class_name))
             handles, labels = ax.get_legend_handles_labels()
@@ -640,7 +597,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
             figure_list.append(f)
             axis_list.append(ax)
-            color = colors.next()
+            color = next(colors)
 
             ax.bar3d(x1, x2, pdp_data,
                      dx, dy, dz, color=color)
@@ -696,3 +653,61 @@ class PartialDependence(BaseGlobalInterpretation):
             err_msg = "All elements of grid range {} " \
                       "must be between 0 and 1".format(grid_range)
             raise exceptions.MalformedGridRangeError(err_msg)
+
+    @staticmethod
+    def compute_3d_gradients(pdp, mean_col, feature_1, feature_2, scaled=True):
+        """
+        Computes component-wise gradients of pdp dataframe.
+
+
+        :param pdp: pandas.DataFrame
+            DataFrame containing partial dependence values
+        :param mean_col: string
+            column name corresponding to pdp value
+        :param feature_1: string
+            column name corresponding to feature 1
+        :param feature_2: string
+            column name corresponding to feature 2
+        :param scaled: bool
+            Whether to scale the x1 and x2 gradients relative to x1 and x2 bin sizes
+        :return: dx, dy, x_matrix, y_matrix, z_matrix
+        """
+        def feature_vals_to_grad_deltas(values):
+            values = np.unique(values)
+            values.sort()
+            diffs = np.diff(values)
+            conv_diffs = np.array([(diffs[i] + diffs[i + 1]) / 2 for i in range(0, len(diffs) - 1)])
+            diffs = np.concatenate((np.array([diffs[0]]), conv_diffs, np.array([diffs[-1]])))
+            return diffs
+
+        df = pdp.sort(columns=[feature_1, feature_2])
+        grid_size_1d = int(df.shape[0] ** (.5))
+
+        feature_1_diffs = feature_vals_to_grad_deltas(df[feature_1].values)
+        feature_2_diffs = feature_vals_to_grad_deltas(df[feature_2].values)
+
+        z_matrix = np.zeros((grid_size_1d, grid_size_1d))
+        x_matrix = np.zeros((grid_size_1d, grid_size_1d))
+        y_matrix = np.zeros((grid_size_1d, grid_size_1d))
+
+        for i in range(grid_size_1d):
+            for j in range(grid_size_1d):
+                idx = i * grid_size_1d + j
+                x_val = df[feature_1].iloc[idx]
+                y_val = df[feature_2].iloc[idx]
+                z_val = df[mean_col].iloc[idx]
+
+                z_matrix[i, j] = z_val
+                x_matrix[i, j] = x_val
+                y_matrix[i, j] = y_val
+
+        dx, dy = np.gradient(z_matrix)
+        dx = dx.T
+        if scaled:
+            dx = np.apply_along_axis(lambda x: x / feature_1_diffs, 1, dx)
+            dy = np.apply_along_axis(lambda x: x / feature_2_diffs, 1, dy)
+
+        return dx, dy, x_matrix, y_matrix, z_matrix
+
+
+
