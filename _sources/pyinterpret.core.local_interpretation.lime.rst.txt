@@ -1,0 +1,38 @@
+pyinterpret.core.local_interpretation.lime package
+==================================================
+
+Submodules
+----------
+
+pyinterpret.core.local_interpretation.lime.lime_image module
+------------------------------------------------------------
+
+.. automodule:: pyinterpret.core.local_interpretation.lime.lime_image
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyinterpret.core.local_interpretation.lime.lime_tabular module
+--------------------------------------------------------------
+
+.. automodule:: pyinterpret.core.local_interpretation.lime.lime_tabular
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyinterpret.core.local_interpretation.lime.lime_text module
+-----------------------------------------------------------
+
+.. automodule:: pyinterpret.core.local_interpretation.lime.lime_text
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: pyinterpret.core.local_interpretation.lime
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,259 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyinterpret.model package &#8212; pyinterpret  documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pyinterpret.tests package" href="pyinterpret.tests.html" />
+    <link rel="prev" title="pyinterpret.data package" href="pyinterpret.data.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pyinterpret-model-package">
+<h1>pyinterpret.model package<a class="headerlink" href="#pyinterpret-model-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pyinterpret.model.local">
+<span id="pyinterpret-model-local-module"></span><h2>pyinterpret.model.local module<a class="headerlink" href="#module-pyinterpret.model.local" title="Permalink to this headline">¶</a></h2>
+<p>Model subclass for in memory predict functions</p>
+<dl class="class">
+<dt id="pyinterpret.model.local.InMemoryModel">
+<em class="property">class </em><code class="descclassname">pyinterpret.model.local.</code><code class="descname">InMemoryModel</code><span class="sig-paren">(</span><em>prediction_fn</em>, <em>log_level=30</em>, <em>examples=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/model/local.html#InMemoryModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.model.local.InMemoryModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyinterpret.model.model.Model" title="pyinterpret.model.model.Model"><code class="xref py py-class docutils literal"><span class="pre">pyinterpret.model.model.Model</span></code></a></p>
+<p>This model can be called directly from memory</p>
+<dl class="method">
+<dt id="pyinterpret.model.local.InMemoryModel.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/model/local.html#InMemoryModel.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.model.local.InMemoryModel.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Just use the function itself for predictions</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyinterpret.model.model">
+<span id="pyinterpret-model-model-module"></span><h2>pyinterpret.model.model module<a class="headerlink" href="#module-pyinterpret.model.model" title="Permalink to this headline">¶</a></h2>
+<p>Model class.</p>
+<dl class="class">
+<dt id="pyinterpret.model.model.Model">
+<em class="property">class </em><code class="descclassname">pyinterpret.model.model.</code><code class="descname">Model</code><span class="sig-paren">(</span><em>log_level=30</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/model/model.html#Model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.model.model.Model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>What is a model? A model needs to make predictions, so a means of
+passing data into the model, and receiving results.</p>
+<dl class="docutils">
+<dt>Goals:</dt>
+<dd>We want to abstract away how we access the model.
+We want to make inferences about the format of the output.
+We want to able to map model outputs to some smaller, universal set of output types.
+We want to infer whether the model is real valued, or classification (n classes?)</dd>
+</dl>
+<dl class="method">
+<dt id="pyinterpret.model.model.Model.check_output_signature">
+<code class="descname">check_output_signature</code><span class="sig-paren">(</span><em>examples</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/model/model.html#Model.check_output_signature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.model.model.Model.check_output_signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines the model_type, output_type. Side effects
+of this method are to mutate object&#8217;s attributes (model_type,
+n_classes, etc).</p>
+<dl class="docutils">
+<dt>examples: pandas.DataFrame or numpy.ndarray</dt>
+<dd>The examples that will be passed through the predict function.
+The outputs from these examples will be used to make inferences
+about the types of outputs the function generally makes.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.model.model.Model.model_report">
+<code class="descname">model_report</code><span class="sig-paren">(</span><em>examples</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/model/model.html#Model.model_report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.model.model.Model.model_report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Just returns a list of model attributes as a list</p>
+<dl class="docutils">
+<dt>examples: array type:</dt>
+<dd>Examples to use for which we report behavior of predict_fn.</dd>
+</dl>
+<dl class="docutils">
+<dt>reports: list of strings</dt>
+<dd>metadata about function.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.model.model.Model.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/model/model.html#Model.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.model.model.Model.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>The way in which the submodule predicts values given an input</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.model.model.Model.predict_function_transformer">
+<code class="descname">predict_function_transformer</code><span class="sig-paren">(</span><em>output</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/model/model.html#Model.predict_function_transformer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.model.model.Model.predict_function_transformer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call this method when model returns a 1D array of
+predicted classes. The output is one hot encoded version.</p>
+<dl class="docutils">
+<dt>output: array type</dt>
+<dd>The output of the pre-formatted predict function</dd>
+</dl>
+<dl class="docutils">
+<dt>output: numpy.ndarray</dt>
+<dd>The one hot encoded outputs of predict_fn</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.model.model.Model.set_examples">
+<code class="descname">set_examples</code><span class="sig-paren">(</span><em>examples</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/model/model.html#Model.set_examples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.model.model.Model.set_examples" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ties examples to self. equivalent to self.examples = np.array(examples).
+Parameters
+&#8212;&#8212;&#8212;-
+examples: array type</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.model.model.Model.transformer_func_factory">
+<code class="descname">transformer_func_factory</code><span class="sig-paren">(</span><em>outputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/model/model.html#Model.transformer_func_factory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.model.model.Model.transformer_func_factory" title="Permalink to this definition">¶</a></dt>
+<dd><p>In the event that the predict func returns 1D array of predictions,
+then this returns a formatter to convert outputs to a 2D one hot encoded
+array.</p>
+<dl class="docutils">
+<dt>For instance, if:</dt>
+<dd>predict_fn(data) -&gt; [&#8216;apple&#8217;,&#8217;banana&#8217;]</dd>
+<dt>then</dt>
+<dd>transformer = Model.transformer_func_factory()
+transformer(predict_fn(data)) -&gt; [[1, 0], [0, 1]]</dd>
+</dl>
+<dl class="docutils">
+<dt>(callable):</dt>
+<dd>formatter function to wrap around predict_fn</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyinterpret.model.remote">
+<span id="pyinterpret-model-remote-module"></span><h2>pyinterpret.model.remote module<a class="headerlink" href="#module-pyinterpret.model.remote" title="Permalink to this headline">¶</a></h2>
+<p>Subclass of Model for deployed models</p>
+<dl class="class">
+<dt id="pyinterpret.model.remote.DeployedModel">
+<em class="property">class </em><code class="descclassname">pyinterpret.model.remote.</code><code class="descname">DeployedModel</code><span class="sig-paren">(</span><em>uri</em>, <em>parse_function=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/model/remote.html#DeployedModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.model.remote.DeployedModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyinterpret.model.model.Model" title="pyinterpret.model.model.Model"><code class="xref py py-class docutils literal"><span class="pre">pyinterpret.model.model.Model</span></code></a></p>
+<p>Model that gets predictions from a deployed model</p>
+<dl class="staticmethod">
+<dt id="pyinterpret.model.remote.DeployedModel.default_parser">
+<em class="property">static </em><code class="descname">default_parser</code><span class="sig-paren">(</span><em>content</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/model/remote.html#DeployedModel.default_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.model.remote.DeployedModel.default_parser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Just returns raw results</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.model.remote.DeployedModel.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>request_body</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/model/remote.html#DeployedModel.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.model.remote.DeployedModel.predict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyinterpret.model">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyinterpret.model" title="Permalink to this headline">¶</a></h2>
+<p>The modules responsible for wrapping models through a common interface. Useful
+If wed like to use the same api for models of different types (classifier v reg) or local
+vs deployed.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">pyinterpret.model package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-pyinterpret.model.local">pyinterpret.model.local module</a></li>
+<li><a class="reference internal" href="#module-pyinterpret.model.model">pyinterpret.model.model module</a></li>
+<li><a class="reference internal" href="#module-pyinterpret.model.remote">pyinterpret.model.remote module</a></li>
+<li><a class="reference internal" href="#module-pyinterpret.model">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="pyinterpret.html">pyinterpret package</a><ul>
+      <li>Previous: <a href="pyinterpret.data.html" title="previous chapter">pyinterpret.data package</a></li>
+      <li>Next: <a href="pyinterpret.tests.html" title="next chapter">pyinterpret.tests package</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/pyinterpret.model.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/pyinterpret.model.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

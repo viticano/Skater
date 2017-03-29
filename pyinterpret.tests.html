@@ -1,0 +1,417 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyinterpret.tests package &#8212; pyinterpret  documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pyinterpret.util package" href="pyinterpret.util.html" />
+    <link rel="prev" title="pyinterpret.model package" href="pyinterpret.model.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pyinterpret-tests-package">
+<h1>pyinterpret.tests package<a class="headerlink" href="#pyinterpret-tests-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pyinterpret.tests.all_tests">
+<span id="pyinterpret-tests-all-tests-module"></span><h2>pyinterpret.tests.all_tests module<a class="headerlink" href="#module-pyinterpret.tests.all_tests" title="Permalink to this headline">¶</a></h2>
+<p>Run all tests</p>
+<dl class="function">
+<dt id="pyinterpret.tests.all_tests.run_tests">
+<code class="descclassname">pyinterpret.tests.all_tests.</code><code class="descname">run_tests</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/all_tests.html#run_tests"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.all_tests.run_tests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run all tests in current directory with signature test*.py</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyinterpret.tests.arg_parser">
+<span id="pyinterpret-tests-arg-parser-module"></span><h2>pyinterpret.tests.arg_parser module<a class="headerlink" href="#module-pyinterpret.tests.arg_parser" title="Permalink to this headline">¶</a></h2>
+<p>Utility for parsing command line arguments for testing</p>
+<dl class="function">
+<dt id="pyinterpret.tests.arg_parser.arg_parse">
+<code class="descclassname">pyinterpret.tests.arg_parser.</code><code class="descname">arg_parse</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/arg_parser.html#arg_parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.arg_parser.arg_parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyinterpret.tests.arg_parser.create_parser">
+<code class="descclassname">pyinterpret.tests.arg_parser.</code><code class="descname">create_parser</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/arg_parser.html#create_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.arg_parser.create_parser" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pyinterpret.tests.test_data">
+<span id="pyinterpret-tests-test-data-module"></span><h2>pyinterpret.tests.test_data module<a class="headerlink" href="#module-pyinterpret.tests.test_data" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pyinterpret.tests.test_data.TestData">
+<em class="property">class </em><code class="descclassname">pyinterpret.tests.test_data.</code><code class="descname">TestData</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_data.html#TestData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_data.TestData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<p>Tests the pyinterpret.data.DataSet object</p>
+<dl class="method">
+<dt id="pyinterpret.tests.test_data.TestData.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_data.html#TestData.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_data.TestData.setUp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create data for testing</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_data.TestData.test_1D_numpy_array">
+<code class="descname">test_1D_numpy_array</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_data.html#TestData.test_1D_numpy_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_data.TestData.test_1D_numpy_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>ensure Dataset(data) works when data is 1D np.ndarray</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_data.TestData.test_2D_numpy_array">
+<code class="descname">test_2D_numpy_array</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_data.html#TestData.test_2D_numpy_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_data.TestData.test_2D_numpy_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>ensure Dataset(data) works when data is 2D np.ndarray</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_data.TestData.test_dataset_data_returns_original">
+<code class="descname">test_dataset_data_returns_original</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_data.html#TestData.test_dataset_data_returns_original"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_data.TestData.test_dataset_data_returns_original" title="Permalink to this definition">¶</a></dt>
+<dd><p>ensure Dataset(data).data == data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_data.TestData.test_generate_grid_1_variable">
+<code class="descname">test_generate_grid_1_variable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_data.html#TestData.test_generate_grid_1_variable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_data.TestData.test_generate_grid_1_variable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensures generate grid works with 1 variable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_data.TestData.test_generate_grid_2_variables">
+<code class="descname">test_generate_grid_2_variables</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_data.html#TestData.test_generate_grid_2_variables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_data.TestData.test_generate_grid_2_variables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensures generate grid works with 2 variables</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_data.TestData.test_pandas_dataframe">
+<code class="descname">test_pandas_dataframe</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_data.html#TestData.test_pandas_dataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_data.TestData.test_pandas_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure Dataset(data) works when data is pd.DataFrame</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyinterpret.tests.test_lime">
+<span id="pyinterpret-tests-test-lime-module"></span><h2>pyinterpret.tests.test_lime module<a class="headerlink" href="#module-pyinterpret.tests.test_lime" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pyinterpret.tests.test_lime.TestLime">
+<em class="property">class </em><code class="descclassname">pyinterpret.tests.test_lime.</code><code class="descname">TestLime</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_lime.html#TestLime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_lime.TestLime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<p>Test imported lime package</p>
+<dl class="method">
+<dt id="pyinterpret.tests.test_lime.TestLime.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_lime.html#TestLime.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_lime.TestLime.setUp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build data for testing
+:param n:
+:param dim:
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_lime.TestLime.test_classifier_no_proba_with_feature_names">
+<code class="descname">test_classifier_no_proba_with_feature_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_lime.html#TestLime.test_classifier_no_proba_with_feature_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_lime.TestLime.test_classifier_no_proba_with_feature_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure lime.lime_tabular works when predict_fn = classifier.predict
+and feature names are passed
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_lime.TestLime.test_classifier_no_proba_without_feature_names">
+<code class="descname">test_classifier_no_proba_without_feature_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_lime.html#TestLime.test_classifier_no_proba_without_feature_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_lime.TestLime.test_classifier_no_proba_without_feature_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure lime.lime_tabular works when predict_fn = classifier.predict
+and feature names are NOT passed
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_lime.TestLime.test_classifier_with_proba_with_feature_names">
+<code class="descname">test_classifier_with_proba_with_feature_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_lime.html#TestLime.test_classifier_with_proba_with_feature_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_lime.TestLime.test_classifier_with_proba_with_feature_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure lime.lime_tabular works when predict_fn = classifier.predict_proba
+and feature names are passed
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_lime.TestLime.test_classifier_with_proba_without_feature_names">
+<code class="descname">test_classifier_with_proba_without_feature_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_lime.html#TestLime.test_classifier_with_proba_without_feature_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_lime.TestLime.test_classifier_with_proba_without_feature_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure lime.lime_tabular works when predict_fn = classifier.predict_proba
+and feature names are NOT passed
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_lime.TestLime.test_lime_coef_accuracy">
+<code class="descname">test_lime_coef_accuracy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_lime.html#TestLime.test_lime_coef_accuracy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_lime.TestLime.test_lime_coef_accuracy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure that for a trivial example, the coefficients of a regressor explanation
+are all similar to the true beta values of the generative process.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_lime.TestLime.test_regression_with_feature_names">
+<code class="descname">test_regression_with_feature_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_lime.html#TestLime.test_regression_with_feature_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_lime.TestLime.test_regression_with_feature_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure lime.lime_tabular works when predict_fn = regressor.predict
+and feature names are passed
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_lime.TestLime.test_regression_without_feature_names">
+<code class="descname">test_regression_without_feature_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_lime.html#TestLime.test_regression_without_feature_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_lime.TestLime.test_regression_without_feature_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure lime.lime_tabular works when predict_fn = regressor.predict
+and feature names are NOT passed
+:return:</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyinterpret.tests.test_local_interpreter">
+<span id="pyinterpret-tests-test-local-interpreter-module"></span><h2>pyinterpret.tests.test_local_interpreter module<a class="headerlink" href="#module-pyinterpret.tests.test_local_interpreter" title="Permalink to this headline">¶</a></h2>
+<p>Test local interpretations (not lime)</p>
+<dl class="class">
+<dt id="pyinterpret.tests.test_local_interpreter.TestLocalInterpreter">
+<em class="property">class </em><code class="descclassname">pyinterpret.tests.test_local_interpreter.</code><code class="descname">TestLocalInterpreter</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_local_interpreter.html#TestLocalInterpreter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_local_interpreter.TestLocalInterpreter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<dl class="method">
+<dt id="pyinterpret.tests.test_local_interpreter.TestLocalInterpreter.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_local_interpreter.html#TestLocalInterpreter.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_local_interpreter.TestLocalInterpreter.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_local_interpreter.TestLocalInterpreter.test_coefs_are_non_zero_for_breast_cancer_dataset">
+<code class="descname">test_coefs_are_non_zero_for_breast_cancer_dataset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_local_interpreter.html#TestLocalInterpreter.test_coefs_are_non_zero_for_breast_cancer_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_local_interpreter.TestLocalInterpreter.test_coefs_are_non_zero_for_breast_cancer_dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_local_interpreter.TestLocalInterpreter.test_lime_classifier_coefs_correct_sign">
+<code class="descname">test_lime_classifier_coefs_correct_sign</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_local_interpreter.html#TestLocalInterpreter.test_lime_classifier_coefs_correct_sign"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_local_interpreter.TestLocalInterpreter.test_lime_classifier_coefs_correct_sign" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_local_interpreter.TestLocalInterpreter.test_lime_regression_coefs_are_close">
+<code class="descname">test_lime_regression_coefs_are_close</code><span class="sig-paren">(</span><em>epsilon=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_local_interpreter.html#TestLocalInterpreter.test_lime_regression_coefs_are_close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_local_interpreter.TestLocalInterpreter.test_lime_regression_coefs_are_close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyinterpret.tests.test_partial_dependence">
+<span id="pyinterpret-tests-test-partial-dependence-module"></span><h2>pyinterpret.tests.test_partial_dependence module<a class="headerlink" href="#module-pyinterpret.tests.test_partial_dependence" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pyinterpret.tests.test_partial_dependence.TestPartialDependence">
+<em class="property">class </em><code class="descclassname">pyinterpret.tests.test_partial_dependence.</code><code class="descname">TestPartialDependence</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_partial_dependence.html#TestPartialDependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_partial_dependence.TestPartialDependence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<dl class="staticmethod">
+<dt id="pyinterpret.tests.test_partial_dependence.TestPartialDependence.feature_column_name_formatter">
+<em class="property">static </em><code class="descname">feature_column_name_formatter</code><span class="sig-paren">(</span><em>columnname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_partial_dependence.html#TestPartialDependence.feature_column_name_formatter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_partial_dependence.TestPartialDependence.feature_column_name_formatter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_partial_dependence.TestPartialDependence.setUp">
+<code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_partial_dependence.html#TestPartialDependence.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_partial_dependence.TestPartialDependence.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_2D_pdp">
+<code class="descname">test_2D_pdp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_partial_dependence.html#TestPartialDependence.test_2D_pdp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_2D_pdp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_fail_when_grid_range_is_outside_0_and_1">
+<code class="descname">test_fail_when_grid_range_is_outside_0_and_1</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_partial_dependence.html#TestPartialDependence.test_fail_when_grid_range_is_outside_0_and_1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_fail_when_grid_range_is_outside_0_and_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_partial_dependence_binary_classification">
+<code class="descname">test_partial_dependence_binary_classification</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_partial_dependence.html#TestPartialDependence.test_partial_dependence_binary_classification"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_partial_dependence_binary_classification" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_partial_dependence_multiclass">
+<code class="descname">test_partial_dependence_multiclass</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_partial_dependence.html#TestPartialDependence.test_partial_dependence_multiclass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_partial_dependence_multiclass" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_1d_classifier_no_proba">
+<code class="descname">test_pdp_1d_classifier_no_proba</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_partial_dependence.html#TestPartialDependence.test_pdp_1d_classifier_no_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_1d_classifier_no_proba" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_1d_classifier_with_proba">
+<code class="descname">test_pdp_1d_classifier_with_proba</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_partial_dependence.html#TestPartialDependence.test_pdp_1d_classifier_with_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_1d_classifier_with_proba" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_1d_string_classifier_no_proba">
+<code class="descname">test_pdp_1d_string_classifier_no_proba</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_partial_dependence.html#TestPartialDependence.test_pdp_1d_string_classifier_no_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_1d_string_classifier_no_proba" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_1d_string_classifier_with_proba">
+<code class="descname">test_pdp_1d_string_classifier_with_proba</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_partial_dependence.html#TestPartialDependence.test_pdp_1d_string_classifier_with_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_1d_string_classifier_with_proba" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_2d_classifier_no_proba">
+<code class="descname">test_pdp_2d_classifier_no_proba</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_partial_dependence.html#TestPartialDependence.test_pdp_2d_classifier_no_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_2d_classifier_no_proba" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_2d_classifier_with_proba">
+<code class="descname">test_pdp_2d_classifier_with_proba</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_partial_dependence.html#TestPartialDependence.test_pdp_2d_classifier_with_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_2d_classifier_with_proba" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_inputs">
+<code class="descname">test_pdp_inputs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_partial_dependence.html#TestPartialDependence.test_pdp_inputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_inputs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_regression_coefs_closeness">
+<code class="descname">test_pdp_regression_coefs_closeness</code><span class="sig-paren">(</span><em>epsilon=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_partial_dependence.html#TestPartialDependence.test_pdp_regression_coefs_closeness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_regression_coefs_closeness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_with_default_sampling">
+<code class="descname">test_pdp_with_default_sampling</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_partial_dependence.html#TestPartialDependence.test_pdp_with_default_sampling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_with_default_sampling" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_plot_1D_pdp">
+<code class="descname">test_plot_1D_pdp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_partial_dependence.html#TestPartialDependence.test_plot_1D_pdp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_plot_1D_pdp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_plot_1D_pdp_with_sampling">
+<code class="descname">test_plot_1D_pdp_with_sampling</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_partial_dependence.html#TestPartialDependence.test_plot_1D_pdp_with_sampling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_plot_1D_pdp_with_sampling" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_plot_2D_pdp">
+<code class="descname">test_plot_2D_pdp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_partial_dependence.html#TestPartialDependence.test_plot_2D_pdp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_plot_2D_pdp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_plot_2D_pdp_with_sampling">
+<code class="descname">test_plot_2D_pdp_with_sampling</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/tests/test_partial_dependence.html#TestPartialDependence.test_plot_2D_pdp_with_sampling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_plot_2D_pdp_with_sampling" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyinterpret.tests">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyinterpret.tests" title="Permalink to this headline">¶</a></h2>
+<p>Test Suite</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">pyinterpret.tests package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-pyinterpret.tests.all_tests">pyinterpret.tests.all_tests module</a></li>
+<li><a class="reference internal" href="#module-pyinterpret.tests.arg_parser">pyinterpret.tests.arg_parser module</a></li>
+<li><a class="reference internal" href="#module-pyinterpret.tests.test_data">pyinterpret.tests.test_data module</a></li>
+<li><a class="reference internal" href="#module-pyinterpret.tests.test_lime">pyinterpret.tests.test_lime module</a></li>
+<li><a class="reference internal" href="#module-pyinterpret.tests.test_local_interpreter">pyinterpret.tests.test_local_interpreter module</a></li>
+<li><a class="reference internal" href="#module-pyinterpret.tests.test_partial_dependence">pyinterpret.tests.test_partial_dependence module</a></li>
+<li><a class="reference internal" href="#module-pyinterpret.tests">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="pyinterpret.html">pyinterpret package</a><ul>
+      <li>Previous: <a href="pyinterpret.model.html" title="previous chapter">pyinterpret.model package</a></li>
+      <li>Next: <a href="pyinterpret.util.html" title="next chapter">pyinterpret.util package</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/pyinterpret.tests.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/pyinterpret.tests.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

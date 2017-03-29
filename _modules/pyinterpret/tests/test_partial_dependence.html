@@ -1,0 +1,325 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyinterpret.tests.test_partial_dependence &#8212; pyinterpret  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pyinterpret.tests.test_partial_dependence</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">unittest</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">norm</span>
+<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="k">import</span> <span class="n">expit</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="k">import</span> <span class="n">LinearRegression</span><span class="p">,</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="k">import</span> <span class="n">GradientBoostingClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="k">import</span> <span class="n">datasets</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
+
+<span class="kn">from</span> <span class="nn">pyinterpret.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
+<span class="kn">from</span> <span class="nn">pyinterpret.util</span> <span class="k">import</span> <span class="n">exceptions</span>
+<span class="kn">from</span> <span class="nn">pyinterpret.tests.arg_parser</span> <span class="k">import</span> <span class="n">create_parser</span>
+
+<div class="viewcode-block" id="TestPartialDependence"><a class="viewcode-back" href="../../../pyinterpret.tests.html#pyinterpret.tests.test_partial_dependence.TestPartialDependence">[docs]</a><span class="k">class</span> <span class="nc">TestPartialDependence</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestPartialDependence.setUp"><a class="viewcode-back" href="../../../pyinterpret.tests.html#pyinterpret.tests.test_partial_dependence.TestPartialDependence.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">create_parser</span><span class="p">()</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+        <span class="n">debug</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">debug</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">n</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">),</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">10.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">6.1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_as_int</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">expit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_as_string</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_as_int</span><span class="p">])</span>
+        <span class="c"># example dataset for y = B.X</span>
+        <span class="c"># X = array([[ 1.62434536, -0.61175641, -0.52817175], ... [-0.15065961, -1.40002289, -1.30106608]])  (1000 * 3)</span>
+        <span class="c"># B = array([-10.1,   2.2,   6.1])</span>
+        <span class="c"># y = array([ -2.09736000e+01,  -1.29850618e+00,  -1.73511155e+01, ...]) (1000 * 1)</span>
+        <span class="c"># features = [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;]</span>
+        <span class="c">##</span>
+        <span class="c"># Other output types:</span>
+        <span class="c"># y_as_int = array[ 0.,  0.,  0.,  0.,  1.,  1.,  0.,  0.,  0.,  1.,  1.,  1.,  1., ...]</span>
+        <span class="c"># y_as_string = array[&#39;0.0&#39;, &#39;0.0&#39;, &#39;0.0&#39;, &#39;0.0&#39;, &#39;1.0&#39;, &#39;1.0&#39;, &#39;0.0&#39;, &#39;0.0&#39;, &#39;0.0&#39;, ... ]</span>
+
+
+        <span class="c"># Another set of input</span>
+        <span class="c"># sample data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_feature_name</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">(</span><span class="n">log_level</span><span class="o">=</span><span class="s">&#39;DEBUG&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span> <span class="c"># default level is &#39;WARNING&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span> <span class="o">=</span> <span class="n">LinearRegression</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">regressor_predict_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">predict</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_as_int</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classifier_predict_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span><span class="o">.</span><span class="n">predict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classifier_predict_proba_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span><span class="o">.</span><span class="n">predict_proba</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">string_classifier</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">string_classifier</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_as_string</span><span class="p">)</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TestPartialDependence.feature_column_name_formatter"><a class="viewcode-back" href="../../../pyinterpret.tests.html#pyinterpret.tests.test_partial_dependence.TestPartialDependence.feature_column_name_formatter">[docs]</a>    <span class="k">def</span> <span class="nf">feature_column_name_formatter</span><span class="p">(</span><span class="n">columnname</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;val_{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">columnname</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestPartialDependence.test_pdp_with_default_sampling"><a class="viewcode-back" href="../../../pyinterpret.tests.html#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_with_default_sampling">[docs]</a>    <span class="k">def</span> <span class="nf">test_pdp_with_default_sampling</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pdp_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">partial_dependence</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">regressor_predict_fn</span><span class="p">,</span>
+                                                                       <span class="n">sample</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">pdp_df</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span> <span class="c"># default grid resolution is 100</span></div>
+
+
+<div class="viewcode-block" id="TestPartialDependence.test_partial_dependence_binary_classification"><a class="viewcode-back" href="../../../pyinterpret.tests.html#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_partial_dependence_binary_classification">[docs]</a>    <span class="k">def</span> <span class="nf">test_partial_dependence_binary_classification</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># In the default implementation of pdp on sklearn, there is an approx. done</span>
+        <span class="c"># if the number of unique values for a feature space &lt; grid_resolution specified.</span>
+        <span class="c"># For now, we have decided to not have that approximation. In V2, we will be benchmarking for</span>
+        <span class="c"># performance as well. Around that time we will revisit the same.</span>
+        <span class="c"># Reference: https://github.com/scikit-learn/scikit-learn/blob/4d9a12d175a38f2bcb720389ad2213f71a3d7697/sklearn/ensemble/tests/test_partial_dependence.py</span>
+        <span class="c"># TODO: check on the feature space approximation (V2)</span>
+        <span class="c"># Test partial dependence for classifier</span>
+        <span class="n">clf</span> <span class="o">=</span> <span class="n">GradientBoostingClassifier</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_y</span><span class="p">)</span>
+        <span class="n">classifier_predict_fn</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict_proba</span>
+        <span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span>
+        <span class="n">interpreter</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_x</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_feature_name</span><span class="p">)</span>
+        <span class="n">pdp_df</span> <span class="o">=</span> <span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">partial_dependence</span><span class="p">([</span><span class="s">&#39;0&#39;</span><span class="p">],</span> <span class="n">classifier_predict_fn</span><span class="p">,</span>
+                                                                  <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">pdp_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">5</span><span class="p">)</span>
+
+        <span class="c"># now with our own grid</span>
+        <span class="n">ud_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_x</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="c"># input: array([-2, -1,  1,  2])</span>
+        <span class="c"># the returned grid should have only 4 values as specified by the user</span>
+        <span class="n">pdp_df</span> <span class="o">=</span> <span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">partial_dependence</span><span class="p">([</span><span class="s">&#39;0&#39;</span><span class="p">],</span> <span class="n">classifier_predict_fn</span><span class="p">,</span>
+                                                                   <span class="n">grid</span><span class="o">=</span><span class="n">ud_grid</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">pdp_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">4</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestPartialDependence.test_partial_dependence_multiclass"><a class="viewcode-back" href="../../../pyinterpret.tests.html#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_partial_dependence_multiclass">[docs]</a>    <span class="k">def</span> <span class="nf">test_partial_dependence_multiclass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Iris data classes: [&#39;setosa&#39;, &#39;versicolor&#39;, &#39;virginica&#39;]</span>
+        <span class="n">iris</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">load_iris</span><span class="p">()</span>
+        <span class="c">#1. Using GB Classifier</span>
+        <span class="n">clf</span> <span class="o">=</span> <span class="n">GradientBoostingClassifier</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">iris</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">iris</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+        <span class="n">classifier_predict_fn</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict_proba</span>
+        <span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span>
+        <span class="n">interpreter</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">iris</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">iris</span><span class="o">.</span><span class="n">feature_names</span><span class="p">)</span>
+        <span class="n">pdp_df</span> <span class="o">=</span> <span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">partial_dependence</span><span class="p">([</span><span class="n">iris</span><span class="o">.</span><span class="n">feature_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">classifier_predict_fn</span><span class="p">,</span>
+                                                                   <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
+
+        <span class="n">expected_feature_name</span> <span class="o">=</span> <span class="s">&#39;val_sepal length (cm)&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">expected_feature_name</span><span class="p">,</span> <span class="n">pdp_df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">pdp_df</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+        <span class="c">#2. Using SVC</span>
+        <span class="kn">from</span> <span class="nn">sklearn</span> <span class="k">import</span> <span class="n">svm</span>
+        <span class="c"># With SVC, predict_proba is supported only if probability flag is enabled, by default it is false</span>
+        <span class="n">clf</span> <span class="o">=</span> <span class="n">svm</span><span class="o">.</span><span class="n">SVC</span><span class="p">(</span><span class="n">probability</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
+        <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">iris</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">iris</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+        <span class="n">classifier_predict_fn</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict_proba</span>
+        <span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span>
+        <span class="n">interpreter</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">iris</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">iris</span><span class="o">.</span><span class="n">feature_names</span><span class="p">)</span>
+        <span class="n">pdp_df</span> <span class="o">=</span> <span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">partial_dependence</span><span class="p">([</span><span class="n">iris</span><span class="o">.</span><span class="n">feature_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">classifier_predict_fn</span><span class="p">,</span>
+                                                                   <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">expected_feature_name</span><span class="p">,</span> <span class="n">pdp_df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">pdp_df</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="TestPartialDependence.test_pdp_regression_coefs_closeness"><a class="viewcode-back" href="../../../pyinterpret.tests.html#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_regression_coefs_closeness">[docs]</a>    <span class="k">def</span> <span class="nf">test_pdp_regression_coefs_closeness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">pdp_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">partial_dependence</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">regressor_predict_fn</span><span class="p">)</span>
+        <span class="n">val_col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_column_name_formatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pdp_df</span><span class="p">[</span><span class="s">&#39;mean&#39;</span><span class="p">])</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pdp_df</span><span class="p">[</span><span class="n">val_col</span><span class="p">])[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="n">regressor</span> <span class="o">=</span> <span class="n">LinearRegression</span><span class="p">()</span>
+        <span class="n">regressor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Regressor coefs: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">regressor</span><span class="o">.</span><span class="n">coef_</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Regressor coef shape: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">regressor</span><span class="o">.</span><span class="n">coef_</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="n">coef</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">coef</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">epsilon</span><span class="p">,</span> <span class="k">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestPartialDependence.test_pdp_inputs"><a class="viewcode-back" href="../../../pyinterpret.tests.html#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_inputs">[docs]</a>    <span class="k">def</span> <span class="nf">test_pdp_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">clf</span> <span class="o">=</span> <span class="n">GradientBoostingClassifier</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_y</span><span class="p">)</span>
+        <span class="n">classifier_predict_fn</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict_proba</span>
+        <span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertRaisesRegexp</span><span class="p">(</span><span class="ne">Exception</span><span class="p">,</span> <span class="s">&quot;Invalid Data&quot;</span><span class="p">,</span> <span class="n">interpreter</span><span class="o">.</span><span class="n">load_data</span><span class="p">,</span> <span class="k">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_feature_name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestPartialDependence.test_2D_pdp"><a class="viewcode-back" href="../../../pyinterpret.tests.html#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_2D_pdp">[docs]</a>    <span class="k">def</span> <span class="nf">test_2D_pdp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">coefs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">partial_dependence</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span>
+                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">regressor_predict_fn</span><span class="p">,</span>
+                                                                       <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                                                                       <span class="n">sample</span><span class="o">=</span><span class="k">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestPartialDependence.test_plot_1D_pdp"><a class="viewcode-back" href="../../../pyinterpret.tests.html#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_plot_1D_pdp">[docs]</a>    <span class="k">def</span> <span class="nf">test_plot_1D_pdp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">coefs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">plot_partial_dependence</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">regressor_predict_fn</span><span class="p">,</span>
+                                                                       <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestPartialDependence.test_plot_1D_pdp_with_sampling"><a class="viewcode-back" href="../../../pyinterpret.tests.html#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_plot_1D_pdp_with_sampling">[docs]</a>    <span class="k">def</span> <span class="nf">test_plot_1D_pdp_with_sampling</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">coefs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">plot_partial_dependence</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">regressor_predict_fn</span><span class="p">,</span>
+            <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+            <span class="n">sample</span><span class="o">=</span><span class="k">True</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestPartialDependence.test_plot_2D_pdp"><a class="viewcode-back" href="../../../pyinterpret.tests.html#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_plot_2D_pdp">[docs]</a>    <span class="k">def</span> <span class="nf">test_plot_2D_pdp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">coefs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">plot_partial_dependence</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span>
+                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">regressor_predict_fn</span><span class="p">,</span>
+                                                                       <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                                                                       <span class="n">sample</span><span class="o">=</span><span class="k">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestPartialDependence.test_plot_2D_pdp_with_sampling"><a class="viewcode-back" href="../../../pyinterpret.tests.html#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_plot_2D_pdp_with_sampling">[docs]</a>    <span class="k">def</span> <span class="nf">test_plot_2D_pdp_with_sampling</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">coefs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">plot_partial_dependence</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span>
+                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">regressor_predict_fn</span><span class="p">,</span>
+                                                                       <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                                                                       <span class="n">sample</span><span class="o">=</span><span class="k">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestPartialDependence.test_fail_when_grid_range_is_outside_0_and_1"><a class="viewcode-back" href="../../../pyinterpret.tests.html#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_fail_when_grid_range_is_outside_0_and_1">[docs]</a>    <span class="k">def</span> <span class="nf">test_fail_when_grid_range_is_outside_0_and_1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pdp_func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">partial_dependence</span><span class="p">,</span>
+                           <span class="o">*</span><span class="p">[[</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="bp">self</span><span class="o">.</span><span class="n">regressor_predict_fn</span><span class="p">],</span>
+                           <span class="o">**</span><span class="p">{</span><span class="s">&#39;grid_range&#39;</span><span class="p">:(</span><span class="o">.</span><span class="mi">01</span><span class="p">,</span> <span class="mf">1.01</span><span class="p">)})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">exceptions</span><span class="o">.</span><span class="n">MalformedGridRangeError</span><span class="p">,</span> <span class="n">pdp_func</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestPartialDependence.test_pdp_1d_classifier_no_proba"><a class="viewcode-back" href="../../../pyinterpret.tests.html#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_1d_classifier_no_proba">[docs]</a>    <span class="k">def</span> <span class="nf">test_pdp_1d_classifier_no_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">coefs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">partial_dependence</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[:</span><span class="mi">1</span><span class="p">],</span>
+                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">classifier_predict_fn</span><span class="p">,</span>
+                                                                       <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestPartialDependence.test_pdp_2d_classifier_no_proba"><a class="viewcode-back" href="../../../pyinterpret.tests.html#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_2d_classifier_no_proba">[docs]</a>    <span class="k">def</span> <span class="nf">test_pdp_2d_classifier_no_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">coefs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">partial_dependence</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span>
+                                                                            <span class="bp">self</span><span class="o">.</span><span class="n">classifier_predict_fn</span><span class="p">,</span>
+                                                                            <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestPartialDependence.test_pdp_1d_classifier_with_proba"><a class="viewcode-back" href="../../../pyinterpret.tests.html#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_1d_classifier_with_proba">[docs]</a>    <span class="k">def</span> <span class="nf">test_pdp_1d_classifier_with_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">coefs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">partial_dependence</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[:</span><span class="mi">1</span><span class="p">],</span>
+                                                                            <span class="bp">self</span><span class="o">.</span><span class="n">classifier_predict_proba_fn</span><span class="p">,</span>
+                                                                            <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestPartialDependence.test_pdp_2d_classifier_with_proba"><a class="viewcode-back" href="../../../pyinterpret.tests.html#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_2d_classifier_with_proba">[docs]</a>    <span class="k">def</span> <span class="nf">test_pdp_2d_classifier_with_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">coefs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">partial_dependence</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span>
+                                                                            <span class="bp">self</span><span class="o">.</span><span class="n">classifier_predict_proba_fn</span><span class="p">,</span>
+                                                                            <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestPartialDependence.test_pdp_1d_string_classifier_no_proba"><a class="viewcode-back" href="../../../pyinterpret.tests.html#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_1d_string_classifier_no_proba">[docs]</a>    <span class="k">def</span> <span class="nf">test_pdp_1d_string_classifier_no_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">coefs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">partial_dependence</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[:</span><span class="mi">1</span><span class="p">],</span>
+                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">string_classifier</span><span class="o">.</span><span class="n">predict</span><span class="p">,</span>
+                                                                       <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestPartialDependence.test_pdp_1d_string_classifier_with_proba"><a class="viewcode-back" href="../../../pyinterpret.tests.html#pyinterpret.tests.test_partial_dependence.TestPartialDependence.test_pdp_1d_string_classifier_with_proba">[docs]</a>    <span class="k">def</span> <span class="nf">test_pdp_1d_string_classifier_with_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">coefs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">partial_dependence</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[:</span><span class="mi">1</span><span class="p">],</span>
+                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">string_classifier</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">,</span>
+                                                                       <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span></div></div>
+
+
+    <span class="c">#TODO: Add tests for various kinds of kwargs like sampling for pdp funcs</span>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestLoader</span><span class="p">()</span><span class="o">.</span><span class="n">loadTestsFromTestCase</span><span class="p">(</span><span class="n">TestPartialDependence</span><span class="p">)</span>
+    <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">(</span><span class="n">verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

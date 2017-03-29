@@ -1,0 +1,30 @@
+pyinterpret.core.global_interpretation package
+==============================================
+
+Submodules
+----------
+
+pyinterpret.core.global_interpretation.base module
+--------------------------------------------------
+
+.. automodule:: pyinterpret.core.global_interpretation.base
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyinterpret.core.global_interpretation.partial_dependence module
+----------------------------------------------------------------
+
+.. automodule:: pyinterpret.core.global_interpretation.partial_dependence
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: pyinterpret.core.global_interpretation
+    :members:
+    :undoc-members:
+    :show-inheritance:

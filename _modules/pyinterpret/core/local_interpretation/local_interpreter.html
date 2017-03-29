@@ -1,0 +1,269 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyinterpret.core.local_interpretation.local_interpreter &#8212; pyinterpret  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pyinterpret.core.local_interpretation.local_interpreter</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Local Interpreter class&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="k">import</span> <span class="n">metrics</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="k">import</span> <span class="n">LinearRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span> <span class="nn">sklearn.neighbors</span> <span class="k">import</span> <span class="n">NearestNeighbors</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
+
+<span class="kn">from</span> <span class="nn">...util.kernels</span> <span class="k">import</span> <span class="n">rbf_kernel</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="n">BaseLocalInterpretation</span>
+<span class="kn">from</span> <span class="nn">..model_interpreter</span> <span class="k">import</span> <span class="n">ModelInterpreter</span>
+
+
+<div class="viewcode-block" id="LocalInterpreter"><a class="viewcode-back" href="../../../../pyinterpret.core.local_interpretation.html#pyinterpret.core.local_interpretation.local_interpreter.LocalInterpreter">[docs]</a><span class="k">class</span> <span class="nc">LocalInterpreter</span><span class="p">(</span><span class="n">BaseLocalInterpretation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Contains all methods for LIME style interpretations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_ds_explain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_row</span><span class="p">,</span> <span class="n">predict_fn</span><span class="p">,</span> <span class="n">similarity_method</span><span class="o">=</span><span class="s">&#39;local-affinity-scaling&#39;</span><span class="p">,</span>
+                    <span class="n">sample</span><span class="o">=</span><span class="k">False</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span>
+                    <span class="n">sampling_strategy</span><span class="o">=</span><span class="s">&#39;uniform-over-similarity-ranks&#39;</span><span class="p">,</span>
+                    <span class="n">distance_metric</span><span class="o">=</span><span class="s">&#39;euclidean&#39;</span><span class="p">,</span> <span class="n">kernel_width</span><span class="o">=</span><span class="k">None</span><span class="p">,</span>
+                    <span class="n">explainer_model</span><span class="o">=</span><span class="n">LinearRegression</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;For performing Local interpretable model explanation. Creates a sample of data</span>
+<span class="sd">        around of point, passing these points through your prediction function. This</span>
+<span class="sd">        gives a linear model of the full model centered around a point.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            data_row(numpy.ndarray):</span>
+<span class="sd">                The observation to explain.</span>
+<span class="sd">            predict_fn(function):</span>
+<span class="sd">                The model to explain</span>
+<span class="sd">            similarity_method(string):</span>
+<span class="sd">                The means by which similarities are computed. Currently supported</span>
+<span class="sd">                options:</span>
+<span class="sd">                    cosine-similarity:</span>
+<span class="sd">                        generally gives more global coefficients</span>
+<span class="sd">                    unscaled-kernel-substitution:</span>
+<span class="sd">                        calculates euclidean distances, then passes these distances</span>
+<span class="sd">                        through a gaussian kernel with hyperparameter kernel_width</span>
+<span class="sd">                    scaled-kernel-substitution:</span>
+<span class="sd">                        calculates euclidean distances on standard-scaled data,</span>
+<span class="sd">                        then passes these distances through a gaussian kernel with</span>
+<span class="sd">                        hyperparameter kernel_width. Not recommended</span>
+<span class="sd">                    local-affinity-weighting:</span>
+<span class="sd">                        calculates euclidean distances, then passes these through an</span>
+<span class="sd">                        adaptive kernel function that weights according to local scales</span>
+<span class="sd">                        of the given data_row and each point in the neighborhood.</span>
+
+<span class="sd">            sample(Bool):</span>
+<span class="sd">                Whether or not to sample the data.</span>
+<span class="sd">            distance_metric(string):</span>
+<span class="sd">                The measure by which we evaluate distane between a point in the sampled</span>
+<span class="sd">                data and the data row to explain.</span>
+<span class="sd">            kernel_width(numeric):</span>
+<span class="sd">                We pass distances through a kernel function, this specifies the width.</span>
+<span class="sd">                Smaller widths will give more weight to points neighboring the</span>
+<span class="sd">                explained point. Defaults to proportional to dimensionality of dataset.</span>
+<span class="sd">            explainer_model(scikit learn model):</span>
+<span class="sd">                Model to use to explain the point. Defaults to Linear regression.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">kernel_width</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+            <span class="n">kernel_width</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_set</span><span class="o">.</span><span class="n">dim</span><span class="p">)</span> <span class="o">*</span> <span class="o">.</span><span class="mi">75</span>
+
+        <span class="n">explainer_model</span> <span class="o">=</span> <span class="n">explainer_model</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_explainer_model_pre_train</span><span class="p">(</span><span class="n">explainer_model</span><span class="p">)</span>
+        <span class="n">predict_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_annotated_model</span><span class="p">(</span><span class="n">predict_fn</span><span class="p">,</span> <span class="n">examples</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_set</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+        <span class="c"># data that has been sampled</span>
+        <span class="n">neighborhood</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">data_set</span><span class="o">.</span><span class="n">generate_sample</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="n">sampling_strategy</span><span class="p">,</span>
+                                                                 <span class="n">sample</span><span class="o">=</span><span class="n">sample</span><span class="p">,</span>
+                                                                 <span class="n">n_samples_from_dataset</span><span class="o">=</span><span class="n">n_samples</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_neighborhood</span><span class="p">(</span><span class="n">neighborhood</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">similarity_method</span> <span class="o">==</span> <span class="s">&#39;cosine-similarity&#39;</span><span class="p">:</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_weights_from_cosine_similarity</span><span class="p">(</span><span class="n">neighborhood</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                                                              <span class="n">data_row</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">similarity_method</span> <span class="o">==</span> <span class="s">&#39;unscaled-kernel-substitution&#39;</span><span class="p">:</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_weights_via_kernel_subtitution</span><span class="p">(</span><span class="n">neighborhood</span><span class="p">,</span>
+                                                               <span class="n">data_row</span><span class="p">,</span>
+                                                               <span class="n">kernel_width</span><span class="p">,</span>
+                                                               <span class="n">distance_metric</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">similarity_method</span> <span class="o">==</span> <span class="s">&#39;scaled-kernel-substitution&#39;</span><span class="p">:</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_weights_kernel_tranformation_of_scaled_euclidean_distance</span><span class="p">(</span><span class="n">neighborhood</span><span class="p">,</span>
+                                                                                          <span class="n">data_row</span><span class="p">,</span>
+                                                                                          <span class="n">kernel_width</span><span class="p">,</span>
+                                                                                          <span class="n">distance_metric</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">similarity_method</span> <span class="o">==</span> <span class="s">&#39;local-affinity-scaling&#39;</span><span class="p">:</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_weights_via_local_scaling_weights</span><span class="p">(</span><span class="n">neighborhood</span><span class="p">,</span>
+                                                                  <span class="n">data_row</span><span class="p">,</span>
+                                                                  <span class="n">distance_metric</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;{} is not a valid similarity method&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">similarity_method</span><span class="p">))</span>
+
+        <span class="n">predictions</span> <span class="o">=</span> <span class="n">predict_fn</span><span class="p">(</span><span class="n">neighborhood</span><span class="p">)</span>
+        <span class="n">explainer_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">neighborhood</span><span class="p">,</span> <span class="n">predictions</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_explainer_model_post_train</span><span class="p">(</span><span class="n">explainer_model</span><span class="p">)</span>
+
+        <span class="c">#results = pd.DataFrame(explainer_model.coef_, self.data_set.feature_ids, index = &#39;coef&#39;)</span>
+        <span class="k">return</span> <span class="n">explainer_model</span><span class="o">.</span><span class="n">coef_</span>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_weights_kernel_tranformation_of_scaled_euclidean_distance</span><span class="p">(</span><span class="n">neighborhood</span><span class="p">,</span>
+                                                                       <span class="n">point</span><span class="p">,</span>
+                                                                       <span class="n">kernel_width</span><span class="p">,</span>
+                                                                       <span class="n">distance_metric</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This method scales data, then computes distance metric, then passes</span>
+<span class="sd">        through kernel&quot;&quot;&quot;</span>
+
+        <span class="n">scaler</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">(</span><span class="n">copy</span><span class="o">=</span><span class="k">True</span><span class="p">,</span> <span class="n">with_mean</span><span class="o">=</span><span class="k">True</span><span class="p">,</span> <span class="n">with_std</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
+        <span class="n">scaled_neighborhood</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">neighborhood</span><span class="p">)</span>
+        <span class="n">scaled_point</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">pairwise_distances</span><span class="p">(</span>
+            <span class="n">scaled_neighborhood</span><span class="p">,</span>
+            <span class="n">scaled_point</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">metric</span><span class="o">=</span><span class="n">distance_metric</span><span class="p">)</span> \
+            <span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">rbf_kernel</span><span class="p">(</span><span class="n">distances</span><span class="p">,</span> <span class="n">kernel_width</span><span class="o">=</span><span class="n">kernel_width</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">weights</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_weights_from_cosine_similarity</span><span class="p">(</span><span class="n">neighborhood</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This method computes absolute values of cosine similarities&quot;&quot;&quot;</span>
+        <span class="n">similarities</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">pairwise</span><span class="o">.</span><span class="n">cosine_similarity</span><span class="p">(</span><span class="n">neighborhood</span><span class="p">,</span>
+                                                          <span class="n">point</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">similarities</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_weights_via_kernel_subtitution</span><span class="p">(</span><span class="n">neighborhood</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">kernel_width</span><span class="p">,</span>
+                                           <span class="n">distance_metric</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Computes distances, passes through gaussian kernel&quot;&quot;&quot;</span>
+        <span class="n">kernel_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">d</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">kernel_width</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">pairwise_distances</span><span class="p">(</span>
+            <span class="n">neighborhood</span><span class="p">,</span>
+            <span class="n">point</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">metric</span><span class="o">=</span><span class="n">distance_metric</span><span class="p">)</span> \
+            <span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">kernel_fn</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">weights</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_weights_via_local_scaling_weights</span><span class="p">(</span><span class="n">neighborhood</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">distance_metric</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Computes distances, passes through kernel that weights distance by</span>
+<span class="sd">        pointwise local densities&quot;&quot;&quot;</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">pairwise_distances</span><span class="p">(</span>
+            <span class="n">neighborhood</span><span class="p">,</span>
+            <span class="n">point</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">metric</span><span class="o">=</span><span class="n">distance_metric</span><span class="p">)</span> \
+            <span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+        <span class="n">combined</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">neighborhood</span><span class="p">,</span> <span class="n">point</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">nearest_neighbor</span> <span class="o">=</span> <span class="n">NearestNeighbors</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+        <span class="n">nearest_neighbor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">combined</span><span class="p">)</span>
+        <span class="n">local_distances</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">nearest_neighbor</span><span class="o">.</span><span class="n">kneighbors</span><span class="p">(</span><span class="n">combined</span><span class="p">)</span>
+        <span class="n">local_distances</span> <span class="o">=</span> <span class="n">local_distances</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">]</span>
+        <span class="n">point_sigma</span> <span class="o">=</span> <span class="n">local_distances</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">population_sigmas</span> <span class="o">=</span> <span class="n">local_distances</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">affinities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="n">distances</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">point_sigma</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">population_sigmas</span><span class="p">))</span>\
+            <span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">affinities</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_check_explainer_model_pre_train</span><span class="p">(</span><span class="n">explainer_model</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">explainer_model</span><span class="p">,</span> <span class="s">&#39;fit&#39;</span><span class="p">),</span> <span class="s">&quot;Model needs to have a fit method &quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_check_explainer_model_post_train</span><span class="p">(</span><span class="n">explainer_model</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">explainer_model</span><span class="p">,</span> <span class="s">&#39;coef_&#39;</span><span class="p">),</span> <span class="s">&quot;Model needs to have coefficients to explain &quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_check_neighborhood</span><span class="p">(</span><span class="n">neighborhood</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">neighborhood</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

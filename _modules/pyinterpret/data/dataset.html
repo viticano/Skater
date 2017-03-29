@@ -1,0 +1,315 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyinterpret.data.dataset &#8212; pyinterpret  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pyinterpret.data.dataset</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;DataSet object&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics.pairwise</span> <span class="k">import</span> <span class="n">cosine_distances</span>
+
+<span class="kn">from</span> <span class="nn">..util.logger</span> <span class="k">import</span> <span class="n">build_logger</span>
+<span class="kn">from</span> <span class="nn">..util</span> <span class="k">import</span> <span class="n">exceptions</span>
+
+<div class="viewcode-block" id="DataSet"><a class="viewcode-back" href="../../../pyinterpret.data.html#pyinterpret.data.dataset.DataSet">[docs]</a><span class="k">class</span> <span class="nc">DataSet</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Module for passing around data to interpretation objects&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">log_level</span> <span class="o">=</span> <span class="mi">30</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The abstraction around using, accessing, sampling data for interpretation purposes.</span>
+<span class="sd">        Used by interpretation objects to grab data, collect samples, and handle</span>
+<span class="sd">        feature names and row indices.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            data: 1D or 2D numpy array.</span>
+<span class="sd">            feature_names: iterable of feature names</span>
+<span class="sd">            index: iterable of row names</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># create logger</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">=</span> <span class="n">log_level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">build_logger</span><span class="p">(</span><span class="n">log_level</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)):</span>
+            <span class="n">err_msg</span> <span class="o">=</span> <span class="s">&#39;Invalid Data: expected data to be a numpy array or pandas dataframe but got &#39;</span> \
+                      <span class="s">&#39;{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">DataSetError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+
+        <span class="n">ndim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;__init__ data.shape: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="n">ndim</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">err_msg</span> <span class="o">=</span> <span class="s">&quot;Invalid Data: expected data to be 1 or 2 dimensions, &quot;</span> \
+                      <span class="s">&quot;Data.shape: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ndim</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">DataSetError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_rows</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;after transform data.shape: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">feature_names</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+                <span class="n">feature_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">index</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_ids</span> <span class="o">=</span> <span class="n">feature_names</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">feature_names</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+                <span class="n">feature_names</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">index</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_rows</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_ids</span> <span class="o">=</span> <span class="n">feature_names</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Invalid: currently we only support pandas dataframes and numpy arrays&quot;</span>
+                             <span class="s">&quot;If you would like support for additional data structures let us &quot;</span>
+                             <span class="s">&quot;know!&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_ids</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metastore</span> <span class="o">=</span> <span class="k">None</span>
+
+<div class="viewcode-block" id="DataSet.generate_grid"><a class="viewcode-back" href="../../../pyinterpret.data.html#pyinterpret.data.dataset.DataSet.generate_grid">[docs]</a>    <span class="k">def</span> <span class="nf">generate_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_ids</span><span class="p">,</span> <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">grid_range</span><span class="o">=</span><span class="p">(</span><span class="o">.</span><span class="mi">05</span><span class="p">,</span> <span class="o">.</span><span class="mi">95</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates a grid of values on which to compute pdp. For each feature xi, for value</span>
+<span class="sd">        yj of xi, we will fix xi = yj for every observation in X.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            feature_ids(list):</span>
+<span class="sd">                Feature names for which we&#39;ll generate a grid. Must be contained</span>
+<span class="sd">                by self.feature_ids</span>
+
+<span class="sd">            grid_resolution(int):</span>
+<span class="sd">                The number of unique values to choose for each feature.</span>
+
+<span class="sd">            grid_range(tuple):</span>
+<span class="sd">                The percentile bounds of the grid. For instance, (.05, .95) corresponds to</span>
+<span class="sd">                the 5th and 95th percentiles, respectively.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        grid(numpy.ndarray): 	There are as many rows as there are feature_ids</span>
+<span class="sd">                                There are as many columns as specified by grid_resolution</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">grid_range</span><span class="p">):</span>
+            <span class="n">err_msg</span> <span class="o">=</span> <span class="s">&quot;Grid range values must be between 0 and 1 but got:&quot;</span> \
+                                 <span class="s">&quot;{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">grid_range</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MalformedGridRangeError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">grid_resolution</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">grid_resolution</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">err_msg</span> <span class="o">=</span> <span class="s">&quot;Grid resolution {} is not a positive integer&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">grid_resolution</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MalformedGridRangeError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">feature_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_ids</span> <span class="k">for</span> <span class="n">feature_id</span> <span class="ow">in</span> <span class="n">feature_ids</span><span class="p">):</span>
+            <span class="n">missing_features</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">feature_id</span> <span class="ow">in</span> <span class="n">feature_ids</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">feature_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_ids</span><span class="p">:</span>
+                    <span class="n">missing_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">feature_id</span><span class="p">)</span>
+            <span class="n">err_msg</span> <span class="o">=</span> <span class="s">&quot;Feature ids {} not found in DataSet.feature_ids&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">missing_features</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+
+        <span class="n">grid_range</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">*</span> <span class="mi">100</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">grid_range</span><span class="p">]</span>
+        <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">*</span><span class="n">grid_range</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">grid_resolution</span><span class="p">)</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">feature_id</span> <span class="ow">in</span> <span class="n">feature_ids</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">feature_id</span><span class="p">]</span>
+            <span class="n">uniques</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">uniques</span><span class="p">)</span> <span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="n">uniques</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">feature_id</span><span class="p">],</span> <span class="n">bins</span><span class="p">)</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Generated grid of shape {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">grid</span></div>
+
+    <span class="k">def</span> <span class="nf">_build_metastore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bin_count</span><span class="p">):</span>
+
+        <span class="n">n_rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">medians</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">)</span>
+
+        <span class="c"># how far each data point is from the global median</span>
+        <span class="n">dists</span> <span class="o">=</span> <span class="n">cosine_distances</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">medians</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c"># the percentile distance of each datapoint to the global median</span>
+        <span class="c"># dist_percentiles = map(lambda i: int(stats.percentileofscore(dists, i)), dists)</span>
+
+        <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">bin_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">unique_dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_dists</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">ranks_rounded</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">qcut</span><span class="p">(</span><span class="n">dists</span><span class="p">,</span> <span class="n">bins</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="k">False</span><span class="p">)</span>
+            <span class="n">unique_ranks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">ranks_rounded</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ranks_rounded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_rows</span><span class="p">)</span>
+            <span class="n">unique_ranks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s">&#39;median&#39;</span><span class="p">:</span> <span class="n">medians</span><span class="p">,</span>
+            <span class="s">&#39;dists&#39;</span><span class="p">:</span> <span class="n">dists</span><span class="p">,</span>
+            <span class="s">&#39;n_rows&#39;</span><span class="p">:</span> <span class="n">n_rows</span><span class="p">,</span>
+            <span class="s">&#39;unique_ranks&#39;</span><span class="p">:</span> <span class="n">unique_ranks</span><span class="p">,</span>
+            <span class="s">&#39;ranks_rounded&#39;</span><span class="p">:</span> <span class="n">ranks_rounded</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_ids</span><span class="p">:</span>
+            <span class="n">err_msg</span> <span class="o">=</span> <span class="s">&quot;The key {} is not the set of feature_ids {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_ids</span><span class="p">])</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">newval</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">newval</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DataSet.generate_sample"><a class="viewcode-back" href="../../../pyinterpret.data.html#pyinterpret.data.dataset.DataSet.generate_sample">[docs]</a>    <span class="k">def</span> <span class="nf">generate_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="k">True</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s">&#39;random-choice&#39;</span><span class="p">,</span> <span class="n">n_samples_from_dataset</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                        <span class="n">replace</span><span class="o">=</span><span class="k">True</span><span class="p">,</span> <span class="n">samples_per_bin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">bin_count</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method for generating data from the dataset.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">            sample(Bool):</span>
+<span class="sd">                If False, we&#39;ll take the full dataset, otherwise we&#39;ll sample.</span>
+
+<span class="sd">            n_samples_from_dataset(int):</span>
+<span class="sd">                Specifies the number of samples to return. Only implemented</span>
+<span class="sd">                if strategy is &quot;random-choice&quot;.</span>
+
+<span class="sd">            replace(Bool):</span>
+<span class="sd">                Bool for sampling with or without replacement</span>
+
+<span class="sd">            samples_per_bin(int):</span>
+<span class="sd">                If strategy is uniform-over-similarity-ranks, then this is the number</span>
+<span class="sd">                of samples to take from each discrete rank.</span>
+
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">arg_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;sample&#39;</span><span class="p">:</span><span class="n">sample</span><span class="p">,</span>
+            <span class="s">&#39;strategy&#39;</span><span class="p">:</span><span class="n">strategy</span><span class="p">,</span>
+            <span class="s">&#39;n_samples_from_dataset&#39;</span><span class="p">:</span><span class="n">n_samples_from_dataset</span><span class="p">,</span>
+            <span class="s">&#39;replace&#39;</span><span class="p">:</span><span class="n">replace</span><span class="p">,</span>
+            <span class="s">&#39;samples_per_bin&#39;</span><span class="p">:</span><span class="n">samples_per_bin</span><span class="p">,</span>
+            <span class="s">&#39;bin_count&#39;</span><span class="p">:</span><span class="n">bin_count</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Generating sample with args:</span><span class="se">\n</span><span class="s"> {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">arg_dict</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sample</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="k">if</span> <span class="n">strategy</span> <span class="o">==</span> <span class="s">&#39;random-choice&#39;</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_samples_from_dataset</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="n">replace</span><span class="p">)</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_ids</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">strategy</span> <span class="o">==</span> <span class="s">&#39;uniform-from-percentile&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;We havent coded this yet.&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">strategy</span> <span class="o">==</span> <span class="s">&#39;uniform-over-similarity-ranks&#39;</span><span class="p">:</span>
+
+            <span class="n">metastore</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_metastore</span><span class="p">(</span><span class="n">bin_count</span><span class="p">)</span>
+
+            <span class="n">data_distance_ranks</span> <span class="o">=</span> <span class="n">metastore</span><span class="p">[</span><span class="s">&#39;ranks_rounded&#39;</span><span class="p">]</span>
+            <span class="n">n_rows</span> <span class="o">=</span> <span class="n">metastore</span><span class="p">[</span><span class="s">&#39;n_rows&#39;</span><span class="p">]</span>
+            <span class="n">unique_ranks</span> <span class="o">=</span> <span class="n">metastore</span><span class="p">[</span><span class="s">&#39;unique_ranks&#39;</span><span class="p">]</span>
+
+            <span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">rank</span> <span class="ow">in</span> <span class="n">unique_ranks</span><span class="p">:</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">data_distance_ranks</span> <span class="o">==</span> <span class="n">rank</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">idx</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                    <span class="n">new_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="k">True</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">samples_per_bin</span><span class="p">)</span>
+                    <span class="n">samples</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">new_samples</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_ids</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

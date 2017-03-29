@@ -1,0 +1,266 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyinterpret.core package &#8212; pyinterpret  documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pyinterpret.core.global_interpretation package" href="pyinterpret.core.global_interpretation.html" />
+    <link rel="prev" title="pyinterpret package" href="pyinterpret.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pyinterpret-core-package">
+<h1>pyinterpret.core package<a class="headerlink" href="#pyinterpret-core-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pyinterpret.core.global_interpretation.html">pyinterpret.core.global_interpretation package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyinterpret.core.global_interpretation.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyinterpret.core.global_interpretation.html#module-pyinterpret.core.global_interpretation.base">pyinterpret.core.global_interpretation.base module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyinterpret.core.global_interpretation.html#module-pyinterpret.core.global_interpretation.partial_dependence">pyinterpret.core.global_interpretation.partial_dependence module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyinterpret.core.global_interpretation.html#module-pyinterpret.core.global_interpretation">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pyinterpret.core.local_interpretation.html">pyinterpret.core.local_interpretation package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyinterpret.core.local_interpretation.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyinterpret.core.local_interpretation.lime.html">pyinterpret.core.local_interpretation.lime package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyinterpret.core.local_interpretation.lime.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyinterpret.core.local_interpretation.lime.html#module-pyinterpret.core.local_interpretation.lime.lime_image">pyinterpret.core.local_interpretation.lime.lime_image module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyinterpret.core.local_interpretation.lime.html#module-pyinterpret.core.local_interpretation.lime.lime_tabular">pyinterpret.core.local_interpretation.lime.lime_tabular module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyinterpret.core.local_interpretation.lime.html#module-pyinterpret.core.local_interpretation.lime.lime_text">pyinterpret.core.local_interpretation.lime.lime_text module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyinterpret.core.local_interpretation.lime.html#module-pyinterpret.core.local_interpretation.lime">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyinterpret.core.local_interpretation.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyinterpret.core.local_interpretation.html#module-pyinterpret.core.local_interpretation.base">pyinterpret.core.local_interpretation.base module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyinterpret.core.local_interpretation.html#module-pyinterpret.core.local_interpretation.local_interpreter">pyinterpret.core.local_interpretation.local_interpreter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyinterpret.core.local_interpretation.html#module-pyinterpret.core.local_interpretation">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pyinterpret.core.explanations">
+<span id="pyinterpret-core-explanations-module"></span><h2>pyinterpret.core.explanations module<a class="headerlink" href="#module-pyinterpret.core.explanations" title="Permalink to this headline">¶</a></h2>
+<p>Interpretation Class</p>
+<dl class="class">
+<dt id="pyinterpret.core.explanations.Interpretation">
+<em class="property">class </em><code class="descclassname">pyinterpret.core.explanations.</code><code class="descname">Interpretation</code><span class="sig-paren">(</span><em>log_level='WARNING'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/core/explanations.html#Interpretation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.core.explanations.Interpretation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Interpretation class. Before calling interpretation subclasses like partial
+dependence, one must call Interpretation.load_data().</p>
+<dl class="docutils">
+<dt>data_set: pyinterpret.data.DataSet</dt>
+<dd><dl class="first last docutils">
+<dt>Pyinterpret&#8217;s data abstraction layer. All interactions with data goes through</dt>
+<dd>this object.</dd>
+</dl>
+</dd>
+<dt>local_interpreter: pyinterpret.core.local_interpreter.LocalInterpreter</dt>
+<dd>Contains methods for interpreting single prediction. Currently exposes the lime
+library.</dd>
+<dt>global_interpreter: pyinterpret.core.global_interpreter.GlobalInterpreter</dt>
+<dd>Contains methods for evaluating a model over entire regions of the domain. Currently
+exposes partial dependency</dd>
+</dl>
+<p>from pyinterpret.core.explanations import Interpretation
+interpreter = Interpretation()
+interpreter.load_data(X, feature_ids = [&#8216;a&#8217;,&#8217;b&#8217;])
+interpreter.partial_dependence([feature_id1, feature_id2], regressor.predict)</p>
+<dl class="method">
+<dt id="pyinterpret.core.explanations.Interpretation.build_annotated_model">
+<code class="descname">build_annotated_model</code><span class="sig-paren">(</span><em>prediction_function</em>, <em>examples=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/core/explanations.html#Interpretation.build_annotated_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.core.explanations.Interpretation.build_annotated_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a callable model that has annotations.
+Uses examples from the Interpreter&#8217;s dataset if available</p>
+<dl class="docutils">
+<dt>prediction_function: callable</dt>
+<dd>function to generate predictions</dd>
+<dt>examples: np.ndarray or pd.DataFrame</dt>
+<dd>The examples to use when calling InMemoryModel.check_output_types(examples).</dd>
+</dl>
+<p>annotated_model: pyinterpret.model.InMemoryModel</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.core.explanations.Interpretation.load_data">
+<code class="descname">load_data</code><span class="sig-paren">(</span><em>training_data</em>, <em>feature_names=None</em>, <em>index=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/core/explanations.html#Interpretation.load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.core.explanations.Interpretation.load_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a DataSet object from inputs, ties to interpretation object.
+This will be exposed to all submodules.</p>
+<dl class="docutils">
+<dt>training_data: numpy.ndarray, pandas.DataFrame</dt>
+<dd>the dataset. can be 1D or 2D</dd>
+<dt>feature_names: array-type</dt>
+<dd>names to call features.</dd>
+<dt>index: array-type</dt>
+<dd>names to call rows.</dd>
+</dl>
+<blockquote>
+<div>None</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyinterpret.core.model_interpreter">
+<span id="pyinterpret-core-model-interpreter-module"></span><h2>pyinterpret.core.model_interpreter module<a class="headerlink" href="#module-pyinterpret.core.model_interpreter" title="Permalink to this headline">¶</a></h2>
+<p>Base ModelInterpreter class. submodules like lime and partial dependence&#8221;
+must have these methods</p>
+<dl class="class">
+<dt id="pyinterpret.core.model_interpreter.ModelInterpreter">
+<em class="property">class </em><code class="descclassname">pyinterpret.core.model_interpreter.</code><code class="descname">ModelInterpreter</code><span class="sig-paren">(</span><em>interpreter</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/core/model_interpreter.html#ModelInterpreter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.core.model_interpreter.ModelInterpreter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Base Interpreter class. Common methods include loading a dataset and type setting.</p>
+<dl class="method">
+<dt id="pyinterpret.core.model_interpreter.ModelInterpreter.build_annotated_model">
+<code class="descname">build_annotated_model</code><span class="sig-paren">(</span><em>prediction_function</em>, <em>examples=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/core/model_interpreter.html#ModelInterpreter.build_annotated_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.core.model_interpreter.ModelInterpreter.build_annotated_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns pyinterpret.model.InMemoryModel
+Parameters
+&#8212;&#8212;&#8212;-</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>prediction_function(callable):</dt>
+<dd><p class="first">the machine learning model &#8220;prediction&#8221; function to explain, such that
+predictions = predict_fn(data).</p>
+<dl class="last docutils">
+<dt>For instance:</dt>
+<dd>from sklearn.ensemble import RandomForestClassier
+rf = RandomForestClassier()
+rf.fit(X,y)
+Interpreter.build_annotated_model(rf.predict)</dd>
+</dl>
+</dd>
+<dt>examples(np.ndarray):</dt>
+<dd>Examples to pass through the prediction_function to make inferences
+about what it outputs</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyinterpret.core.model_interpreter.ModelInterpreter.data_set">
+<code class="descname">data_set</code><a class="headerlink" href="#pyinterpret.core.model_interpreter.ModelInterpreter.data_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>data_set routes to the Interpreter&#8217;s dataset</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyinterpret.core.model_interpreter.ModelInterpreter.load_data">
+<code class="descname">load_data</code><span class="sig-paren">(</span><em>training_data</em>, <em>index=None</em>, <em>feature_names=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/core/model_interpreter.html#ModelInterpreter.load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.core.model_interpreter.ModelInterpreter.load_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>.consider routes to Interpreter&#8217;s .consider</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyinterpret.core">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyinterpret.core" title="Permalink to this headline">¶</a></h2>
+<p>Core Interpretation Objects. All attached interpreters have access to the same
+model tools and data set tools.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">pyinterpret.core package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-pyinterpret.core.explanations">pyinterpret.core.explanations module</a></li>
+<li><a class="reference internal" href="#module-pyinterpret.core.model_interpreter">pyinterpret.core.model_interpreter module</a></li>
+<li><a class="reference internal" href="#module-pyinterpret.core">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="pyinterpret.html">pyinterpret package</a><ul>
+      <li>Previous: <a href="pyinterpret.html" title="previous chapter">pyinterpret package</a></li>
+      <li>Next: <a href="pyinterpret.core.global_interpretation.html" title="next chapter">pyinterpret.core.global_interpretation package</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/pyinterpret.core.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/pyinterpret.core.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

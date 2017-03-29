@@ -1,0 +1,396 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyinterpret.util package &#8212; pyinterpret  documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="pyinterpret.tests package" href="pyinterpret.tests.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pyinterpret-util-package">
+<h1>pyinterpret.util package<a class="headerlink" href="#pyinterpret-util-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pyinterpret.util.exceptions">
+<span id="pyinterpret-util-exceptions-module"></span><h2>pyinterpret.util.exceptions module<a class="headerlink" href="#module-pyinterpret.util.exceptions" title="Permalink to this headline">¶</a></h2>
+<p>Specialized Exceptions for pyinterpret</p>
+<dl class="exception">
+<dt id="pyinterpret.util.exceptions.DataSetError">
+<em class="property">exception </em><code class="descclassname">pyinterpret.util.exceptions.</code><code class="descname">DataSetError</code><a class="headerlink" href="#pyinterpret.util.exceptions.DataSetError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="pyinterpret.util.exceptions.DataSetNotLoadedError">
+<em class="property">exception </em><code class="descclassname">pyinterpret.util.exceptions.</code><code class="descname">DataSetNotLoadedError</code><a class="headerlink" href="#pyinterpret.util.exceptions.DataSetNotLoadedError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="pyinterpret.util.exceptions.DuplicateFeaturesError">
+<em class="property">exception </em><code class="descclassname">pyinterpret.util.exceptions.</code><code class="descname">DuplicateFeaturesError</code><a class="headerlink" href="#pyinterpret.util.exceptions.DuplicateFeaturesError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyinterpret.util.exceptions.PartialDependenceError" title="pyinterpret.util.exceptions.PartialDependenceError"><code class="xref py py-class docutils literal"><span class="pre">pyinterpret.util.exceptions.PartialDependenceError</span></code></a></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="pyinterpret.util.exceptions.EmptyFeatureListError">
+<em class="property">exception </em><code class="descclassname">pyinterpret.util.exceptions.</code><code class="descname">EmptyFeatureListError</code><a class="headerlink" href="#pyinterpret.util.exceptions.EmptyFeatureListError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyinterpret.util.exceptions.PartialDependenceError" title="pyinterpret.util.exceptions.PartialDependenceError"><code class="xref py py-class docutils literal"><span class="pre">pyinterpret.util.exceptions.PartialDependenceError</span></code></a></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="pyinterpret.util.exceptions.MalformedGridError">
+<em class="property">exception </em><code class="descclassname">pyinterpret.util.exceptions.</code><code class="descname">MalformedGridError</code><a class="headerlink" href="#pyinterpret.util.exceptions.MalformedGridError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyinterpret.util.exceptions.PartialDependenceError" title="pyinterpret.util.exceptions.PartialDependenceError"><code class="xref py py-class docutils literal"><span class="pre">pyinterpret.util.exceptions.PartialDependenceError</span></code></a></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="pyinterpret.util.exceptions.MalformedGridRangeError">
+<em class="property">exception </em><code class="descclassname">pyinterpret.util.exceptions.</code><code class="descname">MalformedGridRangeError</code><a class="headerlink" href="#pyinterpret.util.exceptions.MalformedGridRangeError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyinterpret.util.exceptions.PartialDependenceError" title="pyinterpret.util.exceptions.PartialDependenceError"><code class="xref py py-class docutils literal"><span class="pre">pyinterpret.util.exceptions.PartialDependenceError</span></code></a></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="pyinterpret.util.exceptions.ModelError">
+<em class="property">exception </em><code class="descclassname">pyinterpret.util.exceptions.</code><code class="descname">ModelError</code><a class="headerlink" href="#pyinterpret.util.exceptions.ModelError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="pyinterpret.util.exceptions.PartialDependenceError">
+<em class="property">exception </em><code class="descclassname">pyinterpret.util.exceptions.</code><code class="descname">PartialDependenceError</code><a class="headerlink" href="#pyinterpret.util.exceptions.PartialDependenceError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="pyinterpret.util.exceptions.TooManyFeaturesError">
+<em class="property">exception </em><code class="descclassname">pyinterpret.util.exceptions.</code><code class="descname">TooManyFeaturesError</code><a class="headerlink" href="#pyinterpret.util.exceptions.TooManyFeaturesError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyinterpret.util.exceptions.PartialDependenceError" title="pyinterpret.util.exceptions.PartialDependenceError"><code class="xref py py-class docutils literal"><span class="pre">pyinterpret.util.exceptions.PartialDependenceError</span></code></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyinterpret.util.exceptions.exception_factory">
+<code class="descclassname">pyinterpret.util.exceptions.</code><code class="descname">exception_factory</code><span class="sig-paren">(</span><em>exception_name</em>, <em>base_exception=&lt;type 'exceptions.Exception'&gt;</em>, <em>attributes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/util/exceptions.html#exception_factory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.util.exceptions.exception_factory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pyinterpret.util.kernels">
+<span id="pyinterpret-util-kernels-module"></span><h2>pyinterpret.util.kernels module<a class="headerlink" href="#module-pyinterpret.util.kernels" title="Permalink to this headline">¶</a></h2>
+<p>Holds all the kernels</p>
+<dl class="function">
+<dt id="pyinterpret.util.kernels.flatten">
+<code class="descclassname">pyinterpret.util.kernels.</code><code class="descname">flatten</code><span class="sig-paren">(</span><em>array</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/util/kernels.html#flatten"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.util.kernels.flatten" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyinterpret.util.kernels.rbf_kernel">
+<code class="descclassname">pyinterpret.util.kernels.</code><code class="descname">rbf_kernel</code><span class="sig-paren">(</span><em>distance</em>, <em>kernel_width=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/util/kernels.html#rbf_kernel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.util.kernels.rbf_kernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Passes a distance through a gaussian kernel</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyinterpret.util.logger">
+<span id="pyinterpret-util-logger-module"></span><h2>pyinterpret.util.logger module<a class="headerlink" href="#module-pyinterpret.util.logger" title="Permalink to this headline">¶</a></h2>
+<p>Funcs for logging</p>
+<dl class="function">
+<dt id="pyinterpret.util.logger.build_logger">
+<code class="descclassname">pyinterpret.util.logger.</code><code class="descname">build_logger</code><span class="sig-paren">(</span><em>log_level</em>, <em>logger_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/util/logger.html#build_logger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.util.logger.build_logger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pyinterpret.util.static_types">
+<span id="pyinterpret-util-static-types-module"></span><h2>pyinterpret.util.static_types module<a class="headerlink" href="#module-pyinterpret.util.static_types" title="Permalink to this headline">¶</a></h2>
+<p>Static types class and methods for inferring types.</p>
+<dl class="class">
+<dt id="pyinterpret.util.static_types.ModelTypes">
+<em class="property">class </em><code class="descclassname">pyinterpret.util.static_types.</code><code class="descname">ModelTypes</code><a class="reference internal" href="_modules/pyinterpret/util/static_types.html#ModelTypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.util.static_types.ModelTypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Stores values for model types and keywords</p>
+<dl class="attribute">
+<dt id="pyinterpret.util.static_types.ModelTypes.classifier">
+<code class="descname">classifier</code><em class="property"> = 'classifier'</em><a class="headerlink" href="#pyinterpret.util.static_types.ModelTypes.classifier" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyinterpret.util.static_types.ModelTypes.regressor">
+<code class="descname">regressor</code><em class="property"> = 'regressor'</em><a class="headerlink" href="#pyinterpret.util.static_types.ModelTypes.regressor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyinterpret.util.static_types.ModelTypes.unknown">
+<code class="descname">unknown</code><em class="property"> = 'unknown'</em><a class="headerlink" href="#pyinterpret.util.static_types.ModelTypes.unknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyinterpret.util.static_types.OutputTypes">
+<em class="property">class </em><code class="descclassname">pyinterpret.util.static_types.</code><code class="descname">OutputTypes</code><a class="reference internal" href="_modules/pyinterpret/util/static_types.html#OutputTypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.util.static_types.OutputTypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Stores values for output types, and keywords</p>
+<dl class="attribute">
+<dt id="pyinterpret.util.static_types.OutputTypes.float">
+<code class="descname">float</code><em class="property"> = 'float'</em><a class="headerlink" href="#pyinterpret.util.static_types.OutputTypes.float" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyinterpret.util.static_types.OutputTypes.int">
+<code class="descname">int</code><em class="property"> = 'int'</em><a class="headerlink" href="#pyinterpret.util.static_types.OutputTypes.int" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyinterpret.util.static_types.OutputTypes.iterable">
+<code class="descname">iterable</code><em class="property"> = 'iterable'</em><a class="headerlink" href="#pyinterpret.util.static_types.OutputTypes.iterable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyinterpret.util.static_types.OutputTypes.string">
+<code class="descname">string</code><em class="property"> = 'string'</em><a class="headerlink" href="#pyinterpret.util.static_types.OutputTypes.string" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyinterpret.util.static_types.OutputTypes.unknown">
+<code class="descname">unknown</code><em class="property"> = 'unknown'</em><a class="headerlink" href="#pyinterpret.util.static_types.OutputTypes.unknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyinterpret.util.static_types.StaticTypes">
+<em class="property">class </em><code class="descclassname">pyinterpret.util.static_types.</code><code class="descname">StaticTypes</code><a class="reference internal" href="_modules/pyinterpret/util/static_types.html#StaticTypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.util.static_types.StaticTypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Stores values for model types, output types, and keywords</p>
+<dl class="attribute">
+<dt id="pyinterpret.util.static_types.StaticTypes.model_types">
+<code class="descname">model_types</code><a class="headerlink" href="#pyinterpret.util.static_types.StaticTypes.model_types" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#pyinterpret.util.static_types.ModelTypes" title="pyinterpret.util.static_types.ModelTypes"><code class="xref py py-class docutils literal"><span class="pre">ModelTypes</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyinterpret.util.static_types.StaticTypes.not_applicable">
+<code class="descname">not_applicable</code><em class="property"> = 'not applicable'</em><a class="headerlink" href="#pyinterpret.util.static_types.StaticTypes.not_applicable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyinterpret.util.static_types.StaticTypes.output_types">
+<code class="descname">output_types</code><a class="headerlink" href="#pyinterpret.util.static_types.StaticTypes.output_types" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#pyinterpret.util.static_types.OutputTypes" title="pyinterpret.util.static_types.OutputTypes"><code class="xref py py-class docutils literal"><span class="pre">OutputTypes</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyinterpret.util.static_types.StaticTypes.unknown">
+<code class="descname">unknown</code><em class="property"> = 'unknown'</em><a class="headerlink" href="#pyinterpret.util.static_types.StaticTypes.unknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="pyinterpret.util.static_types.return_data_type">
+<code class="descclassname">pyinterpret.util.static_types.</code><code class="descname">return_data_type</code><span class="sig-paren">(</span><em>thing</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/util/static_types.html#return_data_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.util.static_types.return_data_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an output type given a variable</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyinterpret.util">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyinterpret.util" title="Permalink to this headline">¶</a></h2>
+<p>Includes kernels, static type/properties for package, exceptions, logging.</p>
+<dl class="function">
+<dt id="pyinterpret.util.rbf_kernel">
+<code class="descclassname">pyinterpret.util.</code><code class="descname">rbf_kernel</code><span class="sig-paren">(</span><em>distance</em>, <em>kernel_width=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/util/kernels.html#rbf_kernel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.util.rbf_kernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Passes a distance through a gaussian kernel</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pyinterpret.util.StaticTypes">
+<em class="property">class </em><code class="descclassname">pyinterpret.util.</code><code class="descname">StaticTypes</code><a class="reference internal" href="_modules/pyinterpret/util/static_types.html#StaticTypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.util.StaticTypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Stores values for model types, output types, and keywords</p>
+<dl class="attribute">
+<dt id="pyinterpret.util.StaticTypes.model_types">
+<code class="descname">model_types</code><a class="headerlink" href="#pyinterpret.util.StaticTypes.model_types" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#pyinterpret.util.ModelTypes" title="pyinterpret.util.ModelTypes"><code class="xref py py-class docutils literal"><span class="pre">ModelTypes</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyinterpret.util.StaticTypes.not_applicable">
+<code class="descname">not_applicable</code><em class="property"> = 'not applicable'</em><a class="headerlink" href="#pyinterpret.util.StaticTypes.not_applicable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyinterpret.util.StaticTypes.output_types">
+<code class="descname">output_types</code><a class="headerlink" href="#pyinterpret.util.StaticTypes.output_types" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#pyinterpret.util.OutputTypes" title="pyinterpret.util.OutputTypes"><code class="xref py py-class docutils literal"><span class="pre">OutputTypes</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyinterpret.util.StaticTypes.unknown">
+<code class="descname">unknown</code><em class="property"> = 'unknown'</em><a class="headerlink" href="#pyinterpret.util.StaticTypes.unknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="pyinterpret.util.return_data_type">
+<code class="descclassname">pyinterpret.util.</code><code class="descname">return_data_type</code><span class="sig-paren">(</span><em>thing</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/util/static_types.html#return_data_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.util.return_data_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an output type given a variable</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pyinterpret.util.ModelTypes">
+<em class="property">class </em><code class="descclassname">pyinterpret.util.</code><code class="descname">ModelTypes</code><a class="reference internal" href="_modules/pyinterpret/util/static_types.html#ModelTypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.util.ModelTypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Stores values for model types and keywords</p>
+<dl class="attribute">
+<dt id="pyinterpret.util.ModelTypes.classifier">
+<code class="descname">classifier</code><em class="property"> = 'classifier'</em><a class="headerlink" href="#pyinterpret.util.ModelTypes.classifier" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyinterpret.util.ModelTypes.regressor">
+<code class="descname">regressor</code><em class="property"> = 'regressor'</em><a class="headerlink" href="#pyinterpret.util.ModelTypes.regressor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyinterpret.util.ModelTypes.unknown">
+<code class="descname">unknown</code><em class="property"> = 'unknown'</em><a class="headerlink" href="#pyinterpret.util.ModelTypes.unknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyinterpret.util.OutputTypes">
+<em class="property">class </em><code class="descclassname">pyinterpret.util.</code><code class="descname">OutputTypes</code><a class="reference internal" href="_modules/pyinterpret/util/static_types.html#OutputTypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.util.OutputTypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Stores values for output types, and keywords</p>
+<dl class="attribute">
+<dt id="pyinterpret.util.OutputTypes.float">
+<code class="descname">float</code><em class="property"> = 'float'</em><a class="headerlink" href="#pyinterpret.util.OutputTypes.float" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyinterpret.util.OutputTypes.int">
+<code class="descname">int</code><em class="property"> = 'int'</em><a class="headerlink" href="#pyinterpret.util.OutputTypes.int" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyinterpret.util.OutputTypes.iterable">
+<code class="descname">iterable</code><em class="property"> = 'iterable'</em><a class="headerlink" href="#pyinterpret.util.OutputTypes.iterable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyinterpret.util.OutputTypes.string">
+<code class="descname">string</code><em class="property"> = 'string'</em><a class="headerlink" href="#pyinterpret.util.OutputTypes.string" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyinterpret.util.OutputTypes.unknown">
+<code class="descname">unknown</code><em class="property"> = 'unknown'</em><a class="headerlink" href="#pyinterpret.util.OutputTypes.unknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">pyinterpret.util package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-pyinterpret.util.exceptions">pyinterpret.util.exceptions module</a></li>
+<li><a class="reference internal" href="#module-pyinterpret.util.kernels">pyinterpret.util.kernels module</a></li>
+<li><a class="reference internal" href="#module-pyinterpret.util.logger">pyinterpret.util.logger module</a></li>
+<li><a class="reference internal" href="#module-pyinterpret.util.static_types">pyinterpret.util.static_types module</a></li>
+<li><a class="reference internal" href="#module-pyinterpret.util">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="pyinterpret.html">pyinterpret package</a><ul>
+      <li>Previous: <a href="pyinterpret.tests.html" title="previous chapter">pyinterpret.tests package</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/pyinterpret.util.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/pyinterpret.util.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

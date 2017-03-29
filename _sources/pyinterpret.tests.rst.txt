@@ -1,0 +1,62 @@
+pyinterpret.tests package
+=========================
+
+Submodules
+----------
+
+pyinterpret.tests.all_tests module
+----------------------------------
+
+.. automodule:: pyinterpret.tests.all_tests
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyinterpret.tests.arg_parser module
+-----------------------------------
+
+.. automodule:: pyinterpret.tests.arg_parser
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyinterpret.tests.test_data module
+----------------------------------
+
+.. automodule:: pyinterpret.tests.test_data
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyinterpret.tests.test_lime module
+----------------------------------
+
+.. automodule:: pyinterpret.tests.test_lime
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyinterpret.tests.test_local_interpreter module
+-----------------------------------------------
+
+.. automodule:: pyinterpret.tests.test_local_interpreter
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyinterpret.tests.test_partial_dependence module
+------------------------------------------------
+
+.. automodule:: pyinterpret.tests.test_partial_dependence
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: pyinterpret.tests
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,33 @@
+pyinterpret package
+===================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    pyinterpret.core
+    pyinterpret.data
+    pyinterpret.model
+    pyinterpret.tests
+    pyinterpret.util
+
+Submodules
+----------
+
+pyinterpret.test module
+-----------------------
+
+.. automodule:: pyinterpret.test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: pyinterpret
+    :members:
+    :undoc-members:
+    :show-inheritance:

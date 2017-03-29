@@ -1,0 +1,46 @@
+pyinterpret.util package
+========================
+
+Submodules
+----------
+
+pyinterpret.util.exceptions module
+----------------------------------
+
+.. automodule:: pyinterpret.util.exceptions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyinterpret.util.kernels module
+-------------------------------
+
+.. automodule:: pyinterpret.util.kernels
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyinterpret.util.logger module
+------------------------------
+
+.. automodule:: pyinterpret.util.logger
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyinterpret.util.static_types module
+------------------------------------
+
+.. automodule:: pyinterpret.util.static_types
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: pyinterpret.util
+    :members:
+    :undoc-members:
+    :show-inheritance:

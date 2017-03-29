@@ -1,156 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 
-<!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>pyinterpret.core.global_interpretation.partial_dependence &mdash; pyinterpret 1 documentation</title>
-  
-
-  
-  
-  
-  
-
-  
-
-  
-  
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-
-  
-
-  
-  
-    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../../search.html"/>
-    <link rel="top" title="pyinterpret 1 documentation" href="../../../../index.html"/>
-        <link rel="up" title="Module code" href="../../../index.html"/> 
-
-  
-  <script src="../../../../_static/js/modernizr.min.js"></script>
-
-</head>
-
-<body class="wy-body-for-nav" role="document">
-
+    <title>pyinterpret.core.global_interpretation.partial_dependence &#8212; pyinterpret  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
    
-  <div class="wy-grid-for-nav">
-
-    
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
-
-          
-            <a href="../../../../index.html" class="icon icon-home"> pyinterpret
-          
-
-          
-          </a>
-
-          
-            
-            
-              <div class="version">
-                0.1
-              </div>
-            
-          
-
-          
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <!-- Local TOC -->
-              <div class="local-toc"></div>
-            
-          
-        </div>
-      </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">pyinterpret</a>
-        
-      </nav>
-
-
-      
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
-  <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
-        
-          <li><a href="../../../index.html">Module code</a> &raquo;</li>
-        
-      <li>pyinterpret.core.global_interpretation.partial_dependence</li>
-    
-    
-      <li class="wy-breadcrumbs-aside">
-        
-            
-        
-      </li>
-    
-  </ul>
-
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
   
-  <hr/>
-</div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
             
   <h1>Source code for pyinterpret.core.global_interpretation.partial_dependence</h1><div class="highlight"><pre>
 <span class="sd">&quot;&quot;&quot;Partial Dependence class&quot;&quot;&quot;</span>
@@ -171,7 +60,7 @@
 
 <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s">&#39;figure.autolayout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="k">True</span>
 
-<div class="viewcode-block" id="PartialDependence"><a class="viewcode-back" href="../../../../index.html#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence">[docs]</a><span class="k">class</span> <span class="nc">PartialDependence</span><span class="p">(</span><span class="n">BaseGlobalInterpretation</span><span class="p">):</span>
+<div class="viewcode-block" id="PartialDependence"><a class="viewcode-back" href="../../../../pyinterpret.core.global_interpretation.html#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence">[docs]</a><span class="k">class</span> <span class="nc">PartialDependence</span><span class="p">(</span><span class="n">BaseGlobalInterpretation</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Contains methods for partial dependence. Subclass of BaseGlobalInterpretation&quot;&quot;&quot;</span>
 
     <span class="n">_pdp_metadata</span> <span class="o">=</span> <span class="p">{}</span>
@@ -186,7 +75,7 @@
         <span class="p">}</span>
 
 
-<div class="viewcode-block" id="PartialDependence.partial_dependence"><a class="viewcode-back" href="../../../../index.html#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence">[docs]</a>    <span class="k">def</span> <span class="nf">partial_dependence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_ids</span><span class="p">,</span> <span class="n">predict_fn</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+<div class="viewcode-block" id="PartialDependence.partial_dependence"><a class="viewcode-back" href="../../../../pyinterpret.core.global_interpretation.html#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence">[docs]</a>    <span class="k">def</span> <span class="nf">partial_dependence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_ids</span><span class="p">,</span> <span class="n">predict_fn</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
                            <span class="n">grid_range</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="k">False</span><span class="p">,</span>
                            <span class="n">sampling_strategy</span><span class="o">=</span><span class="s">&#39;uniform-over-similarity-ranks&#39;</span><span class="p">,</span>
                            <span class="n">n_samples</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">bin_count</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">samples_per_bin</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
@@ -406,7 +295,7 @@
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">pdps</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="PartialDependence.plot_partial_dependence"><a class="viewcode-back" href="../../../../index.html#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence">[docs]</a>    <span class="k">def</span> <span class="nf">plot_partial_dependence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_ids</span><span class="p">,</span> <span class="n">predict_fn</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="k">None</span><span class="p">,</span>
+<div class="viewcode-block" id="PartialDependence.plot_partial_dependence"><a class="viewcode-back" href="../../../../pyinterpret.core.global_interpretation.html#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence">[docs]</a>    <span class="k">def</span> <span class="nf">plot_partial_dependence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_ids</span><span class="p">,</span> <span class="n">predict_fn</span><span class="p">,</span> <span class="n">class_id</span><span class="o">=</span><span class="k">None</span><span class="p">,</span>
                                 <span class="n">grid</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">grid_resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
                                 <span class="n">grid_range</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="k">False</span><span class="p">,</span>
                                 <span class="n">sampling_strategy</span><span class="o">=</span><span class="s">&#39;uniform-over-similarity-ranks&#39;</span><span class="p">,</span>
@@ -818,7 +707,7 @@
 
 
 
-<div class="viewcode-block" id="PartialDependence.partial_dependency_sklearn"><a class="viewcode-back" href="../../../../index.html#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.partial_dependency_sklearn">[docs]</a>    <span class="k">def</span> <span class="nf">partial_dependency_sklearn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PartialDependence.partial_dependency_sklearn"><a class="viewcode-back" href="../../../../pyinterpret.core.global_interpretation.html#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.partial_dependency_sklearn">[docs]</a>    <span class="k">def</span> <span class="nf">partial_dependency_sklearn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Uses sklearn&#39;s implementation&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;Not yet included&quot;</span><span class="p">)</span></div>
 
@@ -863,7 +752,7 @@
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MalformedGridRangeError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="PartialDependence.compute_3d_gradients"><a class="viewcode-back" href="../../../../index.html#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.compute_3d_gradients">[docs]</a>    <span class="k">def</span> <span class="nf">compute_3d_gradients</span><span class="p">(</span><span class="n">pdp</span><span class="p">,</span> <span class="n">mean_col</span><span class="p">,</span> <span class="n">feature_1</span><span class="p">,</span> <span class="n">feature_2</span><span class="p">,</span> <span class="n">scaled</span><span class="o">=</span><span class="k">True</span><span class="p">):</span>
+<div class="viewcode-block" id="PartialDependence.compute_3d_gradients"><a class="viewcode-back" href="../../../../pyinterpret.core.global_interpretation.html#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.compute_3d_gradients">[docs]</a>    <span class="k">def</span> <span class="nf">compute_3d_gradients</span><span class="p">(</span><span class="n">pdp</span><span class="p">,</span> <span class="n">mean_col</span><span class="p">,</span> <span class="n">feature_1</span><span class="p">,</span> <span class="n">feature_2</span><span class="p">,</span> <span class="n">scaled</span><span class="o">=</span><span class="k">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes component-wise gradients of pdp dataframe.</span>
 
@@ -921,67 +810,44 @@
 
 </pre></div>
 
-           </div>
-           <div class="articleComments">
-            
-           </div>
           </div>
-          <footer>
-  
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>
-        &copy; Copyright 2017, Aaron Kramer and Pramit Choudhary.
-
-    </p>
-  </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
-
-</footer>
-
         </div>
       </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
 
-    </section>
+    
 
-  </div>
-  
-
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../../',
-            VERSION:'1',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
-  
-
-  
-  
-  <script type="text/javascript">
-      jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
-      });
-  </script>
-   
-
-</body>
+    
+  </body>
 </html>
