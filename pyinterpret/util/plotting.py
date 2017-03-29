@@ -5,6 +5,9 @@ COLORS = ['#328BD5', '#404B5A', '#3EB642', '#E04341', '#8665D0']
 
 
 class ColorMap(object):
+    """
+    Maps arrays to colors
+    """
     class LinearSegments(object):
         black_to_blue_dict = {
             'red': ((0.0, 0.0, 0.0),
@@ -45,6 +48,26 @@ class ColorMap(object):
 
 
 def coordinate_gradients_to_1d_colorscale(dx, dy, x_buffer=.5, y_buffer=.5, norm='separate'):
+    """
+    Map x and y gradients to single array of colors based on 2D color scale
+
+    Parameters
+    ----------
+    dx: array type
+        x component of gradient
+    dy: array type
+        y component of gradient
+    x_buffer:
+    y_buffer:
+    norm: string
+        whether to normalize colors based on differences in x and y scales.
+        if separate, each component gets its own scaling (default)
+        if global, will scale based on global extrema
+
+    Returns
+    ----------
+    color_array, xmin, xmax, ymin, ymax
+    """
     xmin, xmax = dx.min(), dx.max()
     ymin, ymax = dy.min(), dy.max()
     global_min = min(xmin, ymin)
@@ -72,7 +95,28 @@ def coordinate_gradients_to_1d_colorscale(dx, dy, x_buffer=.5, y_buffer=.5, norm
     return color, xmin-x_buffer, xmax+x_buffer, ymin-y_buffer, ymax+y_buffer
 
 def plot_2d_color_scale(x1_min, x1_max, x2_min, x2_max, resolution=10, ax=None):
+    """
+    Return a generic plot of a 2D color scale
 
+    Parameters
+    ----------
+    x1_min: numeric
+        how high x1 should extend the color scale
+    x1_max:  numeric
+        how high 2 should extend the color scale
+    x2_min:  numeric
+        how low x2 should extend the color scale
+    x2_max: numeric
+        how high x2 should extend the color scale
+    resolution: int
+        how fine grain to make the color scale
+    ax: matplotlib.axes._subplots.AxesSubplot
+        matplotlib axis to plot on. if none will generate a new one
+
+    Returns
+    ----------
+    matplotlib.axes._subplots.AxesSubplot
+    """
     ax.set_xlim(x1_min, x1_max)
     ax.set_ylim(x2_min, x2_max)
     x1 = np.linspace(x1_min, x1_max, resolution+1)
