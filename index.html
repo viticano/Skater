@@ -268,6 +268,35 @@ about what it outputs</dd>
 <dt id="pyinterpret.core.global_interpretation.partial_dependence.PartialDependence">
 <em class="property">class </em><code class="descclassname">pyinterpret.core.global_interpretation.partial_dependence.</code><code class="descname">PartialDependence</code><span class="sig-paren">(</span><em>interpreter</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/core/global_interpretation/partial_dependence.html#PartialDependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Contains methods for partial dependence. Subclass of BaseGlobalInterpretation</p>
+<dl class="staticmethod">
+<dt id="pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.compute_3d_gradients">
+<em class="property">static </em><code class="descname">compute_3d_gradients</code><span class="sig-paren">(</span><em>pdp</em>, <em>mean_col</em>, <em>feature_1</em>, <em>feature_2</em>, <em>scaled=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/core/global_interpretation/partial_dependence.html#PartialDependence.compute_3d_gradients"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.compute_3d_gradients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes component-wise gradients of pdp dataframe.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pdp</strong> &#8211; pandas.DataFrame
+DataFrame containing partial dependence values</li>
+<li><strong>mean_col</strong> &#8211; string
+column name corresponding to pdp value</li>
+<li><strong>feature_1</strong> &#8211; string
+column name corresponding to feature 1</li>
+<li><strong>feature_2</strong> &#8211; string
+column name corresponding to feature 2</li>
+<li><strong>scaled</strong> &#8211; bool
+Whether to scale the x1 and x2 gradients relative to x1 and x2 bin sizes</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dx, dy, x_matrix, y_matrix, z_matrix</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="method">
 <dt id="pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence">
 <code class="descname">partial_dependence</code><span class="sig-paren">(</span><em>feature_ids</em>, <em>predict_fn</em>, <em>grid=None</em>, <em>grid_resolution=100</em>, <em>grid_range=None</em>, <em>sample=False</em>, <em>sampling_strategy='uniform-over-similarity-ranks'</em>, <em>n_samples=5000</em>, <em>bin_count=50</em>, <em>samples_per_bin=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyinterpret/core/global_interpretation/partial_dependence.html#PartialDependence.partial_dependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence" title="Permalink to this definition">¶</a></dt>

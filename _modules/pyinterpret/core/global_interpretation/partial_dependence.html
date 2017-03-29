@@ -161,15 +161,15 @@
 <span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="k">import</span> <span class="n">Axes3D</span>
 <span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="k">import</span> <span class="n">ScalarFormatter</span>
 <span class="kn">from</span> <span class="nn">matplotlib.axes._subplots</span> <span class="k">import</span> <span class="n">Axes</span> <span class="k">as</span> <span class="n">mpl_axes</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">cm</span>
 
 <span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="n">BaseGlobalInterpretation</span>
 <span class="kn">from</span> <span class="nn">...util.static_types</span> <span class="k">import</span> <span class="n">StaticTypes</span>
 <span class="kn">from</span> <span class="nn">...util</span> <span class="k">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">...util.kernels</span> <span class="k">import</span> <span class="n">flatten</span>
+<span class="kn">from</span> <span class="nn">...util.plotting</span> <span class="k">import</span> <span class="n">COLORS</span><span class="p">,</span> <span class="n">ColorMap</span><span class="p">,</span> <span class="n">coordinate_gradients_to_1d_colorscale</span><span class="p">,</span> <span class="n">plot_2d_color_scale</span>
 
-<span class="n">COLORS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;#328BD5&#39;</span><span class="p">,</span> <span class="s">&#39;#404B5A&#39;</span><span class="p">,</span> <span class="s">&#39;#3EB642&#39;</span><span class="p">,</span> <span class="s">&#39;#E04341&#39;</span><span class="p">,</span> <span class="s">&#39;#8665D0&#39;</span><span class="p">]</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s">&#39;figure.autolayout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="k">True</span>
-
 
 <div class="viewcode-block" id="PartialDependence"><a class="viewcode-back" href="../../../../index.html#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence">[docs]</a><span class="k">class</span> <span class="nc">PartialDependence</span><span class="p">(</span><span class="n">BaseGlobalInterpretation</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Contains methods for partial dependence. Subclass of BaseGlobalInterpretation&quot;&quot;&quot;</span>
@@ -589,6 +589,7 @@
             <span class="n">class_col_pairs</span> <span class="o">=</span> <span class="p">[</span><span class="n">class_col_pairs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
 
         <span class="k">for</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">mean_col</span> <span class="ow">in</span> <span class="n">class_col_pairs</span><span class="p">:</span>
+
             <span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
             <span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s">&#39;3d&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">plot_title</span><span class="p">:</span>
@@ -684,17 +685,26 @@
                            <span class="n">pdp_metadata</span><span class="p">,</span> <span class="n">class_col_pairs</span><span class="p">,</span>
                            <span class="n">with_variance</span><span class="o">=</span><span class="k">False</span><span class="p">):</span>
         <span class="n">colors</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">(</span><span class="n">COLORS</span><span class="p">)</span>
+
         <span class="n">figure_list</span><span class="p">,</span> <span class="n">axis_list</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
 
         <span class="n">sd_col</span> <span class="o">=</span> <span class="n">pdp_metadata</span><span class="p">[</span><span class="s">&#39;sd_col&#39;</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">mean_col</span> <span class="ow">in</span> <span class="n">class_col_pairs</span><span class="p">:</span>
-            <span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-            <span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s">&#39;3d&#39;</span><span class="p">)</span>
-            <span class="n">figure_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">gradient_x</span><span class="p">,</span> <span class="n">gradient_y</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_3d_gradients</span><span class="p">(</span><span class="n">pdp</span><span class="p">,</span> <span class="n">mean_col</span><span class="p">,</span> <span class="n">feature1</span><span class="p">,</span> <span class="n">feature2</span><span class="p">)</span>
+            <span class="n">color_gradient</span><span class="p">,</span> <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">coordinate_gradients_to_1d_colorscale</span><span class="p">(</span><span class="n">gradient_x</span><span class="p">,</span> <span class="n">gradient_y</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">colspan</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">rowspan</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s">&#39;3d&#39;</span><span class="p">)</span>
+            <span class="n">figure_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="p">)</span>
             <span class="n">axis_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
-            <span class="n">color</span> <span class="o">=</span> <span class="n">colors</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot_trisurf</span><span class="p">(</span><span class="n">pdp</span><span class="p">[</span><span class="n">feature1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">pdp</span><span class="p">[</span><span class="n">feature2</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
-                            <span class="n">pdp</span><span class="p">[</span><span class="n">mean_col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+            <span class="n">surface</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot_surface</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">7</span><span class="p">,</span> <span class="n">facecolors</span><span class="o">=</span><span class="n">color_gradient</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">rstride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cstride</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c">#add 2D color scale</span>
+            <span class="n">ax_colors</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">colspan</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">rowspan</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">ax_colors</span> <span class="o">=</span> <span class="n">plot_2d_color_scale</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax_colors</span><span class="p">)</span>
+            <span class="n">ax_colors</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s">&quot;Local Impact {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">feature1</span><span class="p">))</span>
+            <span class="n">ax_colors</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&quot;Local Impact {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">feature2</span><span class="p">))</span>
+
+            <span class="c">#f.colorbar(surface)</span>
             <span class="k">if</span> <span class="n">with_variance</span><span class="p">:</span>
                 <span class="n">var_color</span> <span class="o">=</span> <span class="n">colors</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">plot_trisurf</span><span class="p">(</span><span class="n">pdp</span><span class="p">[</span><span class="n">feature1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">pdp</span><span class="p">[</span><span class="n">feature2</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
@@ -850,7 +860,65 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">grid_range</span><span class="p">]):</span>
             <span class="n">err_msg</span> <span class="o">=</span> <span class="s">&quot;All elements of grid range {} &quot;</span> \
                       <span class="s">&quot;must be between 0 and 1&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">grid_range</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MalformedGridRangeError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span></div>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MalformedGridRangeError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="PartialDependence.compute_3d_gradients"><a class="viewcode-back" href="../../../../index.html#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.compute_3d_gradients">[docs]</a>    <span class="k">def</span> <span class="nf">compute_3d_gradients</span><span class="p">(</span><span class="n">pdp</span><span class="p">,</span> <span class="n">mean_col</span><span class="p">,</span> <span class="n">feature_1</span><span class="p">,</span> <span class="n">feature_2</span><span class="p">,</span> <span class="n">scaled</span><span class="o">=</span><span class="k">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes component-wise gradients of pdp dataframe.</span>
+
+
+<span class="sd">        :param pdp: pandas.DataFrame</span>
+<span class="sd">            DataFrame containing partial dependence values</span>
+<span class="sd">        :param mean_col: string</span>
+<span class="sd">            column name corresponding to pdp value</span>
+<span class="sd">        :param feature_1: string</span>
+<span class="sd">            column name corresponding to feature 1</span>
+<span class="sd">        :param feature_2: string</span>
+<span class="sd">            column name corresponding to feature 2</span>
+<span class="sd">        :param scaled: bool</span>
+<span class="sd">            Whether to scale the x1 and x2 gradients relative to x1 and x2 bin sizes</span>
+<span class="sd">        :return: dx, dy, x_matrix, y_matrix, z_matrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">feature_vals_to_grad_deltas</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+            <span class="n">values</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">diffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+            <span class="n">conv_diffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">diffs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">diffs</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">diffs</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)])</span>
+            <span class="n">diffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">diffs</span><span class="p">[</span><span class="mi">0</span><span class="p">]]),</span> <span class="n">conv_diffs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">diffs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])))</span>
+            <span class="k">return</span> <span class="n">diffs</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pdp</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">feature_1</span><span class="p">,</span> <span class="n">feature_2</span><span class="p">])</span>
+        <span class="n">grid_size_1d</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="p">(</span><span class="o">.</span><span class="mi">5</span><span class="p">))</span>
+
+        <span class="n">feature_1_diffs</span> <span class="o">=</span> <span class="n">feature_vals_to_grad_deltas</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">feature_1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">feature_2_diffs</span> <span class="o">=</span> <span class="n">feature_vals_to_grad_deltas</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">feature_2</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+        <span class="n">z_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">grid_size_1d</span><span class="p">,</span> <span class="n">grid_size_1d</span><span class="p">))</span>
+        <span class="n">x_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">grid_size_1d</span><span class="p">,</span> <span class="n">grid_size_1d</span><span class="p">))</span>
+        <span class="n">y_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">grid_size_1d</span><span class="p">,</span> <span class="n">grid_size_1d</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">grid_size_1d</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">grid_size_1d</span><span class="p">):</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">grid_size_1d</span> <span class="o">+</span> <span class="n">j</span>
+                <span class="n">x_val</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">feature_1</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                <span class="n">y_val</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">feature_2</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                <span class="n">z_val</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">mean_col</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+                <span class="n">z_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">z_val</span>
+                <span class="n">x_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_val</span>
+                <span class="n">y_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_val</span>
+
+        <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">z_matrix</span><span class="p">)</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">dx</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">if</span> <span class="n">scaled</span><span class="p">:</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">apply_along_axis</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">/</span> <span class="n">feature_1_diffs</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">apply_along_axis</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">/</span> <span class="n">feature_2_diffs</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">x_matrix</span><span class="p">,</span> <span class="n">y_matrix</span><span class="p">,</span> <span class="n">z_matrix</span></div></div>
+
+
+
 </pre></div>
 
            </div>
