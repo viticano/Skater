@@ -16,38 +16,56 @@ COLORS = ['#328BD5', '#404B5A', '#3EB642', '#E04341', '#8665D0']
 plt.rcParams['figure.autolayout'] = True
 
 
-def compute_pd(index, model_fn, grid_expanded, number_of_classes, feature_ids, input_data):
+def _compute_pd(index, estimator_fn, grid_expanded, number_of_classes, feature_ids, input_data):
+    """
+    Helper function to compute pd for each grid value
+
+    Parameters:
+    -----------
+    index(int): row index for the grid
+    estimator_fn(estimator.func): an estimator function of a fitted model used to derive prediction classification or
+                                  regression
+    grid_expanded(numpy.ndarray: The grid of ``target_labels` for which partial dependence needs to be computed
+    number_of_classes(int): unique number of classes in the ``target_labels``
+    feature_ids(list): the names/ids of the features for which partial dependence is to be computed.
+    input_data(numpy.ndarray): input sample data as array to compute partial dependence
+
+    Returns
+    -------
+    pd(dict, shape={'sd': <>, 'val_1': <>, 'mean'} : containing estimated value on sample dataset
+    """
     # pandas dataframe
     data_sample = input_data.copy()
-    pdp = {}
+    pd = {}
     new_row = grid_expanded[index]
 
     for feature_idx, feature_id in enumerate(feature_ids):
         data_sample[feature_id] = new_row[feature_idx]
 
-    predictions = model_fn(data_sample.values)
+    predictions = estimator_fn(data_sample.values)
     mean_prediction = np.mean(predictions, axis=0)
     std_prediction = np.std(predictions, axis=0)
 
     for feature_idx, feature_id in enumerate(feature_ids):
         val_col = 'val_{}'.format(feature_id)
-        pdp[val_col] = new_row[feature_idx]
+        pd[val_col] = new_row[feature_idx]
 
     if number_of_classes == 1:
-        pdp['mean'] = mean_prediction
-        pdp['sd'] = std_prediction
+        pd['mean'] = mean_prediction
+        pd['sd'] = std_prediction
     elif number_of_classes == 2:
         mean_col = 'mean_class_{}'.format(1)
-        pdp[mean_col] = mean_prediction[-1]
-        pdp['sd'] = std_prediction[-1]
+        pd[mean_col] = mean_prediction[-1]
+        pd['sd'] = std_prediction[-1]
     else:
         for class_i in range(mean_prediction.shape[0]):
             mean_col = 'mean_class_{}'.format(class_i)
-            pdp[mean_col] = mean_prediction[class_i]
+            pd[mean_col] = mean_prediction[class_i]
             # we can return 1 sd since its a common variance across classes
+            # TODO: if redundant, and is needed there could be a better way to address it
             # this line is currently redundant, as in it gets executed multiple times
-            pdp['sd'] = std_prediction[class_i]
-    return pdp
+            pd['sd'] = std_prediction[class_i]
+    return pd
 
 
 class PartialDependence(BaseGlobalInterpretation):
@@ -72,7 +90,7 @@ class PartialDependence(BaseGlobalInterpretation):
         if self._predict_fn.n_classes > 1:
             classes = range(self._predict_fn.n_classes)
             self._pdp_metadata['pdp_cols'] = {
-            class_i: "mean_class_{}".format(class_i) for class_i in classes
+                class_i: "mean_class_{}".format(class_i) for class_i in classes
             }
         else:
             self._pdp_metadata['pdp_cols'] = {0:'mean'}
@@ -94,7 +112,7 @@ class PartialDependence(BaseGlobalInterpretation):
         Parameters:
         -----------
         feature_ids(list):
-            the names/ids of the features for which we compute partial dependence.
+            the names/ids of the features for which partial dependence is to be computed.
             Note that the algorithm's complexity scales exponentially with additional
             features, so generally one should only look at one or two features at a
             time. These feature ids must be available in the class's associated DataSet.
@@ -254,9 +272,9 @@ class PartialDependence(BaseGlobalInterpretation):
         pd_list = []
         import functools
         executor_instance = Pool(n_jobs) if n_jobs > 0 else Pool()
-        for pd_row in executor_instance.map(functools.partial(compute_pd, model_fn=predict_fn,
-                                              grid_expanded=grid_expanded, number_of_classes=n_classes,
-                                              feature_ids=feature_ids, input_data=data_sample),
+        for pd_row in executor_instance.map(functools.partial(_compute_pd, estimator_fn=predict_fn,
+                                                              grid_expanded=grid_expanded, number_of_classes=n_classes,
+                                                              feature_ids=feature_ids, input_data=data_sample),
                                             [i for i in range(grid_expanded.shape[0])]):
             pd_list.append(pd_row)
         self.build_pd_meta_dict()
@@ -343,11 +361,12 @@ class PartialDependence(BaseGlobalInterpretation):
         >>> from sklearn.datasets.california_housing import fetch_california_housing
         >>> cal_housing = fetch_california_housing()
         # split 80/20 train-test
-        >>> x_train, x_test, y_train, y_test = train_test_split(cal_housing.data, cal_housing.target, test_size=0.2, random_state=1)
+        >>> x_train, x_test, y_train, y_test = train_test_split(cal_housing.data,
+        >>>                             cal_housing.target, test_size=0.2, random_state=1)
         >>> names = cal_housing.feature_names
-
         >>> print("Training the estimator...")
-        >>> estimator = GradientBoostingRegressor(n_estimators=10, max_depth=4, learning_rate=0.1, loss='huber', random_state=1)
+        >>> estimator = GradientBoostingRegressor(n_estimators=10, max_depth=4,
+        >>>                             learning_rate=0.1, loss='huber', random_state=1)
         >>> estimator.fit(x_train, y_train)
         >>> from pyinterpret.core.explanations import Interpretation
         >>> interpreter = Interpretation()
@@ -360,15 +379,15 @@ class PartialDependence(BaseGlobalInterpretation):
 
         # in the event that a user wants a 3D pdp with multiple classes, how should
         # we handle this? currently each class will get its own figure
-        pdp = self.partial_dependence(feature_ids, predict_fn,
-                                      grid=grid, grid_resolution=grid_resolution,
-                                      grid_range=grid_range, sample=sample,
-                                      sampling_strategy=sampling_strategy,
-                                      n_samples=n_samples, bin_count=bin_count,
-                                      samples_per_bin=samples_per_bin, n_jobs=-1)
+        pd_df = self.partial_dependence(feature_ids, predict_fn,
+                                        grid=grid, grid_resolution=grid_resolution,
+                                        grid_range=grid_range, sample=sample,
+                                        sampling_strategy=sampling_strategy,
+                                        n_samples=n_samples, bin_count=bin_count,
+                                        samples_per_bin=samples_per_bin, n_jobs=-1)
 
         self.interpreter.logger.info("done computing pd, now plotting ...")
-        ax = self._plot_pdp_from_df(feature_ids, pdp, with_variance=with_variance)
+        ax = self._plot_pdp_from_df(feature_ids, pd_df, with_variance=with_variance)
         return ax
 
 
@@ -390,8 +409,8 @@ class PartialDependence(BaseGlobalInterpretation):
         elif n_features == 2:
             feature1, feature2 = val_columns
             return self._3d_pdp_plot_turbo_booster(pdp, feature1, feature2, self._pdp_metadata,
-                                     with_variance=with_variance,
-                                     plot_title=plot_title)
+                                                   with_variance=with_variance,
+                                                   plot_title=plot_title)
 
 
     def _2d_pdp_plot(self, pdp, feature_name, pdp_metadata,
@@ -500,7 +519,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
 
     def _3d_pdp_plot_turbo_booster(self, pdp, feature1, feature2, pdp_metadata,
-                     with_variance=False, plot_title=None, disable_offset=True):
+                                   with_variance=False, plot_title=None, disable_offset=True):
 
         class_col_pairs = pdp_metadata['pdp_cols'].items()
         sd_col = pdp_metadata['sd_col']
@@ -595,11 +614,10 @@ class PartialDependence(BaseGlobalInterpretation):
                                   class_col_pairs, with_variance=False):
         colors = cycle(COLORS)
         figure_list, axis_list = [], []
-        sd_col = pdp_metadata['sd_col']
         for class_name, mean_col in class_col_pairs:
 
-            f = plt.figure()
-            ax = f.add_subplot(111, projection='3d')
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
 
             for val in np.unique(pdp[feature2]):
                 filter_idx = pdp[feature2] == val
@@ -608,7 +626,7 @@ class PartialDependence(BaseGlobalInterpretation):
                 x2 = pdp[filter_idx][feature2].values
                 ax.plot(x1, x2, pdp_vals)
 
-            figure_list.append(f)
+            figure_list.append(fig)
             axis_list.append(ax)
             color = colors.next()
             ax.set_xlabel(feature1)
@@ -636,7 +654,7 @@ class PartialDependence(BaseGlobalInterpretation):
                 x1 = pdp[filter_idx][feature1].values
                 ax.bar(x1, pdp_vals, color=color,
                        label="{} = {}".format(*[feature2, val], align='center')
-                       )
+                      )
                 if with_variance:
                     ax.errorbar(x1, pdp_vals, yerr=pdp[filter_idx][sd_col].values,
                                 color=color)
