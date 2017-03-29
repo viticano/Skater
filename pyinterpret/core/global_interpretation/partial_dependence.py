@@ -381,7 +381,7 @@ class PartialDependence(BaseGlobalInterpretation):
             f, ax = plt.subplots(1)
             figure_list.append(f)
             axis_list.append(ax)
-            color = colors.next()
+            color = next(colors)
 
             data = pdp.set_index(feature_name)
             plane = data[mean_col]
@@ -440,11 +440,11 @@ class PartialDependence(BaseGlobalInterpretation):
                 ax.set_title("Partial Dependence")
             figure_list.append(f)
             axis_list.append(ax)
-            color = colors.next()
+            color = next(colors)
             ax.plot_trisurf(pdp[feature1].values, pdp[feature2].values,
                             pdp[mean_col].values, alpha=.5, color=color)
             if with_variance:
-                var_color = colors.next()
+                var_color = next(colors)
                 ax.plot_trisurf(pdp[feature1].values, pdp[feature2].values,
                                 (pdp[mean_col] + pdp[sd_col]).values, alpha=.2,
                                 color=var_color)
@@ -537,11 +537,11 @@ class PartialDependence(BaseGlobalInterpretation):
             ax = f.add_subplot(111, projection='3d')
             figure_list.append(f)
             axis_list.append(ax)
-            color = colors.next()
+            color = next(colors)
             ax.plot_trisurf(pdp[feature1].values, pdp[feature2].values,
                             pdp[mean_col].values, alpha=.5, color=color)
             if with_variance:
-                var_color = colors.next()
+                var_color = next(colors)
                 ax.plot_trisurf(pdp[feature1].values, pdp[feature2].values,
                                 (pdp[mean_col] + pdp[sd_col]).values, alpha=.2,
                                 color=var_color)
