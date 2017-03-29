@@ -2,6 +2,7 @@
 from itertools import product, cycle
 import numpy as np
 import pandas as pd
+import re
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.ticker import ScalarFormatter
@@ -178,6 +179,12 @@ class PartialDependence(BaseGlobalInterpretation):
             total samples = bin_count * samples per bin.
 
         """
+        # TODO: There might be a better place to do this check
+        pattern_to_check = 'classifier.predict |logisticregression.predict '
+        if re.search(r'{}'.format(pattern_to_check), str(predict_fn).lower()):
+            raise exceptions.ModelError("Incorrect estimator function used for computing partial dependence, try one "
+                                        "with which give probability estimates")
+
         if len(feature_ids) >= 3:
             too_many_features_err_msg = "Pass in at most 2 features for pdp. If you have a " \
                                         "use case where you'd like to look at 3 simultaneously" \
