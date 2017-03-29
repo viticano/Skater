@@ -18,7 +18,7 @@ plt.rcParams['figure.autolayout'] = True
 
 
 def _compute_pd(index, estimator_fn, grid_expanded, number_of_classes, feature_ids, input_data):
-    """ Helper function to compute pd for each grid value
+    """ Helper function to compute partial dependence for each grid value
 
     Parameters:
     -----------
@@ -32,10 +32,10 @@ def _compute_pd(index, estimator_fn, grid_expanded, number_of_classes, feature_i
 
     Returns
     -------
-    pd(dict, shape={'sd': <>, 'val_1': <>, 'mean'} : containing estimated value on sample dataset
+    pd_dict(dict, shape={'sd': <>, 'val_1': <>, 'mean'} : containing estimated value on sample dataset
     """
     data_sample = input_data.copy()
-    pd = {}
+    pd_dict = {}
     new_row = grid_expanded[index]
 
     for feature_idx, feature_id in enumerate(feature_ids):
@@ -47,24 +47,24 @@ def _compute_pd(index, estimator_fn, grid_expanded, number_of_classes, feature_i
 
     for feature_idx, feature_id in enumerate(feature_ids):
         val_col = 'val_{}'.format(feature_id)
-        pd[val_col] = new_row[feature_idx]
+        pd_dict[val_col] = new_row[feature_idx]
 
     if number_of_classes == 1:
-        pd['mean'] = mean_prediction
-        pd['sd'] = std_prediction
+        pd_dict['mean'] = mean_prediction
+        pd_dict['sd'] = std_prediction
     elif number_of_classes == 2:
         mean_col = 'mean_class_{}'.format(1)
-        pd[mean_col] = mean_prediction[-1]
-        pd['sd'] = std_prediction[-1]
+        pd_dict[mean_col] = mean_prediction[-1]
+        pd_dict['sd'] = std_prediction[-1]
     else:
         for class_i in range(mean_prediction.shape[0]):
             mean_col = 'mean_class_{}'.format(class_i)
-            pd[mean_col] = mean_prediction[class_i]
+            pd_dict[mean_col] = mean_prediction[class_i]
             # we can return 1 sd since its a common variance across classes
             # TODO: if redundant, and is needed there could be a better way to address it
             # this line is currently redundant, as in it gets executed multiple times
-            pd['sd'] = std_prediction[class_i]
-    return pd
+            pd_dict['sd'] = std_prediction[class_i]
+    return pd_dict
 
 
 class PartialDependence(BaseGlobalInterpretation):
@@ -580,8 +580,8 @@ class PartialDependence(BaseGlobalInterpretation):
                 # matplotlib increases x from left to right, flipping that
                 # so the origin is front and center
                 obj.invert_xaxis()
-
         return plot_objects
+
 
     def _plot_3d_full_mesh(self, pdp, feature1, feature2,
                            pdp_metadata, class_col_pairs,
