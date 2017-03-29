@@ -8,12 +8,13 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.ticker import ScalarFormatter
 from pathos.multiprocessing import ProcessingPool as Pool
 from matplotlib.axes._subplots import Axes as mpl_axes
+from matplotlib import cm
 
 from .base import BaseGlobalInterpretation
 from ...util import exceptions
 from ...util.kernels import flatten
+from ...util.plotting import COLORS, ColorMap, coordinate_gradients_to_1d_colorscale, plot_2d_color_scale
 
-COLORS = ['#328BD5', '#404B5A', '#3EB642', '#E04341', '#8665D0']
 plt.rcParams['figure.autolayout'] = True
 
 
@@ -121,48 +122,38 @@ class PartialDependence(BaseGlobalInterpretation):
             features, so generally one should only look at one or two features at a
             time. These feature ids must be available in the class's associated DataSet.
             As of now, we only support looking at 1 or 2 features at a time.
-
         predict_fn(estimator.function):
             an estimator function of a fitted model used to derive prediction. Supports
             classification and regression. Supports classification(binary, multi-class) and regression.
             predictions = predict_fn(data)
-
         grid(numpy.ndarray):
             2 dimensional array on which we fix values of features. Note this is
             determined automatically if not given based on the percentiles of the
             dataset.
-
         grid_resolution(int):
             how many unique values to include in the grid. If the percentile range
             is 5% to 95%, then that range will be cut into <grid_resolution>
             equally size bins.
-
         n_jobs(int):
             The number of CPUs to use to compute the PDs. -1 means 'all CPUs'.
             Defaults to using all cores(-1).
-
         grid_range(tuple):
             the percentile extrama to consider. 2 element tuple, increasing, bounded
             between 0 and 1.
-
         sample(bool):
             Whether to sample from the original dataset.
-
         sampling_strategy(string):
             If sampling, which approach to take. See DataSet.generate_sample for
             details.
-
         n_samples(int):
             The number of samples to use from the original dataset. Note this is
             only active if sample = True and sampling strategy = 'uniform'. If
             using 'uniform-over-similarity-ranks', use samples per bin
-
         bin_count(int):
             The number of bins to use when using the similarity based sampler. Note
             this is only active if sample = True and
             sampling_strategy = 'uniform-over-similarity-ranks'.
             total samples = bin_count * samples per bin.
-
         samples_per_bin(int):
             The number of samples to collect for each bin within the sampler. Note
             this is only active if sample = True and
@@ -176,7 +167,6 @@ class PartialDependence(BaseGlobalInterpretation):
         >>> rf = RandomForestClassier()
         >>> rf.fit(X,y)
         >>> partial_dependence(feature_ids, rf.predict)
-            or
         >>> partial_dependence(feature_ids, rf.predict_proba)
         """
         # TODO: There might be a better place to do this check
@@ -292,7 +282,6 @@ class PartialDependence(BaseGlobalInterpretation):
                                 sampling_strategy='uniform-over-similarity-ranks',
                                 n_samples=5000, bin_count=50, samples_per_bin=10,
                                 with_variance=False, n_jobs=-1):
-
         """
         Computes partial_dependence of a set of variables. Essentially approximates
         the partial partial_dependence of the predict_fn with respect to the variables
@@ -305,60 +294,47 @@ class PartialDependence(BaseGlobalInterpretation):
             Note that the algorithm's complexity scales exponentially with additional
             features, so generally one should only look at one or two features at a
             time. These feature ids must be avaiable in the class's associated DataSet.
-
             As of now, we only support looking at 1 or 2 features at a time.
-
         predict_fn(predict_fn):
             an estimator function of a fitted model used to derive prediction. Supports
             classification and regression. Supports classification(binary, multi-class) and regression.
-
         grid(numpy.ndarray):
             2 dimensional array on which we fix values of features. Note this is
             determined automatically if not given based on the percentiles of the
             dataset.
-
         grid_resolution(int):
             how many unique values to include in the grid. If the percentile range
             is 5% to 95%, then that range will be cut into <grid_resolution>
             equally size bins.
-
         grid_range(tuple):
             the percentile extrama to consider. 2 element tuple, increasing, bounded
             between 0 and 1.
-
         sample(bool):
-            Whether to sample from the original dataset.
-
+            whether to sample from the original dataset.
         sampling_strategy(string):
             If sampling, which approach to take. See DataSet.generate_sample for
             details.
-
         n_samples(int):
             The number of samples to use from the original dataset. Note this is
             only active if sample = True and sampling strategy = 'uniform'. If
             using 'uniform-over-similarity-ranks', use samples per bin
-
         bin_count(int):
             The number of bins to use when using the similarity based sampler. Note
             this is only active if sample = True and
             sampling_strategy = 'uniform-over-similarity-ranks'.
             total samples = bin_count * samples per bin.
-
         samples_per_bin(int):
             The number of samples to collect for each bin within the sampler. Note
             this is only active if sample = True and
             sampling_strategy = 'uniform-over-similarity-ranks'. If using
             sampling_strategy = 'uniform', use n_samples.
             total samples = bin_count * samples per bin.
-
         with_variance(bool):
             whether to include pdp error bars in the plots. Currently disabled for 3D
             plots for visibility. If you have a use case where you'd like error bars for
             3D pdp plots, let us know!
-
         plot_title(string):
             title for pdp plots
-
         n_jobs(int):
             The number of CPUs to use to compute the PDs. -1 means 'all CPUs'.
             Defaults to using all cores(-1).
@@ -403,10 +379,8 @@ class PartialDependence(BaseGlobalInterpretation):
     def _plot_pdp_from_df(self, feature_ids, pdp, with_variance=False,
                           plot_title=None, disable_offset=True):
         n_features = len(feature_ids)
-
         mean_columns = self._pdp_metadata['pdp_cols'].values()
         val_columns = self._pdp_metadata['val_cols']
-
         self.interpreter.logger.debug("Mean columns: {}".format(mean_columns))
 
         if n_features == 1:
@@ -414,7 +388,6 @@ class PartialDependence(BaseGlobalInterpretation):
             return self._2d_pdp_plot(pdp, feature_name, self._pdp_metadata,
                                      with_variance=with_variance,
                                      plot_title=plot_title, disable_offset=disable_offset)
-
         elif n_features == 2:
             feature1, feature2 = val_columns
             return self._3d_pdp_plot_turbo_booster(pdp, feature1, feature2, self._pdp_metadata,
@@ -426,7 +399,6 @@ class PartialDependence(BaseGlobalInterpretation):
                      with_variance=False, plot_title=None, disable_offset=True):
         colors = cycle(COLORS)
         figure_list, axis_list = [], []
-
         class_col_pairs = pdp_metadata['pdp_cols'].items()
         sd_col = pdp_metadata['sd_col']
 
@@ -440,7 +412,7 @@ class PartialDependence(BaseGlobalInterpretation):
             f, ax = plt.subplots(1)
             figure_list.append(f)
             axis_list.append(ax)
-            color = colors.next()
+            color = next(colors)
 
             data = pdp.set_index(feature_name)
             plane = data[mean_col]
@@ -523,17 +495,14 @@ class PartialDependence(BaseGlobalInterpretation):
             # matplotlib increases x from left to right, flipping that
             # so the origin is front and center
             ax.invert_xaxis()
-
         return flatten([figure_list, axis_list])
 
 
     def _3d_pdp_plot_turbo_booster(self, pdp, feature1, feature2, pdp_metadata,
                                    with_variance=False, plot_title=None, disable_offset=True):
-
         class_col_pairs = pdp_metadata['pdp_cols'].items()
-        sd_col = pdp_metadata['sd_col']
 
-        #if there are just 2 classes, pick the last one.
+        # if there are just 2 classes, pick the last one.
         if len(class_col_pairs) == 2:
             class_col_pairs = [class_col_pairs[-1]]
 
@@ -549,31 +518,24 @@ class PartialDependence(BaseGlobalInterpretation):
                                                    with_variance=with_variance)
 
         elif feature_1_is_binary and feature_2_is_binary:
-            # plot_objects = self._plot_2d_2_binary_feature(pdp, feature1, feature2,
-            #                                               pdp_metadata, class_col_pairs,
-            #                                               with_variance=with_variance)
+            # may want to call _plot_3d_2_binary_features
             plot_objects = self._plot_3d_full_mesh(pdp, feature1, feature2,
                                                    pdp_metadata, class_col_pairs,
                                                    with_variance=with_variance)
 
         else:
-            #one feature is binary and one isnt.
+            # one feature is binary and one isnt.
+            # may want to call _plot_2d_1_binary_feature_and_1_continuous
             binary_feature, non_binary_feature = {
                 feature_1_is_binary: [feature1, feature2],
                 (not feature_1_is_binary):[feature2, feature1]
             }[feature_1_is_binary]
 
-            # plot_objects = self._plot_2d_1_binary_feature_and_1_continuous(pdp,
-            #                                                                binary_feature,
-            #                                                                non_binary_feature,
-            #                                                                pdp_metadata,
-            #                                                                )
             plot_objects = self._plot_3d_full_mesh(pdp,
                                                    binary_feature,
                                                    non_binary_feature,
                                                    pdp_metadata, class_col_pairs,
                                                    with_variance=with_variance)
-
         for obj in plot_objects:
             if isinstance(obj, mpl_axes):
                 if disable_offset:
@@ -591,19 +553,27 @@ class PartialDependence(BaseGlobalInterpretation):
                            pdp_metadata, class_col_pairs,
                            with_variance=False):
         colors = cycle(COLORS)
+
         figure_list, axis_list = [], []
 
         sd_col = pdp_metadata['sd_col']
         for class_name, mean_col in class_col_pairs:
-            f = plt.figure()
-            ax = f.add_subplot(111, projection='3d')
-            figure_list.append(f)
+            gradient_x, gradient_y, X, Y, Z = self.compute_3d_gradients(pdp, mean_col, feature1, feature2)
+            color_gradient, xmin, xmax, ymin, ymax = coordinate_gradients_to_1d_colorscale(gradient_x, gradient_y)
+            plt.figure()
+            ax = plt.subplot2grid((3, 3), (0, 0), colspan=2, rowspan=3, projection='3d')
+            figure_list.append(ax.figure)
             axis_list.append(ax)
-            color = colors.next()
-            ax.plot_trisurf(pdp[feature1].values, pdp[feature2].values,
-                            pdp[mean_col].values, alpha=.5, color=color)
+            surface = ax.plot_surface(X, Y, Z, alpha=.7, facecolors=color_gradient, linewidth=0., rstride=1, cstride=1)
+
+            #add 2D color scale
+            ax_colors = plt.subplot2grid((3, 3), (1, 2), colspan=1, rowspan=1)
+            ax_colors = plot_2d_color_scale(xmin, xmax, ymin, ymax, ax=ax_colors)
+            ax_colors.set_xlabel("Local Impact {}".format(feature1))
+            ax_colors.set_ylabel("Local Impact {}".format(feature2))
+
             if with_variance:
-                var_color = colors.next()
+                var_color = next(colors)
                 ax.plot_trisurf(pdp[feature1].values, pdp[feature2].values,
                                 (pdp[mean_col] + pdp[sd_col]).values, alpha=.2,
                                 color=var_color)
@@ -637,7 +607,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
             figure_list.append(fig)
             axis_list.append(ax)
-            color = colors.next()
+            color = next(colors)
             ax.set_xlabel(feature1)
             ax.set_ylabel(feature2)
             ax.set_zlabel("Predicted {}".format(class_name))
@@ -657,7 +627,7 @@ class PartialDependence(BaseGlobalInterpretation):
             ax = f.add_subplot(111)
 
             for val in np.unique(pdp[feature2]):
-                color = colors.next()
+                color = next(colors)
                 filter_idx = pdp[feature2] == val
                 pdp_vals = pdp[filter_idx][mean_col].values
                 x1 = pdp[filter_idx][feature1].values
@@ -667,18 +637,10 @@ class PartialDependence(BaseGlobalInterpretation):
                 if with_variance:
                     ax.errorbar(x1, pdp_vals, yerr=pdp[filter_idx][sd_col].values,
                                 color=color)
-                # if with_variance:
-                #     upper_plane = pdp_vals + pdp[filter_idx][sd_col]
-                #     lower_plane = pdp_vals - pdp[filter_idx][sd_col]
-                #     ax.fill_between(x1,
-                #                     lower_plane.values,
-                #                     upper_plane.values,
-                #                     alpha=.2,
-                #                     color=color)
 
             figure_list.append(f)
             axis_list.append(ax)
-            color = colors.next()
+            color = next(colors)
             ax.set_xlabel(feature1)
             ax.set_ylabel("Predicted {}".format(class_name))
             handles, labels = ax.get_legend_handles_labels()
@@ -700,7 +662,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
             figure_list.append(f)
             axis_list.append(ax)
-            color = colors.next()
+            color = next(colors)
 
             ax.bar3d(x1, x2, pdp_data,
                      dx, dy, dz, color=color)
@@ -710,8 +672,6 @@ class PartialDependence(BaseGlobalInterpretation):
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(handles, labels)
         return flatten([figure_list, axis_list])
-
-
 
 
     def partial_dependency_sklearn(self):
@@ -759,3 +719,59 @@ class PartialDependence(BaseGlobalInterpretation):
             err_msg = "All elements of grid range {} " \
                       "must be between 0 and 1".format(grid_range)
             raise exceptions.MalformedGridRangeError(err_msg)
+
+    @staticmethod
+    def compute_3d_gradients(pdp, mean_col, feature_1, feature_2, scaled=True):
+        """
+        Computes component-wise gradients of pdp dataframe.
+
+        :param pdp: pandas.DataFrame
+            DataFrame containing partial dependence values
+        :param mean_col: string
+            column name corresponding to pdp value
+        :param feature_1: string
+            column name corresponding to feature 1
+        :param feature_2: string
+            column name corresponding to feature 2
+        :param scaled: bool
+            Whether to scale the x1 and x2 gradients relative to x1 and x2 bin sizes
+        :return: dx, dy, x_matrix, y_matrix, z_matrix
+        """
+        def feature_vals_to_grad_deltas(values):
+            values = np.unique(values)
+            values.sort()
+            diffs = np.diff(values)
+            conv_diffs = np.array([(diffs[i] + diffs[i + 1]) / 2 for i in range(0, len(diffs) - 1)])
+            diffs = np.concatenate((np.array([diffs[0]]), conv_diffs, np.array([diffs[-1]])))
+            return diffs
+
+        df = pdp.sort(columns=[feature_1, feature_2])
+        grid_size_1d = int(df.shape[0] ** (.5))
+
+        feature_1_diffs = feature_vals_to_grad_deltas(df[feature_1].values)
+        feature_2_diffs = feature_vals_to_grad_deltas(df[feature_2].values)
+
+        z_matrix = np.zeros((grid_size_1d, grid_size_1d))
+        x_matrix = np.zeros((grid_size_1d, grid_size_1d))
+        y_matrix = np.zeros((grid_size_1d, grid_size_1d))
+
+        for i in range(grid_size_1d):
+            for j in range(grid_size_1d):
+                idx = i * grid_size_1d + j
+                x_val = df[feature_1].iloc[idx]
+                y_val = df[feature_2].iloc[idx]
+                z_val = df[mean_col].iloc[idx]
+
+                z_matrix[i, j] = z_val
+                x_matrix[i, j] = x_val
+                y_matrix[i, j] = y_val
+
+        dx, dy = np.gradient(z_matrix)
+        dx = dx.T
+        if scaled:
+            dx = np.apply_along_axis(lambda x: x / feature_1_diffs, 1, dx)
+            dy = np.apply_along_axis(lambda x: x / feature_2_diffs, 1, dy)
+        return dx, dy, x_matrix, y_matrix, z_matrix
+
+
+
