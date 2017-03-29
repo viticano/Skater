@@ -17,8 +17,7 @@ plt.rcParams['figure.autolayout'] = True
 
 
 def _compute_pd(index, estimator_fn, grid_expanded, number_of_classes, feature_ids, input_data):
-    """
-    Helper function to compute pd for each grid value
+    """ Helper function to compute pd for each grid value
 
     Parameters:
     -----------
@@ -34,7 +33,6 @@ def _compute_pd(index, estimator_fn, grid_expanded, number_of_classes, feature_i
     -------
     pd(dict, shape={'sd': <>, 'val_1': <>, 'mean'} : containing estimated value on sample dataset
     """
-    # pandas dataframe
     data_sample = input_data.copy()
     pd = {}
     new_row = grid_expanded[index]

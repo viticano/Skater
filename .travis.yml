@@ -2,6 +2,8 @@ language: python
 
 python:
   - "2.7"
+  - "3.3"
+  - "3.4"
 os: 
   - linux
 
@@ -22,7 +24,8 @@ install:
   - python -c "import lime"
 
 # command to run tests
-script: . run_test.sh
+script:
+  - python pyinterpret/tests/all_tests.py
 branches:
   only:
     - master
