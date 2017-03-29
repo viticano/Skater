@@ -23,12 +23,17 @@ def _compute_pd(index, estimator_fn, grid_expanded, number_of_classes, feature_i
     Parameters:
     -----------
     index(int): row index for the grid
-    estimator_fn(estimator.func): an estimator function of a fitted model used to derive prediction classification or
-                                  regression
-    grid_expanded(numpy.ndarray: The grid of ``target_labels` for which partial dependence needs to be computed
-    number_of_classes(int): unique number of classes in the ``target_labels``
-    feature_ids(list): the names/ids of the features for which partial dependence is to be computed.
-    input_data(numpy.ndarray): input sample data as array to compute partial dependence
+    estimator_fn(estimator.function):
+        an estimator function of a fitted model used to derive prediction.
+        Supports classification(binary, multi-class) and regression.
+    grid_expanded(numpy.ndarray:
+        The grid of ``target_labels` for which partial dependence needs to be computed
+    number_of_classes(int):
+        unique number of classes in the ``target_labels``
+    feature_ids(list):
+        the names/ids of the features for which partial dependence is to be computed.
+    input_data(numpy.ndarray):
+        input sample data as array to compute partial dependence
 
     Returns
     -------
@@ -115,25 +120,12 @@ class PartialDependence(BaseGlobalInterpretation):
             Note that the algorithm's complexity scales exponentially with additional
             features, so generally one should only look at one or two features at a
             time. These feature ids must be available in the class's associated DataSet.
-
             As of now, we only support looking at 1 or 2 features at a time.
 
-        predict_fn(function):
-            the machine learning model "prediction" function to explain, such that
-            predictions = predict_fn(data).
-
-            For instance:
-            from sklearn.ensemble import RandomForestClassier
-            rf = RandomForestClassier()
-            rf.fit(X,y)
-
-            partial_dependence(feature_ids, rf.predict)
-            or
-            partial_dependence(feature_ids, rf.predict_proba)
-
-            are acceptable use cases. Output types need to be 1D or 2D numpy arrays.
-
-            Supports classification, multi-class classification, and regression.
+        predict_fn(estimator.function):
+            an estimator function of a fitted model used to derive prediction. Supports
+            classification and regression. Supports classification(binary, multi-class) and regression.
+            predictions = predict_fn(data)
 
         grid(numpy.ndarray):
             2 dimensional array on which we fix values of features. Note this is
@@ -147,13 +139,13 @@ class PartialDependence(BaseGlobalInterpretation):
 
         n_jobs(int):
             The number of CPUs to use to compute the PDs. -1 means 'all CPUs'.
-            Defaults to 1.
+            Defaults to using all cores(-1).
 
         grid_range(tuple):
             the percentile extrama to consider. 2 element tuple, increasing, bounded
             between 0 and 1.
 
-        sample(Bool):
+        sample(bool):
             Whether to sample from the original dataset.
 
         sampling_strategy(string):
@@ -178,6 +170,14 @@ class PartialDependence(BaseGlobalInterpretation):
             sampling_strategy = 'uniform', use n_samples.
             total samples = bin_count * samples per bin.
 
+        Example
+        --------
+        >>> from sklearn.ensemble import RandomForestClassier
+        >>> rf = RandomForestClassier()
+        >>> rf.fit(X,y)
+        >>> partial_dependence(feature_ids, rf.predict)
+            or
+        >>> partial_dependence(feature_ids, rf.predict_proba)
         """
         # TODO: There might be a better place to do this check
         pattern_to_check = 'classifier.predict |logisticregression.predict '
@@ -291,7 +291,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                 grid_range=None, sample=False,
                                 sampling_strategy='uniform-over-similarity-ranks',
                                 n_samples=5000, bin_count=50, samples_per_bin=10,
-                                with_variance=False):
+                                with_variance=False, n_jobs=-1):
 
         """
         Computes partial_dependence of a set of variables. Essentially approximates
@@ -308,10 +308,9 @@ class PartialDependence(BaseGlobalInterpretation):
 
             As of now, we only support looking at 1 or 2 features at a time.
 
-        predict_fn(function):
-            machine learning that takes data and returns an output. Acceptable output
-            formats are ????. Supports classification, multiclass classification,
-            and regression.
+        predict_fn(predict_fn):
+            an estimator function of a fitted model used to derive prediction. Supports
+            classification and regression. Supports classification(binary, multi-class) and regression.
 
         grid(numpy.ndarray):
             2 dimensional array on which we fix values of features. Note this is
@@ -327,7 +326,7 @@ class PartialDependence(BaseGlobalInterpretation):
             the percentile extrama to consider. 2 element tuple, increasing, bounded
             between 0 and 1.
 
-        sample(Bool):
+        sample(bool):
             Whether to sample from the original dataset.
 
         sampling_strategy(string):
@@ -352,13 +351,17 @@ class PartialDependence(BaseGlobalInterpretation):
             sampling_strategy = 'uniform', use n_samples.
             total samples = bin_count * samples per bin.
 
-        with_variance(Bool):
+        with_variance(bool):
             whether to include pdp error bars in the plots. Currently disabled for 3D
             plots for visibility. If you have a use case where you'd like error bars for
             3D pdp plots, let us know!
 
         plot_title(string):
             title for pdp plots
+
+        n_jobs(int):
+            The number of CPUs to use to compute the PDs. -1 means 'all CPUs'.
+            Defaults to using all cores(-1).
 
         Example
         --------
@@ -378,7 +381,8 @@ class PartialDependence(BaseGlobalInterpretation):
         >>> print("Feature name: {}".format(names))
         >>> interpreter.load_data(X_train, feature_names=names)
         >>> print("Input feature name: {}".format[names[1], names[5]])
-        >>> interpreter.partial_dependence.plot_partial_dependence([names[1], names[5]], clf.predict, n_samples=100)
+        >>> interpreter.partial_dependence.plot_partial_dependence([names[1], names[5]], clf.predict,
+        >>>                                                         n_samples=100, n_jobs=1)
 
         """
 
@@ -389,7 +393,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                         grid_range=grid_range, sample=sample,
                                         sampling_strategy=sampling_strategy,
                                         n_samples=n_samples, bin_count=bin_count,
-                                        samples_per_bin=samples_per_bin, n_jobs=-1)
+                                        samples_per_bin=samples_per_bin, n_jobs=n_jobs)
 
         self.interpreter.logger.info("done computing pd, now plotting ...")
         ax = self._plot_pdp_from_df(feature_ids, pd_df, with_variance=with_variance)
