@@ -7,7 +7,6 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.ticker import ScalarFormatter
 from matplotlib.axes._subplots import Axes as mpl_axes
 from matplotlib import cm
-import matplotlib
 
 from .base import BaseGlobalInterpretation
 from ...util.static_types import StaticTypes
@@ -536,7 +535,6 @@ class PartialDependence(BaseGlobalInterpretation):
 
         sd_col = pdp_metadata['sd_col']
         for class_name, mean_col in class_col_pairs:
-            print class_name
             gradient_x, gradient_y, X, Y, Z = self.compute_3d_gradients(pdp, mean_col, feature1, feature2)
             color_gradient, xmin, xmax, ymin, ymax = coordinate_gradients_to_1d_colorscale(gradient_x, gradient_y)
             plt.figure()
