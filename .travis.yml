@@ -4,6 +4,7 @@ python:
   - "2.7"
   - "3.3"
   - "3.4"
+cache: pip
 os: 
   - linux
 
@@ -25,7 +26,7 @@ install:
 
 # command to run tests
 script:
-  - python pyinterpret/tests/all_tests.py
+  - . run_test.sh
 branches:
   only:
     - master
