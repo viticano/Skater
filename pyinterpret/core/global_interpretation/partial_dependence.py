@@ -384,13 +384,13 @@ class PartialDependence(BaseGlobalInterpretation):
         self.interpreter.logger.debug("Mean columns: {}".format(mean_columns))
 
         if n_features == 1:
-            feature_name = val_columns[0]
-            return self._2d_pdp_plot(pdp, feature_name, self._pdp_metadata,
+            feature1 = val_columns[0]
+            return self._2d_pdp_plot(pdp, feature1, self._pdp_metadata,
                                      with_variance=with_variance,
                                      plot_title=plot_title, disable_offset=disable_offset)
         elif n_features == 2:
             feature1, feature2 = val_columns
-            return self._3d_pdp_plot_turbo_booster(pdp, feature1, feature2, self._pdp_metadata,
+            return self._3d_pdp_plot(pdp, feature1, feature2, self._pdp_metadata,
                                                    with_variance=with_variance,
                                                    plot_title=plot_title)
 
@@ -453,52 +453,7 @@ class PartialDependence(BaseGlobalInterpretation):
         else:
             return False
 
-
     def _3d_pdp_plot(self, pdp, feature1, feature2, pdp_metadata,
-                     with_variance=False, plot_title=None, disable_offset=True):
-        colors = cycle(COLORS)
-        figure_list, axis_list = [], []
-
-        class_col_pairs = pdp_metadata['pdp_cols'].items()
-        sd_col = pdp_metadata['sd_col']
-
-        #if there are just 2 classes, pick the last one.
-        if len(class_col_pairs) == 2:
-            class_col_pairs = [class_col_pairs[-1]]
-
-        for class_name, mean_col in class_col_pairs:
-            f = plt.figure()
-            ax = f.add_subplot(111, projection='3d')
-            if plot_title:
-                ax.set_title("Partial Dependence")
-            figure_list.append(f)
-            axis_list.append(ax)
-            color = colors.next()
-            ax.plot_trisurf(pdp[feature1].values, pdp[feature2].values,
-                            pdp[mean_col].values, alpha=.5, color=color)
-            if with_variance:
-                var_color = colors.next()
-                ax.plot_trisurf(pdp[feature1].values, pdp[feature2].values,
-                                (pdp[mean_col] + pdp[sd_col]).values, alpha=.2,
-                                color=var_color)
-                ax.plot_trisurf(pdp[feature1].values, pdp[feature2].values,
-                                (pdp[mean_col] - pdp[sd_col]).values, alpha=.2,
-                                color=var_color)
-            ax.set_xlabel(feature1)
-            ax.set_ylabel(feature2)
-
-            ax.set_zlabel("Predicted {}".format(class_name))
-            handles, labels = ax.get_legend_handles_labels()
-            ax.legend(handles, labels)
-            if disable_offset:
-                ax.zaxis.set_major_formatter(ScalarFormatter())
-            # matplotlib increases x from left to right, flipping that
-            # so the origin is front and center
-            ax.invert_xaxis()
-        return flatten([figure_list, axis_list])
-
-
-    def _3d_pdp_plot_turbo_booster(self, pdp, feature1, feature2, pdp_metadata,
                                    with_variance=False, plot_title=None, disable_offset=True):
         class_col_pairs = pdp_metadata['pdp_cols'].items()
 
@@ -519,7 +474,9 @@ class PartialDependence(BaseGlobalInterpretation):
 
         elif feature_1_is_binary and feature_2_is_binary:
             # may want to call _plot_3d_2_binary_features
-            plot_objects = self._plot_3d_full_mesh(pdp, feature1, feature2,
+            plot_objects = self._plot_2d_2_binary_feature(pdp,
+                                                   feature1,
+                                                   feature2,
                                                    pdp_metadata, class_col_pairs,
                                                    with_variance=with_variance)
 
@@ -531,7 +488,7 @@ class PartialDependence(BaseGlobalInterpretation):
                 (not feature_1_is_binary):[feature2, feature1]
             }[feature_1_is_binary]
 
-            plot_objects = self._plot_3d_full_mesh(pdp,
+            plot_objects = self._plot_2d_1_binary_feature_and_1_continuous(pdp,
                                                    binary_feature,
                                                    non_binary_feature,
                                                    pdp_metadata, class_col_pairs,
@@ -545,7 +502,6 @@ class PartialDependence(BaseGlobalInterpretation):
                     obj.set_title("Partial Dependence")
                 # matplotlib increases x from left to right, flipping that
                 # so the origin is front and center
-                obj.invert_xaxis()
         return plot_objects
 
 
@@ -583,6 +539,7 @@ class PartialDependence(BaseGlobalInterpretation):
             ax.set_xlabel(feature1)
             ax.set_ylabel(feature2)
             ax.set_zlabel("Predicted {}".format(class_name))
+            ax.invert_xaxis()
 
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(handles, labels)
@@ -615,69 +572,69 @@ class PartialDependence(BaseGlobalInterpretation):
             ax.legend(handles, labels)
         return flatten([figure_list, axis_list])
 
-
     def _plot_2d_2_binary_feature(self, pdp, feature1, feature2, pdp_metadata,
                                   class_col_pairs, with_variance=False):
-        colors = cycle(COLORS)
         figure_list, axis_list = [], []
         sd_col = pdp_metadata['sd_col']
+        std_error = pdp.set_index([feature1, feature2])[sd_col].unstack()
         for class_name, mean_col in class_col_pairs:
-
             f = plt.figure()
             ax = f.add_subplot(111)
+            #feature2 is columns
+            #feature1 is index
+            plot_data = pdp.set_index([feature1, feature2])[mean_col].unstack()
+            plot_data.plot(ax=ax, color=COLORS)
 
-            for val in np.unique(pdp[feature2]):
-                color = next(colors)
-                filter_idx = pdp[feature2] == val
-                pdp_vals = pdp[filter_idx][mean_col].values
-                x1 = pdp[filter_idx][feature1].values
-                ax.bar(x1, pdp_vals, color=color,
-                       label="{} = {}".format(*[feature2, val], align='center')
-                      )
-                if with_variance:
-                    ax.errorbar(x1, pdp_vals, yerr=pdp[filter_idx][sd_col].values,
-                                color=color)
-
+            if with_variance:
+                colors = cycle(COLORS)
+                binary1_values = plot_data.index.values
+                binary2_values = plot_data.columns.values
+                for binary2_value in binary2_values:
+                    color = next(colors)
+                    yerr = std_error[binary2_value].values
+                    upper_plane = yerr + plot_data[binary2_value].values
+                    lower_plane = plot_data[binary2_value].values - yerr
+                    ax.fill_between(binary1_values, lower_plane, upper_plane,
+                                    color=color,alpha=.2)
             figure_list.append(f)
             axis_list.append(ax)
-            color = next(colors)
             ax.set_xlabel(feature1)
             ax.set_ylabel("Predicted {}".format(class_name))
-            handles, labels = ax.get_legend_handles_labels()
-            ax.legend(handles, labels)
+            #ax.get
+
         return flatten([figure_list, axis_list])
 
     def _plot_2d_1_binary_feature_and_1_continuous(self, pdp, binary_feature,
                                                    non_binary_feature, pdp_metadata,
                                                    class_col_pairs, with_variance=False):
-        colors = cycle(COLORS)
+
         figure_list, axis_list = [], []
         sd_col = pdp_metadata['sd_col']
 
         binary_vals = np.unique(pdp[binary_feature])
         for class_name, mean_col in class_col_pairs:
-
+            colors = cycle(COLORS)
             f = plt.figure()
-            ax = f.add_subplot(111, projection='3d')
-
+            ax = f.add_subplot(111)
             figure_list.append(f)
             axis_list.append(ax)
-            color = next(colors)
+            plot_data = pdp.set_index([non_binary_feature, binary_feature])[mean_col]\
+                .unstack()
+            sd = pdp.set_index([non_binary_feature, binary_feature])[sd_col]\
+                .unstack()
 
-            ax.bar3d(x1, x2, pdp_data,
-                     dx, dy, dz, color=color)
-            ax.set_xlabel(feature1)
-            ax.set_ylabel(feature2)
-            ax.set_zlabel("Predicted {}".format(class_name))
-            handles, labels = ax.get_legend_handles_labels()
-            ax.legend(handles, labels)
+            plot_data.plot(ax=ax,color=COLORS)
+            if with_variance:
+                non_binary_values = plot_data.index.values
+                binary_values = plot_data.columns.values
+                upper_plane = plot_data + sd
+                lower_plane = plot_data - sd
+                for binary_value in binary_values:
+                    color = next(colors)
+                    ax.fill_between(non_binary_values, lower_plane[binary_value].values, upper_plane[binary_value].values, alpha=.2,
+                                    color=color)
+            ax.set_ylabel("Predicted {}".format(class_name))
         return flatten([figure_list, axis_list])
-
-
-    def partial_dependency_sklearn(self):
-        """Uses sklearn's implementation"""
-        raise NotImplementedError("Not yet included")
-
 
     @staticmethod
     def _check_grid(grid, feature_ids):
