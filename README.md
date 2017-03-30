@@ -56,7 +56,7 @@ explainer.explain_instance(example,  regressor.predict).show_in_notebook()
 
 ### Testing
 ```
-python pyinterpret/tests/test_all.py --debug --n=1000 --dim=3 --seed=1
+python pyinterpret/tests/all_tests.py --debug --n=1000 --dim=3 --seed=1
 ```
 
 ### API documentation
