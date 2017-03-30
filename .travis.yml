@@ -2,6 +2,9 @@ language: python
 
 python:
   - "2.7"
+  - "3.3"
+  - "3.4"
+cache: pip
 os: 
   - linux
 
@@ -22,7 +25,8 @@ install:
   - python -c "import lime"
 
 # command to run tests
-script: . run_test.sh
+script:
+  - . run_test.sh
 branches:
   only:
     - master
