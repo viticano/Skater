@@ -1,9 +1,9 @@
 # PyInterpret
 ##### Master: ![Build Status-master](https://api.travis-ci.com/repositories/datascienceinc/model-interpretation.svg?token=okdWYn5kDgeoCPJZGPEz&branch=master)
-###Layout
 
-![layout](../master/PyInterpret.png?raw=true)
+<!--![layout](../master/PyInterpret.png?raw=true)
 =======
+-->
 
 ### Dev Installation
 ```
@@ -57,4 +57,9 @@ explainer.explain_instance(example,  regressor.predict).show_in_notebook()
 ### Testing
 ```
 python pyinterpret/tests/test_all.py --debug --n=1000 --dim=3 --seed=1
+```
+
+### API documentation
+```
+https://datascienceinc.github.io/model-interpretation/py-modindex.html
 ```
