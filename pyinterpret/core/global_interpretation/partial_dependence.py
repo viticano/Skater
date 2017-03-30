@@ -724,18 +724,23 @@ class PartialDependence(BaseGlobalInterpretation):
     def compute_3d_gradients(pdp, mean_col, feature_1, feature_2, scaled=True):
         """
         Computes component-wise gradients of pdp dataframe.
-
-        :param pdp: pandas.DataFrame
+        
+        Parameters
+        ----------
+        pdp: pandas.DataFrame
             DataFrame containing partial dependence values
-        :param mean_col: string
+        mean_col: string
             column name corresponding to pdp value
-        :param feature_1: string
+        feature_1: string
             column name corresponding to feature 1
-        :param feature_2: string
+        feature_2: string
             column name corresponding to feature 2
-        :param scaled: bool
+        scaled: bool
             Whether to scale the x1 and x2 gradients relative to x1 and x2 bin sizes
-        :return: dx, dy, x_matrix, y_matrix, z_matrix
+
+        Returns
+        ----------
+        dx, dy, x_matrix, y_matrix, z_matrix
         """
         def feature_vals_to_grad_deltas(values):
             values = np.unique(values)
