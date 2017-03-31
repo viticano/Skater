@@ -1,5 +1,6 @@
 from matplotlib import colors, cm, patches, pyplot
 import numpy as np
+import math
 
 COLORS = ['#328BD5', '#404B5A', '#3EB642', '#E04341', '#8665D0']
 
