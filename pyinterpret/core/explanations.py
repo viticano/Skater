@@ -86,7 +86,6 @@ class Interpretation(object):
         self.logger.info("Data loaded")
         self.logger.debug("Data shape: {}".format(self.data_set.data.shape))
         self.logger.debug("Dataset Feature_ids: {}".format(self.data_set.feature_ids))
-        #self.local_interpreter._build_lime_explainers()
 
     def build_annotated_model(self, prediction_function, examples=None):
         """
