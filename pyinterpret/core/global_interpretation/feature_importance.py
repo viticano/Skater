@@ -103,7 +103,7 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         """
 
-        predict_fn = self.build_annotated_model(predict_fn, examples=self.data_set.values)
+        predict_fn = self.build_annotated_model(predict_fn, examples=self.data_set.data.values)
 
         importances = {}
         raw_predictions = predict_fn(self.data_set.data.values)
@@ -114,10 +114,16 @@ class FeatureImportance(BaseGlobalInterpretation):
         # revert column back to copy?
         for feature_id in self.data_set.feature_ids:
             X_mutable = self.data_set.data.copy()
-            X_mutable[feature_id] = self.data_set.generate_column_sample(feature_id, n_samples=n, method='random-choice')
+            samples = self.data_set.generate_column_sample(feature_id, n_samples=n, method='random-choice')
+            deltas = X_mutable[feature_id].values - samples
+            X_mutable[feature_id] = samples
             new_predictions = predict_fn(X_mutable.values)
-            diff = sum(( (raw_predictions - new_predictions) ** 2)) / n
-            importances[feature_id] = diff
+            idx = np.where(deltas != 0)[0]
+            changes_in_predictions = ((raw_predictions[idx] - new_predictions[idx]) / deltas[idx]) ** 2
+            diff_magnitude = sum(changes_in_predictions) / len(idx)
+            importances[feature_id] = diff_magnitude
+            #return raw_predictions, X_mutable, samples, deltas, new_predictions, changes_in_predictions, diff_magnitude
+
 
         importances =  pd.Series(importances)
         importances = importances / importances.sum()
