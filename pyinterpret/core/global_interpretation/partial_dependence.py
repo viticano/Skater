@@ -103,8 +103,22 @@ class PartialDependence(BaseGlobalInterpretation):
         self._pdp_metadata['sd_col'] = 'sd'
         self.interpreter.logger.debug("PDP df metadata: {}".format(self._pdp_metadata))
 
-
     def partial_dependence(self, feature_ids, predict_fn, grid=None, grid_resolution=100, n_jobs=1,
+                           grid_range=None, sample=False,
+                           sampling_strategy='uniform-over-similarity-ranks',
+                           n_samples=5000, bin_count=50, samples_per_bin=10):
+
+        if not hasattr(feature_ids, "__iter__"):
+            raise ValueError("Feature ids must be an iterable but got {}".format(type(feature_ids)))
+
+        pd_df_list = []
+        for feature in feature_ids:
+            pdp = self._partial_dependence(feature, predict_fn, grid=grid, grid_resolution=grid_resolution,
+                                           n_jobs=1, grid_range=None, sample=False,
+                                           sampling_strategy='uniform-over-similarity-ranks',
+                                           n_samples=5000, bin_count=50, samples_per_bin=10)
+
+    def _partial_dependence(self, feature_ids, predict_fn, grid=None, grid_resolution=100, n_jobs=1,
                            grid_range=None, sample=False,
                            sampling_strategy='uniform-over-similarity-ranks',
                            n_samples=5000, bin_count=50, samples_per_bin=10):
@@ -169,6 +183,10 @@ class PartialDependence(BaseGlobalInterpretation):
         >>> partial_dependence(feature_ids, rf.predict)
         >>> partial_dependence(feature_ids, rf.predict_proba)
         """
+
+        if not hasattr(feature_ids, "__iter__"):
+            feature_ids = [feature_ids]
+
         # TODO: There might be a better place to do this check
         pattern_to_check = 'classifier.predict |logisticregression.predict '
         if re.search(r'{}'.format(pattern_to_check), str(predict_fn).lower()):
