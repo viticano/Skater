@@ -10,7 +10,7 @@ from ..util import exceptions
 class DataSet(object):
     """Module for passing around data to interpretation objects"""
 
-    def __init__(self, data, feature_names=None, index=None, log_level = 30):
+    def __init__(self, data, feature_names=None, index=None, log_level=30):
         """
         The abstraction around using, accessing, sampling data for interpretation purposes.
         Used by interpretation objects to grab data, collect samples, and handle
@@ -124,7 +124,8 @@ class DataSet(object):
                 vals = np.unique(np.percentile(self[feature_id], bins))
             grid.append(vals)
         grid = np.array(grid)
-        self.logger.info('Generated grid of shape {}'.format(grid.shape))
+        grid_shape = [(1, i) for i in [row.shape[0] for row in grid]]
+        self.logger.info('Generated grid of shape {}'.format(grid_shape))
         return grid
 
     def _build_metastore(self, bin_count):

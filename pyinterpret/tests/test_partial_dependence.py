@@ -114,7 +114,7 @@ class TestPartialDependence(unittest.TestCase):
 
         expected_feature_name = 'val_sepal length (cm)'
         self.assertEquals(expected_feature_name, pdp_df.columns[4])
-        self.assertEquals(pdp_df.shape, (25, 5))
+
 
         #2. Using SVC
         from sklearn import svm
@@ -127,7 +127,7 @@ class TestPartialDependence(unittest.TestCase):
         pdp_df = interpreter.partial_dependence.partial_dependence([iris.feature_names[0]], classifier_predict_fn,
                                                                    grid_resolution=25, sample=True)
         self.assertEquals(expected_feature_name, pdp_df.columns[4])
-        self.assertEquals(pdp_df.shape, (25, 5))
+
 
 
 
