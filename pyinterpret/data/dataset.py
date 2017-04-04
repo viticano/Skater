@@ -121,7 +121,7 @@ class DataSet(object):
             if len(uniques) ==2:
                 vals = uniques.copy()
             else:
-                vals = np.percentile(self[feature_id], bins)
+                vals = np.unique(np.percentile(self[feature_id], bins))
             grid.append(vals)
         grid = np.array(grid)
         self.logger.info('Generated grid of shape {}'.format(grid.shape))
