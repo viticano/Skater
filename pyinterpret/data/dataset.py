@@ -212,9 +212,7 @@ class DataSet(object):
             raise NotImplementedError("We havent coded this yet.")
 
         elif strategy == 'uniform-over-similarity-ranks':
-
             metastore = self._build_metastore(bin_count)
-
             data_distance_ranks = metastore['ranks_rounded']
             n_rows = metastore['n_rows']
             unique_ranks = metastore['unique_ranks']
