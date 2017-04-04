@@ -7,7 +7,9 @@ from sklearn.metrics.pairwise import cosine_distances
 from ..util.logger import build_logger
 from ..util import exceptions
 
-class DataSet(object):
+__all__ = ['DataManager']
+
+class DataManager(object):
     """Module for passing around data to interpretation objects"""
 
     def __init__(self, data, feature_names=None, index=None, log_level = 30):
@@ -109,7 +111,7 @@ class DataSet(object):
             for feature_id in feature_ids:
                 if feature_id not in self.feature_ids:
                     missing_features.append(feature_id)
-            err_msg = "Feature ids {} not found in DataSet.feature_ids".format(missing_features)
+            err_msg = "Feature ids {} not found in DataManager.feature_ids".format(missing_features)
             raise KeyError(err_msg)
 
         grid_range = [x * 100 for x in grid_range]
