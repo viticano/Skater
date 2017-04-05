@@ -414,7 +414,9 @@ class PartialDependence(BaseGlobalInterpretation):
                                                    with_variance=with_variance,
                                                    plot_title=plot_title)
         else:
-            msg = "{}: {}".format(*[n_features, feature_ids])
+            msg = "Something went wrong. Expected either a single feature, " \
+                  "or a 1-2 element array of features, got array of size:" \
+                  "{}: {}".format(*[n_features, feature_ids])
             raise ValueError(msg)
 
 
