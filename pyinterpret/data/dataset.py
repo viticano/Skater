@@ -10,7 +10,7 @@ from ..util import exceptions
 class DataSet(object):
     """Module for passing around data to interpretation objects"""
 
-    def __init__(self, data, feature_names=None, index=None, log_level = 30):
+    def __init__(self, data, feature_names=None, index=None, log_level=30):
         """
         The abstraction around using, accessing, sampling data for interpretation purposes.
         Used by interpretation objects to grab data, collect samples, and handle
@@ -121,10 +121,11 @@ class DataSet(object):
             if len(uniques) ==2:
                 vals = uniques.copy()
             else:
-                vals = np.percentile(self[feature_id], bins)
+                vals = np.unique(np.percentile(self[feature_id], bins))
             grid.append(vals)
         grid = np.array(grid)
-        self.logger.info('Generated grid of shape {}'.format(grid.shape))
+        grid_shape = [(1, i) for i in [row.shape[0] for row in grid]]
+        self.logger.info('Generated grid of shape {}'.format(grid_shape))
         return grid
 
     def _build_metastore(self, bin_count):
@@ -211,9 +212,7 @@ class DataSet(object):
             raise NotImplementedError("We havent coded this yet.")
 
         elif strategy == 'uniform-over-similarity-ranks':
-
             metastore = self._build_metastore(bin_count)
-
             data_distance_ranks = metastore['ranks_rounded']
             n_rows = metastore['n_rows']
             unique_ranks = metastore['unique_ranks']
