@@ -284,13 +284,8 @@ class PartialDependence(BaseGlobalInterpretation):
                                                               input_data=data_sample)
 
         arg_list = [i for i in range(grid_expanded.shape[0])]
-        try:
-            pd_list = executor_instance.map(pd_func,arg_list)
-            executor_instance.close()
-            executor_instance.join()
-        except:
-            executor_instance.terminate()
 
+        pd_list = executor_instance.map(pd_func,arg_list)
 
         if return_metadata:
             return pd.DataFrame(pd_list), _pdp_metadata

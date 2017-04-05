@@ -64,7 +64,7 @@ class TestPartialDependence(unittest.TestCase):
 
     @staticmethod
     def feature_column_name_formatter(columnname):
-        return "val_{}".format(columnname)
+        return "feature: {}".format(columnname)
 
 
     def test_pdp_with_default_sampling(self):
@@ -112,10 +112,13 @@ class TestPartialDependence(unittest.TestCase):
         pdp_df = interpreter.partial_dependence.partial_dependence([iris.feature_names[0]], classifier_predict_fn,
                                                                    grid_resolution=25, sample=True)
 
-        expected_feature_name = 'val_sepal length (cm)'
-        self.assertEquals(expected_feature_name, pdp_df.columns[4])
+        expected_feature_name = self.feature_column_name_formatter('sepal length (cm)')
+        print pdp_df.columns.values
 
-
+        self.assertIn(expected_feature_name,
+                      pdp_df.columns.values,
+                      "{} not in columns {}".format(*[expected_feature_name,
+                                                     pdp_df.columns.values]))
         #2. Using SVC
         from sklearn import svm
         # With SVC, predict_proba is supported only if probability flag is enabled, by default it is false
@@ -126,7 +129,10 @@ class TestPartialDependence(unittest.TestCase):
         interpreter.load_data(iris.data, iris.feature_names)
         pdp_df = interpreter.partial_dependence.partial_dependence([iris.feature_names[0]], classifier_predict_fn,
                                                                    grid_resolution=25, sample=True)
-        self.assertEquals(expected_feature_name, pdp_df.columns[4])
+        self.assertIn(expected_feature_name,
+                      pdp_df.columns.values,
+                      "{} not in columns {}".format(*[expected_feature_name,
+                                                     pdp_df.columns.values]))
 
 
 
@@ -135,7 +141,8 @@ class TestPartialDependence(unittest.TestCase):
         pdp_df = self.interpreter.partial_dependence.partial_dependence([self.features[0]],
                                                                        self.regressor_predict_fn)
         val_col = self.feature_column_name_formatter(self.features[0])
-        y = np.array(pdp_df['mean'])
+
+        y = np.array(pdp_df['Predicted Value'])
         x = np.array(pdp_df[val_col])[:, np.newaxis]
         regressor = LinearRegression()
         regressor.fit(x, y)
