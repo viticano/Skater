@@ -1,4 +1,5 @@
 """Partial Dependence class"""
+
 from itertools import product, cycle
 import numpy as np
 import pandas as pd
@@ -9,6 +10,7 @@ from matplotlib.ticker import ScalarFormatter
 from pathos.multiprocessing import ProcessingPool as Pool
 from matplotlib.axes._subplots import Axes as mpl_axes
 from matplotlib import cm
+import functools
 
 from .base import BaseGlobalInterpretation
 from ...util import exceptions
@@ -41,6 +43,7 @@ def _compute_pd(index, estimator_fn, grid_expanded, number_of_classes, feature_i
     pd_dict(dict, shape={'sd': <>, 'val_1': <>, 'mean'} : containing estimated value on sample dataset
     """
     data_sample = input_data.copy()
+
     pd_dict = {}
     new_row = grid_expanded[index]
 
@@ -102,6 +105,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
         self._pdp_metadata['sd_col'] = 'sd'
         self.interpreter.logger.debug("PDP df metadata: {}".format(self._pdp_metadata))
+
 
 
     def partial_dependence(self, feature_ids, predict_fn, grid=None, grid_resolution=None, n_jobs=1,
@@ -169,6 +173,10 @@ class PartialDependence(BaseGlobalInterpretation):
         >>> partial_dependence(feature_ids, rf.predict)
         >>> partial_dependence(feature_ids, rf.predict_proba)
         """
+
+        if not hasattr(feature_ids, "__iter__"):
+            feature_ids = [feature_ids]
+
         # TODO: There might be a better place to do this check
         pattern_to_check = 'classifier.predict |logisticregression.predict '
         if re.search(r'{}'.format(pattern_to_check), str(predict_fn).lower()):
@@ -265,7 +273,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
         n_classes = self._predict_fn.n_classes
         pd_list = []
-        import functools
+
         executor_instance = Pool(n_jobs) if n_jobs > 0 else Pool()
         for pd_row in executor_instance.map(functools.partial(_compute_pd, estimator_fn=predict_fn,
                                                               grid_expanded=grid_expanded, number_of_classes=n_classes,
@@ -364,17 +372,31 @@ class PartialDependence(BaseGlobalInterpretation):
 
         # in the event that a user wants a 3D pdp with multiple classes, how should
         # we handle this? currently each class will get its own figure
-        pd_df = self.partial_dependence(feature_ids, predict_fn,
-                                        grid=grid, grid_resolution=grid_resolution,
-                                        grid_range=grid_range, sample=sample,
-                                        sampling_strategy=sampling_strategy,
-                                        n_samples=n_samples, bin_count=bin_count,
-                                        samples_per_bin=samples_per_bin, n_jobs=n_jobs)
+        if not hasattr(feature_ids, "__iter__"):
+            pd_df = self.partial_dependence(feature_ids, predict_fn,
+                                            grid=grid, grid_resolution=grid_resolution,
+                                            grid_range=grid_range, sample=sample,
+                                            sampling_strategy=sampling_strategy,
+                                            n_samples=n_samples, bin_count=bin_count,
+                                            samples_per_bin=samples_per_bin, n_jobs=n_jobs)
 
-        self.interpreter.logger.info("done computing pd, now plotting ...")
-        ax = self._plot_pdp_from_df(feature_ids, pd_df, with_variance=with_variance)
-        return ax
+            self.interpreter.logger.info("done computing pd, now plotting ...")
+            ax = self._plot_pdp_from_df(feature_ids, pd_df, with_variance=with_variance)
+            return ax
+        else:
+            ax_list = []
+            for feature_or_feature_pair in feature_ids:
+                pd_df = self.partial_dependence(feature_or_feature_pair, predict_fn,
+                                                grid=grid, grid_resolution=grid_resolution,
+                                                grid_range=grid_range, sample=sample,
+                                                sampling_strategy=sampling_strategy,
+                                                n_samples=n_samples, bin_count=bin_count,
+                                                samples_per_bin=samples_per_bin, n_jobs=n_jobs)
 
+                self.interpreter.logger.info("done computing pd, now plotting ...")
+                ax = self._plot_pdp_from_df(feature_or_feature_pair, pd_df, with_variance=with_variance)
+                ax_list.append(ax)
+            return ax_list
 
     def _plot_pdp_from_df(self, feature_ids, pdp, with_variance=False,
                           plot_title=None, disable_offset=True):
@@ -383,7 +405,7 @@ class PartialDependence(BaseGlobalInterpretation):
         val_columns = self._pdp_metadata['val_cols']
         self.interpreter.logger.debug("Mean columns: {}".format(mean_columns))
 
-        if n_features == 1:
+        if n_features == 1 or not hasattr(feature_ids, "__iter__"):
             feature1 = val_columns[0]
             return self._2d_pdp_plot(pdp, feature1, self._pdp_metadata,
                                      with_variance=with_variance,
@@ -393,6 +415,11 @@ class PartialDependence(BaseGlobalInterpretation):
             return self._3d_pdp_plot(pdp, feature1, feature2, self._pdp_metadata,
                                                    with_variance=with_variance,
                                                    plot_title=plot_title)
+        else:
+            msg = "Something went wrong. Expected either a single feature, " \
+                  "or a 1-2 element array of features, got array of size:" \
+                  "{}: {}".format(*[n_features, feature_ids])
+            raise ValueError(msg)
 
 
     def _2d_pdp_plot(self, pdp, feature_name, pdp_metadata,
