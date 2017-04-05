@@ -177,6 +177,9 @@ class PartialDependence(BaseGlobalInterpretation):
         if not hasattr(feature_ids, "__iter__"):
             feature_ids = [feature_ids]
 
+        if grid_resolution is None:
+            grid_resolution = 100 if len(feature_ids) == 1 else 2
+
         # TODO: There might be a better place to do this check
         pattern_to_check = 'classifier.predict |logisticregression.predict '
         if re.search(r'{}'.format(pattern_to_check), str(predict_fn).lower()):
