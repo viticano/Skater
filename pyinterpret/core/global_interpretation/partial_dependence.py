@@ -277,14 +277,27 @@ class PartialDependence(BaseGlobalInterpretation):
         n_classes = self._predict_fn.n_classes
         pd_list = []
 
+        pd_function = functools.partial(_compute_pd, estimator_fn=predict_fn,
+                                        grid_expanded=grid_expanded, number_of_classes=n_classes,
+                                        feature_ids=feature_ids, input_data=data_sample)
+        arg_list = [i for i in range(grid_expanded.shape[0])]
         executor_instance = Pool(n_jobs) if n_jobs > 0 else Pool()
-        for pd_row in executor_instance.map(functools.partial(_compute_pd, estimator_fn=predict_fn,
-                                                              grid_expanded=grid_expanded, number_of_classes=n_classes,
-                                                              feature_ids=feature_ids, input_data=data_sample),
-                                            [i for i in range(grid_expanded.shape[0])]):
-            pd_list.append(pd_row)
+
+        #distribute partial dependence evaluation of grid points to parallel processes
+        try:
+            pd_list = executor_instance.map(pd_function, arg_list)
+            executor_instance.close()
+            executor_instance.join()
+        except:
+            print "except clause"
+            #executor_instance.terminate()
+        finally:
+            print "finally clause"
+            #executor_instance.terminate()
+
         self.build_pd_meta_dict()
-        return pd.DataFrame(pd_list)
+        pdp_meta = build_pd_metadata()
+        return pd.DataFrame(pd_list), pdp_meta
 
 
     def plot_partial_dependence(self, feature_ids, predict_fn, class_id=None,
