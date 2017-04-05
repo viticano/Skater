@@ -178,7 +178,7 @@ class PartialDependence(BaseGlobalInterpretation):
             feature_ids = [feature_ids]
 
         if grid_resolution is None:
-            grid_resolution = 100 if len(feature_ids) == 1 else 2
+            grid_resolution = 100 if len(feature_ids) == 1 else 30
 
         # TODO: There might be a better place to do this check
         pattern_to_check = 'classifier.predict |logisticregression.predict '
