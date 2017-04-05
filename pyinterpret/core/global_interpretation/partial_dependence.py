@@ -448,7 +448,7 @@ class PartialDependence(BaseGlobalInterpretation):
             plane = data[mean_col]
 
             # if binary feature, then len(pdp) == 2 -> barchart
-            if self._is_feature_binary(pdp, mean_col):
+            if self._is_feature_binary(pdp, feature_name):
                 if with_variance:
                     error = data[sd_col]
                 else:
