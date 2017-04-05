@@ -9,7 +9,7 @@ class InMemoryModel(Model):
     This model can be called directly from memory
     """
 
-    def __init__(self, prediction_fn, log_level=30, examples=None):
+    def __init__(self, prediction_fn, log_level=30, class_names=None, examples=None):
         """This model can be called directly from memory
         Parameters
         ----------
@@ -21,7 +21,7 @@ class InMemoryModel(Model):
             prediction_fn must be able to take examples as an
             argument.
         """
-        super(InMemoryModel, self).__init__(log_level=log_level)
+        super(InMemoryModel, self).__init__(log_level=log_level, class_names=class_names)
         self.prediction_fn = prediction_fn
 
         if not hasattr(prediction_fn, "__call__"):
