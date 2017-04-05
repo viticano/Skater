@@ -473,16 +473,13 @@ class PartialDependence(BaseGlobalInterpretation):
                                                    with_variance=with_variance)
 
         elif feature_1_is_binary and feature_2_is_binary:
-            # may want to call _plot_3d_2_binary_features
             plot_objects = self._plot_2d_2_binary_feature(pdp,
                                                    feature1,
                                                    feature2,
                                                    pdp_metadata, class_col_pairs,
                                                    with_variance=with_variance)
-
         else:
             # one feature is binary and one isnt.
-            # may want to call _plot_2d_1_binary_feature_and_1_continuous
             binary_feature, non_binary_feature = {
                 feature_1_is_binary: [feature1, feature2],
                 (not feature_1_is_binary):[feature2, feature1]
@@ -507,12 +504,13 @@ class PartialDependence(BaseGlobalInterpretation):
 
     def _plot_3d_full_mesh(self, pdp, feature1, feature2,
                            pdp_metadata, class_col_pairs,
-                           with_variance=False):
+                           with_variance=False, alpha=.7):
         colors = cycle(COLORS)
 
         figure_list, axis_list = [], []
 
         sd_col = pdp_metadata['sd_col']
+
         for class_name, mean_col in class_col_pairs:
             gradient_x, gradient_y, X, Y, Z = self.compute_3d_gradients(pdp, mean_col, feature1, feature2)
             color_gradient, xmin, xmax, ymin, ymax = coordinate_gradients_to_1d_colorscale(gradient_x, gradient_y)
@@ -520,11 +518,14 @@ class PartialDependence(BaseGlobalInterpretation):
             ax = plt.subplot2grid((3, 3), (0, 0), colspan=2, rowspan=3, projection='3d')
             figure_list.append(ax.figure)
             axis_list.append(ax)
-            surface = ax.plot_surface(X, Y, Z, alpha=.7, facecolors=color_gradient, linewidth=0., rstride=1, cstride=1)
+            surface = ax.plot_surface(X, Y, Z, alpha=alpha, facecolors=color_gradient, linewidth=0., rstride=1, cstride=1)
+            dx_mean = np.mean(gradient_x)
+            dy_mean = np.mean(gradient_y)
+            mean_point = (dx_mean, dy_mean)
 
             #add 2D color scale
             ax_colors = plt.subplot2grid((3, 3), (1, 2), colspan=1, rowspan=1)
-            ax_colors = plot_2d_color_scale(xmin, xmax, ymin, ymax, ax=ax_colors)
+            ax_colors = plot_2d_color_scale(xmin, xmax, ymin, ymax, plot_point=mean_point,ax=ax_colors)
             ax_colors.set_xlabel("Local Impact {}".format(feature1))
             ax_colors.set_ylabel("Local Impact {}".format(feature2))
 
@@ -543,6 +544,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(handles, labels)
+
         return flatten([figure_list, axis_list])
 
 
@@ -708,32 +710,33 @@ class PartialDependence(BaseGlobalInterpretation):
             return diffs
 
         df = pdp.sort(columns=[feature_1, feature_2])
-        grid_size_1d = int(df.shape[0] ** (.5))
 
         feature_1_diffs = feature_vals_to_grad_deltas(df[feature_1].values)
         feature_2_diffs = feature_vals_to_grad_deltas(df[feature_2].values)
 
-        z_matrix = np.zeros((grid_size_1d, grid_size_1d))
-        x_matrix = np.zeros((grid_size_1d, grid_size_1d))
-        y_matrix = np.zeros((grid_size_1d, grid_size_1d))
+        x1_size = feature_1_diffs.shape[0]
+        x2_size = feature_2_diffs.shape[0]
 
-        for i in range(grid_size_1d):
-            for j in range(grid_size_1d):
-                idx = i * grid_size_1d + j
-                x_val = df[feature_1].iloc[idx]
-                y_val = df[feature_2].iloc[idx]
+        z_matrix = np.zeros((x1_size, x2_size))
+        x1_matrix = np.zeros((x1_size, x2_size))
+        x2_matrix = np.zeros((x1_size, x2_size))
+
+        for i in range(x1_size):
+            for j in range(x2_size):
+                idx = i * x2_size + j
+                x1_val = df[feature_1].iloc[idx]
+                x2_val = df[feature_2].iloc[idx]
                 z_val = df[mean_col].iloc[idx]
 
                 z_matrix[i, j] = z_val
-                x_matrix[i, j] = x_val
-                y_matrix[i, j] = y_val
+                x1_matrix[i, j] = x1_val
+                x2_matrix[i, j] = x2_val
 
-        dx, dy = np.gradient(z_matrix)
-        dx = dx.T
+        dx1, dx2 = np.gradient(z_matrix)
         if scaled:
-            dx = np.apply_along_axis(lambda x: x / feature_1_diffs, 1, dx)
-            dy = np.apply_along_axis(lambda x: x / feature_2_diffs, 1, dy)
-        return dx, dy, x_matrix, y_matrix, z_matrix
+            dx1 = np.apply_along_axis(lambda x: x / feature_1_diffs, 0, dx1)
+            dx2 = np.apply_along_axis(lambda x: x / feature_2_diffs, 1, dx2)
+        return dx1, dx2, x1_matrix, x2_matrix, z_matrix
 
 
 

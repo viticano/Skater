@@ -95,13 +95,13 @@ class TestData(unittest.TestCase):
         """Ensures generate grid works with 1 variable"""
         data_set = DataSet(self.X, feature_names=self.feature_names, index=self.index)
         grid = data_set.generate_grid(data_set.feature_ids[0:1], grid_resolution=100)
-        assert grid.shape == (1, 100)
+        self.assertEquals(len(grid), 1)
 
     def test_generate_grid_2_variables(self):
         """Ensures generate grid works with 2 variables"""
         data_set = DataSet(self.X, feature_names=self.feature_names, index=self.index)
         grid = data_set.generate_grid(self.feature_names[0:2], grid_resolution=100)
-        assert grid.shape == (2, 100)
+        self.assertEquals(len(grid),2)
 
 
 if __name__ == '__main__':
