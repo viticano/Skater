@@ -473,7 +473,6 @@ class PartialDependence(BaseGlobalInterpretation):
                                                    with_variance=with_variance)
 
         elif feature_1_is_binary and feature_2_is_binary:
-            # may want to call _plot_3d_2_binary_features
             plot_objects = self._plot_2d_2_binary_feature(pdp,
                                                    feature1,
                                                    feature2,
@@ -481,7 +480,6 @@ class PartialDependence(BaseGlobalInterpretation):
                                                    with_variance=with_variance)
         else:
             # one feature is binary and one isnt.
-            # may want to call _plot_2d_1_binary_feature_and_1_continuous
             binary_feature, non_binary_feature = {
                 feature_1_is_binary: [feature1, feature2],
                 (not feature_1_is_binary):[feature2, feature1]
