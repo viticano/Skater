@@ -4,7 +4,6 @@ import math
 
 COLORS = ['#328BD5', '#404B5A', '#3EB642', '#E04341', '#8665D0']
 
-
 class ColorMap(object):
     """
     Maps arrays to colors
@@ -46,6 +45,7 @@ class ColorMap(object):
         scalarMapx.set_array(array_1d)
         return scalarMapx.to_rgba(array_1d)
 
+    
 def coordinate_gradients_to_1d_colorscale(dx, dy,
                                           x_buffer_prop=.1, y_buffer_prop=.1,
                                           norm='separate'):
@@ -94,6 +94,7 @@ def coordinate_gradients_to_1d_colorscale(dx, dy,
     color = np.array(colorx) + np.array(colory)
     color[:, :, 3] = 1.
     return color, xmin+xbuffer, xmax-xbuffer, ymin+ybuffer, ymax-ybuffer
+
 
 def plot_2d_color_scale(x1_min, x1_max, x2_min, x2_max, plot_point=None,
                         resolution=10, ax=None):
@@ -144,9 +145,9 @@ def plot_2d_color_scale(x1_min, x1_max, x2_min, x2_max, plot_point=None,
                    , color='yellow', alpha=1, zorder=2)
     return ax
 
+
 def build_buffer(x, buffer_prop=.1):
     xmin, xmax = min(0, np.percentile(x, 3)), max(np.percentile(x, 97), 0)
     buffer = (xmax - xmin) * buffer_prop / 2.
     xmin, xmax = xmin - buffer, xmax + buffer
     return xmin, xmax, buffer
-
