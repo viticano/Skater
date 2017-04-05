@@ -106,7 +106,9 @@ class PartialDependence(BaseGlobalInterpretation):
         self._pdp_metadata['sd_col'] = 'sd'
         self.interpreter.logger.debug("PDP df metadata: {}".format(self._pdp_metadata))
 
-    def partial_dependence(self, feature_ids, predict_fn, grid=None, grid_resolution=100, n_jobs=1,
+
+
+    def partial_dependence(self, feature_ids, predict_fn, grid=None, grid_resolution=None, n_jobs=1,
                            grid_range=None, sample=False,
                            sampling_strategy='uniform-over-similarity-ranks',
                            n_samples=5000, bin_count=50, samples_per_bin=10):
@@ -135,7 +137,7 @@ class PartialDependence(BaseGlobalInterpretation):
         grid_resolution(int):
             how many unique values to include in the grid. If the percentile range
             is 5% to 95%, then that range will be cut into <grid_resolution>
-            equally size bins.
+            equally size bins. Defaults to 100 for 1D and 30 for 2D.
         n_jobs(int):
             The number of CPUs to use to compute the PDs. -1 means 'all CPUs'.
             Defaults to using all cores(-1).
@@ -174,6 +176,9 @@ class PartialDependence(BaseGlobalInterpretation):
 
         if not hasattr(feature_ids, "__iter__"):
             feature_ids = [feature_ids]
+
+        if grid_resolution is None:
+            grid_resolution = 100 if len(feature_ids) == 1 else 30
 
         # TODO: There might be a better place to do this check
         pattern_to_check = 'classifier.predict |logisticregression.predict '
@@ -283,7 +288,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
 
     def plot_partial_dependence(self, feature_ids, predict_fn, class_id=None,
-                                grid=None, grid_resolution=100,
+                                grid=None, grid_resolution=None,
                                 grid_range=None, sample=False,
                                 sampling_strategy='uniform-over-similarity-ranks',
                                 n_samples=5000, bin_count=50, samples_per_bin=10,
@@ -311,7 +316,7 @@ class PartialDependence(BaseGlobalInterpretation):
         grid_resolution(int):
             how many unique values to include in the grid. If the percentile range
             is 5% to 95%, then that range will be cut into <grid_resolution>
-            equally size bins.
+            equally size bins. Defaults to 100 for 1D and 30 for 2D.
         grid_range(tuple):
             the percentile extrama to consider. 2 element tuple, increasing, bounded
             between 0 and 1.
