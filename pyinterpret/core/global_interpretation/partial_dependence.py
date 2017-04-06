@@ -13,14 +13,37 @@ from matplotlib import cm
 import functools
 from multiprocessing import current_process
 import os
+import copy_reg
+import types
 
 from .base import BaseGlobalInterpretation
 from ...util import exceptions, ControlledDict
+from ...util.model import build_static_predictor
 from ...util.kernels import flatten
 from ...util.plotting import COLORS, ColorMap, coordinate_gradients_to_1d_colorscale, plot_2d_color_scale
 
 plt.rcParams['figure.autolayout'] = True
 
+def _pickle_method(method):
+    func_name = method.im_func.__name__
+    obj = method.im_self
+    cls = method.im_class
+    if func_name.startswith('__') and not func_name.endswith('__'): #deal with mangled names
+        cls_name = cls.__name__.lstrip('_')
+        func_name = '_' + cls_name + func_name
+    return _unpickle_method, (func_name, obj, cls)
+
+def _unpickle_method(func_name, obj, cls):
+    for cls in cls.__mro__:
+        try:
+            func = cls.__dict__[func_name]
+        except KeyError:
+            pass
+        else:
+            break
+    return func.__get__(obj, cls)
+
+copy_reg.pickle(types.MethodType, _pickle_method, _unpickle_method)
 
 def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data):
     """ Helper function to compute partial dependence for each grid value
@@ -106,7 +129,7 @@ class PartialDependence(BaseGlobalInterpretation):
         return metadata
 
 
-    def partial_dependence(self, feature_ids, predict_fn, class_names=None,
+    def partial_dependence(self, feature_ids, model, class_names=None,
                            grid=None, grid_resolution=None, n_jobs=1,
                            grid_range=None, sample=False,
                            sampling_strategy='uniform-over-similarity-ranks',
@@ -182,7 +205,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
         # TODO: There might be a better place to do this check
         pattern_to_check = 'classifier.predict |logisticregression.predict '
-        if re.search(r'{}'.format(pattern_to_check), str(predict_fn).lower()):
+        if re.search(r'{}'.format(pattern_to_check), str(model).lower()):
             raise exceptions.ModelError("Incorrect estimator function used for computing partial dependence, try one "
                                         "with which give probability estimates")
 
@@ -262,11 +285,8 @@ class PartialDependence(BaseGlobalInterpretation):
 
         # make sure data_set module is giving us correct data structure
         self._check_dataset_type(data_sample)
-        self._predict_fn = self.build_annotated_model(predict_fn,
-                                                      class_names=class_names,
-                                                      examples=data_sample)
 
-        _pdp_metadata = self._build_metadata_dict(self._predict_fn, feature_ids)
+        _pdp_metadata = self._build_metadata_dict(model, feature_ids)
 
         # cartesian product of grid
         grid_expanded = np.array(list(product(*grid)))
@@ -276,8 +296,10 @@ class PartialDependence(BaseGlobalInterpretation):
                                           "grid shape: {}".format(grid_expanded.shape)
             raise exceptions.MalformedGridError(empty_grid_expanded_err_msg)
 
-        n_classes = self._predict_fn.n_classes
+        n_classes = model.n_classes
         pd_list = []
+
+        predict_fn = build_static_predictor(model)
 
         n_jobs = None if n_jobs < 0 else n_jobs
         pd_func = functools.partial(_compute_pd, estimator_fn=predict_fn,
@@ -288,11 +310,12 @@ class PartialDependence(BaseGlobalInterpretation):
 
         try:
             pd_list = executor_instance.map(pd_func, arg_list)
+        # except:
+        #     pd_list = map(pd_func, arg_list)
         finally:
             executor_instance.close()
             executor_instance.join()
             executor_instance.terminate()
-
         if return_metadata:
             return pd.DataFrame(pd_list), _pdp_metadata
         else:

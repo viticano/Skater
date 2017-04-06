@@ -4,10 +4,12 @@ import abc
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.utils.multiclass import type_of_target
+from functools import partial
 
 from ..util.static_types import StaticTypes, return_data_type
 from ..util.logger import build_logger
 from ..util import exceptions
+
 
 class Model(object):
     """What is a model? A model needs to make predictions, so a means of
@@ -39,7 +41,7 @@ class Model(object):
         """
         self._log_level = log_level
         self.logger = build_logger(log_level, __name__)
-        self.examples = np.array(None)
+        self.examples = None
         self.model_type = StaticTypes.unknown
         self.output_var_type = StaticTypes.unknown
         self.output_shape = StaticTypes.unknown
@@ -70,7 +72,7 @@ class Model(object):
 
 
         """
-        self.examples = np.array(examples)
+        return np.array(examples)
 
     def check_output_signature(self, examples):
         """
@@ -86,6 +88,7 @@ class Model(object):
             about the types of outputs the function generally makes.
 
         """
+        examples = self.set_examples(examples)
         if not examples.any():
             err_msg = "Examples have not been provided. Cannot check outputs"
             raise exceptions.ModelError(err_msg)
@@ -223,6 +226,7 @@ class Model(object):
             metadata about function.
 
         """
+        examples = self.set_examples(examples)
         reports = []
         if isinstance(self.examples, np.ndarray):
             raw_predictions = self.predict(examples)
@@ -238,3 +242,6 @@ class Model(object):
 
 # todo: add subclasses for classifier and regression, with class names given
 # on init for classifier
+
+
+

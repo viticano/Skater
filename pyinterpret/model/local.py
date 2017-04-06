@@ -26,12 +26,16 @@ class InMemoryModel(Model):
 
         if not hasattr(prediction_fn, "__call__"):
             raise exceptions.ModelError("Predict function must be callable")
-        self.set_examples(examples)
-        if self.examples.any():
-            self.check_output_signature(self.examples)
+        examples = self.set_examples(examples)
+        if examples.any():
+            self.check_output_signature(examples)
 
     def predict(self, *args, **kwargs):
         """
         Just use the function itself for predictions
         """
         return self.formatter(self.prediction_fn(*args, **kwargs))
+
+    @staticmethod
+    def static_predict(data, formatter, predict_fn):
+        return formatter(predict_fn(data))

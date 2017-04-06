@@ -1,11 +1,13 @@
 "Subclass of Model for deployed models"
 import requests
+import numpy as np
 from .model import Model
 
 
 class DeployedModel(Model):
     """Model that gets predictions from a deployed model"""
-    def __init__(self, uri, parse_function=None):
+    def __init__(self, uri, input_formatter, output_formatter,
+                 log_level=30, class_names=None, examples=None):
         """
         This model can be called by making http requests
         to the passed in uri.
@@ -21,27 +23,33 @@ class DeployedModel(Model):
         """
         super(DeployedModel, self).__init__()
         self.uri = uri
-        self.parse_function = parse_function or self.default_parser
+        self.input_formatter = input_formatter
+        self.output_formatter = output_formatter
+        examples = self.set_examples(examples)
+        if examples.any():
+            self.check_output_signature(examples)
 
     @staticmethod
-    def default_parser(content):
-        """Just returns raw results"""
-        return content
+    def default_input_wrapper(data):
+        return {'input': data.tolist()}
 
-    def predict(self, request_body, **kwargs):
-        if self.__confirm_server_is_healthy(self.uri):
-            output = self.parse_function(
-                requests.get(self.uri, data=request_body, **kwargs).content
-            )
-            return output
-        else:
-            raise ValueError("Server is not running.")
+    @staticmethod
+    def default_output_wrapper(response, key='prediction'):
+        return np.array(response.json()[key])
+
+    @staticmethod
+    def static_predict(data, uri, input_formatter, output_formatter, formatter):
+
+        query = input_formatter(data)
+        response = requests.post(uri, json=query)
+        return formatter(output_formatter(response))
+
+    def predict(self, data):
+        query = self.input_formatter(data)
+        response = requests.post(self.uri, json=query)
+        return self.formatter(self.output_formatter(response))
 
     def __call__(self, *args, **kwargs):
         """Just use the function itself for predictions"""
         return self.predict(*args, **kwargs)
 
-    @staticmethod
-    def __confirm_server_is_healthy(uri):
-        """Makes sure uri is up"""
-        return bool(uri)
