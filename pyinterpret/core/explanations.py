@@ -2,7 +2,7 @@
 
 from .global_interpretation.partial_dependence import PartialDependence
 from .local_interpretation.local_interpreter import LocalInterpreter
-from ..data.dataset import DataSet
+from ..data.dataset import DataManager
 from ..model.local import InMemoryModel
 from ..util.logger import build_logger
 
@@ -52,7 +52,7 @@ class Interpretation(object):
         self.logger = build_logger(log_level, __name__)
         self.local_interpreter = LocalInterpreter(self)
         self.partial_dependence = PartialDependence(self)
-        self.data_set = None
+        self.data_manager = None
 
     def load_data(self, training_data, feature_names=None, index=None):
         """
@@ -77,7 +77,7 @@ class Interpretation(object):
         """
 
         self.logger.info("Loading Data")
-        self.data_set = DataSet(training_data,
+        self.data_set = DataManager(training_data,
                                 feature_names=feature_names,
                                 index=index,
                                 log_level=self._log_level)
