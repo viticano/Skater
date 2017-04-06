@@ -7,10 +7,12 @@ import re
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.ticker import ScalarFormatter
-from pathos.multiprocessing import ProcessingPool as Pool
+from pathos.multiprocessing import Pool
 from matplotlib.axes._subplots import Axes as mpl_axes
 from matplotlib import cm
 import functools
+from multiprocessing import current_process
+import os
 
 from .base import BaseGlobalInterpretation
 from ...util import exceptions, ControlledDict
@@ -42,7 +44,7 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data):
     -------
     pd_dict(dict, shape={'sd': <>, 'val_1': <>, 'mean'} : containing estimated value on sample dataset
     """
-
+    #print "process id: {} parent process id {} \n".format(*[os.getpid(), os.getppid()])
     feature_columns = pd_metadata['feature_columns']
     feature_ids= pd_metadata['feature_ids']
     class_columns = pd_metadata['class_columns']
@@ -277,14 +279,19 @@ class PartialDependence(BaseGlobalInterpretation):
         n_classes = self._predict_fn.n_classes
         pd_list = []
 
-        executor_instance = Pool(n_jobs) if n_jobs > 0 else Pool()
+        n_jobs = None if n_jobs < 0 else n_jobs
         pd_func = functools.partial(_compute_pd, estimator_fn=predict_fn,
                                                               grid_expanded=grid_expanded, pd_metadata=_pdp_metadata,
                                                               input_data=data_sample)
-
         arg_list = [i for i in range(grid_expanded.shape[0])]
+        executor_instance = Pool(n_jobs)
 
-        pd_list = executor_instance.map(pd_func,arg_list)
+        try:
+            pd_list = executor_instance.map(pd_func, arg_list)
+        finally:
+            executor_instance.close()
+            executor_instance.join()
+            executor_instance.terminate()
 
         if return_metadata:
             return pd.DataFrame(pd_list), _pdp_metadata
