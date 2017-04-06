@@ -113,7 +113,6 @@ class TestPartialDependence(unittest.TestCase):
                                                                    grid_resolution=25, sample=True)
 
         expected_feature_name = self.feature_column_name_formatter('sepal length (cm)')
-        print pdp_df.columns.values
 
         self.assertIn(expected_feature_name,
                       pdp_df.columns.values,
