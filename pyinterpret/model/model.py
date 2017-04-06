@@ -21,7 +21,7 @@ class Model(object):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, log_level=30):
+    def __init__(self, log_level=30, class_names=None):
         """
         Base model class for wrapping prediction functions. Common methods
         involve output type inference in requiring predict methods
@@ -49,6 +49,7 @@ class Model(object):
         self.formatter = lambda x: x
         self.label_encoder = LabelEncoder()
         self.one_hot_encoder = OneHotEncoder()
+        self.class_names = class_names
 
     @abc.abstractmethod
     def predict(self, *args, **kwargs):
@@ -107,26 +108,36 @@ class Model(object):
             self.model_type = StaticTypes.model_types.regressor
             self.n_classes = 1
             self.probability = StaticTypes.not_applicable
+            if self.class_names is None:
+                self.class_names = ['Predicted Value']
 
         elif self.output_type == 'multiclass':
             self.model_type = StaticTypes.model_types.classifier
             self.probability = False
             self.n_classes = len(np.unique(outputs))
+            if self.class_names is None:
+                self.class_names = ['Probability Class {}'.format(i) for i in range(self.n_classes)]
 
         elif self.output_type == 'continuous-multioutput':
             self.model_type = StaticTypes.model_types.classifier
             self.probability = True
             self.n_classes = outputs.shape[1]
+            if self.class_names is None:
+                self.class_names = ['Probability Class {}'.format(i) for i in range(self.n_classes)]
 
         elif self.output_type == 'binary':
             self.model_type = StaticTypes.model_types.classifier
             self.probability = False
             self.n_classes = 2
+            if self.class_names is None:
+                self.class_names = ['Probability Class {}'.format(i) for i in range(self.n_classes)]
 
         elif self.output_type == 'multilabel-indicator':
             self.model_type = StaticTypes.model_types.classifier
             self.probability = False
             self.n_classes = outputs.shape[1]
+            if self.class_names is None:
+                self.class_names = ['Probability Class {}'.format(i) for i in range(self.n_classes)]
 
         else:
             err_msg = "Could not infer model type"

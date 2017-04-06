@@ -85,7 +85,7 @@ class Interpretation(object):
         self.logger.debug("Data shape: {}".format(self.data_set.data.shape))
         self.logger.debug("Dataset Feature_ids: {}".format(self.data_set.feature_ids))
 
-    def build_annotated_model(self, prediction_function, examples=None):
+    def build_annotated_model(self, prediction_function, class_names=None, examples=None):
         """
         Returns a callable model that has annotations.
         Uses examples from the Interpreter's dataset if available
@@ -108,6 +108,7 @@ class Interpretation(object):
             self.logger.warn('Model will not be annotated, no examples provided.')
 
         annotated_model = InMemoryModel(prediction_function,
+                                        class_names=class_names,
                                         examples=examples,
                                         log_level=self._log_level)
         return annotated_model
