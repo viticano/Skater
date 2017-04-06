@@ -13,7 +13,7 @@ from matplotlib import cm
 import functools
 
 from .base import BaseGlobalInterpretation
-from ...util import exceptions
+from ...util import exceptions, ControlledDict
 from ...util.kernels import flatten
 from ...util.plotting import COLORS, ColorMap, coordinate_gradients_to_1d_colorscale, plot_2d_color_scale
 
@@ -46,10 +46,7 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data):
     feature_columns = pd_metadata['feature_columns']
     feature_ids= pd_metadata['feature_ids']
     class_columns = pd_metadata['class_columns']
-
     data_sample = input_data.copy()
-
-    pd_dict = {}
     new_row = grid_expanded[index]
 
     for feature_idx, feature_id in enumerate(feature_ids):
@@ -63,16 +60,14 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data):
         mean_prediction = np.array([mean_prediction])
         std_prediction = np.array([std_prediction])
 
-    for feature_idx, feature_id in enumerate(feature_ids):
-        val_col = feature_columns[feature_idx]
-        pd_dict[val_col] = new_row[feature_idx]
-
     number_of_classes = len(class_columns)
     assert number_of_classes == mean_prediction.shape[0], "Mismatch between prediction dimension" \
                                                           "and number of class names" \
                                                           "Prediction dimension: {} " \
                                                           "n class_names: {}".format(*[mean_prediction.shape,
                                                                                        number_of_classes])
+
+    pd_dict = {column: new_row[idx] for idx, column in enumerate(feature_columns)}
     if number_of_classes == 2:
         class_column = class_columns[1]
         pd_dict[class_column] = mean_prediction[1]
@@ -93,17 +88,21 @@ class PartialDependence(BaseGlobalInterpretation):
     _pdp_metadata = {}
     _predict_fn = None
 
+
     def _build_metadata_dict(self, annotated_model, feature_ids):
 
         feature_columns = ['feature: {}'.format(i) for i in feature_ids]
         sd_col = 'sd'
         class_names = annotated_model.class_names
-        return {
+        metadata = ControlledDict({
             'sd_column': sd_col,
             'class_columns': class_names,
             'feature_columns': feature_columns,
             'feature_ids':feature_ids
-        }
+        })
+        metadata.block_setitem()
+        return metadata
+
 
     def partial_dependence(self, feature_ids, predict_fn, class_names=None,
                            grid=None, grid_resolution=None, n_jobs=1,
