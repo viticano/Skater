@@ -1,10 +1,25 @@
 from functools import partial
 
-
 from ..model.remote import DeployedModel
 from ..model.local import InMemoryModel
 
+
 def build_static_predictor(model):
+    """Takes a model object, creates an independent prediction
+    function
+
+    Parameters
+    ----------
+    model: subtype of pyinterpret.model.model.Model
+        Either pyinterpret.model.remote.DeployedModel
+        or pyinterpret.model.local.InMemoryModel
+
+    Returns:
+    predict_fn: callable
+        Static prediction function that takes (data) as an argument.
+
+
+    """
     if isinstance(model, DeployedModel):
         uri = model.uri
         input_formatter = model.input_formatter

@@ -13,8 +13,15 @@ class InMemoryModel(Model):
         """This model can be called directly from memory
         Parameters
         ----------
-        prediction_fn(callable)
+        prediction_fn: callable
             function that returns predictions
+
+        log_level: int
+            config setting to see model logs. 10 is a good value for seeing debug messages.
+            30 is warnings only.
+
+        class_names: array type
+            optional names of classes that describe model outputs.
 
         examples(numpy.array or pandas.dataframe):
             examples to use to make inferences about the function.
@@ -38,4 +45,20 @@ class InMemoryModel(Model):
 
     @staticmethod
     def static_predict(data, formatter, predict_fn):
+        """Static prediction function for multiprocessing usecases
+
+        Parameters
+        ----------
+        data: arraytype
+
+        formatter: callable
+            function responsible for formatting model outputs as necessary. For instance,
+            one hot encoding multiclass outputs.
+
+        predict_fn: callable
+
+        Returns
+        -----------
+        predictions: arraytype
+        """
         return formatter(predict_fn(data))
