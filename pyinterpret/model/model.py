@@ -100,7 +100,7 @@ class ModelType(object):
             err_msg = "Examples have not been provided. Cannot check outputs"
             raise exceptions.ModelError(err_msg)
 
-        outputs = self(examples)
+        outputs = self.predict(examples)
         self.input_shape = examples.shape
         self.output_shape = outputs.shape
 

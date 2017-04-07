@@ -35,12 +35,12 @@ class DeployedModel(ModelType):
         examples:
             see pyinterpret.model.Model for details
         """
-        super(DeployedModel, self).__init__(examples=examples,
-                                            class_names=class_names,
-                                            log_level=log_level)
         self.uri = uri
         self.input_formatter = input_formatter
         self.output_formatter = output_formatter
+        super(DeployedModel, self).__init__(examples=examples,
+                                            class_names=class_names,
+                                            log_level=log_level)
 
 
     @staticmethod
