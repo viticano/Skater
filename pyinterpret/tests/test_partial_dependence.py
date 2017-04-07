@@ -11,6 +11,7 @@ from functools import partial
 from pyinterpret.core.explanations import Interpretation
 from pyinterpret.util import exceptions
 from pyinterpret.tests.arg_parser import create_parser
+from pyinterpret.model import InMemoryModel, DeployedModel
 
 class TestPartialDependence(unittest.TestCase):
 
@@ -51,15 +52,17 @@ class TestPartialDependence(unittest.TestCase):
 
         self.regressor = LinearRegression()
         self.regressor.fit(self.X, self.y)
-        self.regressor_predict_fn = self.regressor.predict
+        self.regressor_predict_fn = InMemoryModel(self.regressor.predict, examples=self.X)
 
         self.classifier = LogisticRegression()
         self.classifier.fit(self.X, self.y_as_int)
-        self.classifier_predict_fn = self.classifier.predict
-        self.classifier_predict_proba_fn = self.classifier.predict_proba
+        self.classifier_predict_fn = InMemoryModel(self.classifier.predict, examples=self.X)
+        self.classifier_predict_proba_fn = InMemoryModel(self.classifier.predict_proba, examples=self.X)
 
         self.string_classifier = LogisticRegression()
         self.string_classifier.fit(self.X, self.y_as_string)
+        self.string_classifier_predict_fn = InMemoryModel(self.string_classifier.predict_proba, examples=self.X)
+
 
 
     @staticmethod
@@ -84,7 +87,7 @@ class TestPartialDependence(unittest.TestCase):
         # Test partial dependence for classifier
         clf = GradientBoostingClassifier(n_estimators=10, random_state=1)
         clf.fit(self.sample_x, self.sample_y)
-        classifier_predict_fn = clf.predict_proba
+        classifier_predict_fn = InMemoryModel(clf.predict_proba, examples=self.sample_x)
         interpreter = Interpretation()
         interpreter.load_data(np.array(self.sample_x), self.sample_feature_name)
         pdp_df = interpreter.partial_dependence.partial_dependence(['0'], classifier_predict_fn,
@@ -106,7 +109,7 @@ class TestPartialDependence(unittest.TestCase):
         #1. Using GB Classifier
         clf = GradientBoostingClassifier(n_estimators=10, random_state=1)
         clf.fit(iris.data, iris.target)
-        classifier_predict_fn = clf.predict_proba
+        classifier_predict_fn = InMemoryModel(clf.predict_proba, examples=iris.data)
         interpreter = Interpretation()
         interpreter.load_data(iris.data, iris.feature_names)
         pdp_df = interpreter.partial_dependence.partial_dependence([iris.feature_names[0]], classifier_predict_fn,
@@ -123,7 +126,7 @@ class TestPartialDependence(unittest.TestCase):
         # With SVC, predict_proba is supported only if probability flag is enabled, by default it is false
         clf = svm.SVC(probability=True)
         clf.fit(iris.data, iris.target)
-        classifier_predict_fn = clf.predict_proba
+        classifier_predict_fn = InMemoryModel(clf.predict_proba, examples=iris.data)
         interpreter = Interpretation()
         interpreter.load_data(iris.data, iris.feature_names)
         pdp_df = interpreter.partial_dependence.partial_dependence([iris.feature_names[0]], classifier_predict_fn,
@@ -228,13 +231,13 @@ class TestPartialDependence(unittest.TestCase):
 
     def test_pdp_1d_string_classifier_no_proba(self):
         self.assertRaises(exceptions.ModelError, lambda: self.interpreter.partial_dependence.partial_dependence(self.features[:1],
-                                                                       self.string_classifier.predict,
+                                                                       InMemoryModel(self.string_classifier.predict, examples=self.X),
                                                                        grid_resolution=10))
 
 
     def test_pdp_1d_string_classifier_with_proba(self):
         coefs = self.interpreter.partial_dependence.partial_dependence(self.features[:1],
-                                                                       self.string_classifier.predict_proba,
+                                                                       self.string_classifier_predict_fn,
                                                                        grid_resolution=10)
 
 

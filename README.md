@@ -42,10 +42,12 @@ regressor.fit(X, y)
 
 #partial dependence
 from pyinterpret.core.explanations import Interpretation
+from pyinterpret.model import InMemoryModel
 i = Interpretation()
 i.load_data(X, feature_names = feature_names)
+model = InMemoryModel(regressor.predict, examples = X)
 i.partial_dependence.plot_partial_dependence([feature_names[0], feature_names[1]],
-                                            regressor.predict)
+                                            model)
 
 #local interpretation
 from pyinterpret.core.local_interpretation.lime.lime_tabular import LimeTabularExplainer
