@@ -1,10 +1,10 @@
 "Subclass of Model for deployed models"
 import requests
 import numpy as np
-from .model import Model
+from .model import ModelType
 
 
-class DeployedModel(Model):
+class DeployedModel(ModelType):
     """Model that gets predictions from a deployed model"""
     def __init__(self, uri, input_formatter, output_formatter,
                  log_level=30, class_names=None, examples=None):
@@ -35,24 +35,26 @@ class DeployedModel(Model):
         examples:
             see pyinterpret.model.Model for details
         """
-        super(DeployedModel, self).__init__()
+        super(DeployedModel, self).__init__(examples=examples,
+                                            class_names=class_names,
+                                            log_level=log_level)
         self.uri = uri
         self.input_formatter = input_formatter
         self.output_formatter = output_formatter
-        examples = self.set_examples(examples)
-        if examples.any():
-            self.check_output_signature(examples)
+
 
     @staticmethod
     def default_input_wrapper(data, key='input'):
         return {key: data.tolist()}
 
+
     @staticmethod
     def default_output_wrapper(response, key='prediction'):
         return np.array(response.json()[key])
 
+
     @staticmethod
-    def static_predict(data, uri, input_formatter, output_formatter, formatter):
+    def _predict(data, uri, input_formatter, output_formatter, formatter=None):
         """Static prediction function for multiprocessing usecases
 
         Parameters
@@ -82,16 +84,34 @@ class DeployedModel(Model):
         -----------
         predictions: arraytype
         """
+
         query = input_formatter(data)
         response = requests.post(uri, json=query)
-        return formatter(output_formatter(response))
+        results = output_formatter(response)
+        if formatter:
+            results = formatter(results)
+        return results
+
 
     def predict(self, data):
-        query = self.input_formatter(data)
-        response = requests.post(self.uri, json=query)
-        return self.formatter(self.output_formatter(response))
+        """Predict method for deployed models. Takes an array,
+        passes it through a formatter for the requests library,
+        which makes a request. The response is then passed to the
+        output formatter, which parses results into an array type.
+        Finally, the interal formatter (one hot encoding, etc),
+        formats the final results.
 
-    def __call__(self, *args, **kwargs):
-        """Just use the function itself for predictions"""
-        return self.predict(*args, **kwargs)
+        Parameters
+        ----------
+        data: array type
 
+        Returns
+        ----------
+        predictions: array type
+        """
+        return self._predict(data,
+                             uri=self.uri,
+                             input_formatter=self.input_formatter,
+                             output_formatter=self.output_formatter,
+                             formatter=self.formatter
+                             )

@@ -11,39 +11,22 @@ from pathos.multiprocessing import Pool
 from matplotlib.axes._subplots import Axes as mpl_axes
 from matplotlib import cm
 import functools
-from multiprocessing import current_process
-import os
 import copy_reg
 import types
 
 from .base import BaseGlobalInterpretation
-from ...util import exceptions, ControlledDict
-from ...util.model import build_static_predictor
+from ...model.model import ModelType
+from ...util import exceptions
+from ...util.data_structures import ControlledDict
+from ...util.model import get_predictor
 from ...util.kernels import flatten
 from ...util.plotting import COLORS, ColorMap, coordinate_gradients_to_1d_colorscale, plot_2d_color_scale
 
 plt.rcParams['figure.autolayout'] = True
 
-def _pickle_method(method):
-    func_name = method.im_func.__name__
-    obj = method.im_self
-    cls = method.im_class
-    if func_name.startswith('__') and not func_name.endswith('__'): #deal with mangled names
-        cls_name = cls.__name__.lstrip('_')
-        func_name = '_' + cls_name + func_name
-    return _unpickle_method, (func_name, obj, cls)
-
-def _unpickle_method(func_name, obj, cls):
-    for cls in cls.__mro__:
-        try:
-            func = cls.__dict__[func_name]
-        except KeyError:
-            pass
-        else:
-            break
-    return func.__get__(obj, cls)
-
-copy_reg.pickle(types.MethodType, _pickle_method, _unpickle_method)
+#if we want to employ instance methods in multiprocessing, enable this code:
+#copy_reg.pickle(types.MethodType, pickle_method, unpickle_method)
+#methods stored in util.serialization
 
 def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data):
     """ Helper function to compute partial dependence for each grid value
@@ -114,11 +97,11 @@ class PartialDependence(BaseGlobalInterpretation):
     _predict_fn = None
 
 
-    def _build_metadata_dict(self, annotated_model, feature_ids):
+    def _build_metadata_dict(self, modelinstance, feature_ids):
 
         feature_columns = ['feature: {}'.format(i) for i in feature_ids]
         sd_col = 'sd'
-        class_names = annotated_model.class_names
+        class_names = modelinstance.class_names
         metadata = ControlledDict({
             'sd_column': sd_col,
             'class_columns': class_names,
@@ -129,12 +112,10 @@ class PartialDependence(BaseGlobalInterpretation):
         return metadata
 
 
-    def partial_dependence(self, feature_ids, model, class_names=None,
-                           grid=None, grid_resolution=None, n_jobs=1,
-                           grid_range=None, sample=False,
-                           sampling_strategy='uniform-over-similarity-ranks',
-                           n_samples=5000, bin_count=50, samples_per_bin=10,
-                           return_metadata=False):
+    def partial_dependence(self, feature_ids, modelinstance, grid=None, grid_resolution=None,
+                           n_jobs=-1, grid_range=None, sample=True,
+                           sampling_strategy='random-choice', n_samples=10000,
+                           bin_count=50, samples_per_bin=10, return_metadata=False):
 
         """
         Computes partial_dependence of a set of variables. Essentially approximates
@@ -143,50 +124,54 @@ class PartialDependence(BaseGlobalInterpretation):
 
         Parameters:
         -----------
-        feature_ids(list):
+        feature_ids: list
             the names/ids of the features for which partial dependence is to be computed.
             Note that the algorithm's complexity scales exponentially with additional
             features, so generally one should only look at one or two features at a
             time. These feature ids must be available in the class's associated DataSet.
             As of now, we only support looking at 1 or 2 features at a time.
-        predict_fn(estimator.function):
+        modelinstance: pyinterpret.model.model.Model subtype
             an estimator function of a fitted model used to derive prediction. Supports
             classification and regression. Supports classification(binary, multi-class) and regression.
             predictions = predict_fn(data)
-        grid(numpy.ndarray):
+
+            Can either by a pyinterpret.model.remote.DeployedModel or a
+            pyinterpret.model.local.InMemoryModel
+        grid: numpy.ndarray
             2 dimensional array on which we fix values of features. Note this is
             determined automatically if not given based on the percentiles of the
             dataset.
-        grid_resolution(int):
+        grid_resolution: int
             how many unique values to include in the grid. If the percentile range
             is 5% to 95%, then that range will be cut into <grid_resolution>
             equally size bins. Defaults to 100 for 1D and 30 for 2D.
-        n_jobs(int):
+        n_jobs: int
             The number of CPUs to use to compute the PDs. -1 means 'all CPUs'.
             Defaults to using all cores(-1).
-        grid_range(tuple):
+        grid_range: tuple
             the percentile extrama to consider. 2 element tuple, increasing, bounded
             between 0 and 1.
-        sample(bool):
+        sample: boolean
             Whether to sample from the original dataset.
-        sampling_strategy(string):
+        sampling_strategy: string
             If sampling, which approach to take. See DataSet.generate_sample for
             details.
-        n_samples(int):
+        n_samples: int
             The number of samples to use from the original dataset. Note this is
             only active if sample = True and sampling strategy = 'uniform'. If
             using 'uniform-over-similarity-ranks', use samples per bin
-        bin_count(int):
+        bin_count: int
             The number of bins to use when using the similarity based sampler. Note
             this is only active if sample = True and
             sampling_strategy = 'uniform-over-similarity-ranks'.
             total samples = bin_count * samples per bin.
-        samples_per_bin(int):
+        samples_per_bin: int
             The number of samples to collect for each bin within the sampler. Note
             this is only active if sample = True and
             sampling_strategy = 'uniform-over-similarity-ranks'. If using
             sampling_strategy = 'uniform', use n_samples.
             total samples = bin_count * samples per bin.
+        return_metadata: boolean
 
         Example
         --------
@@ -204,8 +189,12 @@ class PartialDependence(BaseGlobalInterpretation):
             grid_resolution = 100 if len(feature_ids) == 1 else 30
 
         # TODO: There might be a better place to do this check
-        pattern_to_check = 'classifier.predict |logisticregression.predict '
-        if re.search(r'{}'.format(pattern_to_check), str(model).lower()):
+        if not isinstance(modelinstance, ModelType):
+            raise exceptions.ModelError("Incorrect estimator function used for computing partial dependence, try one "
+                                        "creating one with pyinterpret.model.local.InMemoryModel or"
+                                        "pyinterpret.model.remote.DeployedModel")
+
+        if modelinstance.model_type == 'classifier' and modelinstance.probability == False:
             raise exceptions.ModelError("Incorrect estimator function used for computing partial dependence, try one "
                                         "with which give probability estimates")
 
@@ -286,7 +275,8 @@ class PartialDependence(BaseGlobalInterpretation):
         # make sure data_set module is giving us correct data structure
         self._check_dataset_type(data_sample)
 
-        _pdp_metadata = self._build_metadata_dict(model, feature_ids)
+        _pdp_metadata = self._build_metadata_dict(modelinstance, feature_ids)
+        self.interpreter.logger.debug("PD metadata: {}".format(_pdp_metadata))
 
         # cartesian product of grid
         grid_expanded = np.array(list(product(*grid)))
@@ -296,22 +286,24 @@ class PartialDependence(BaseGlobalInterpretation):
                                           "grid shape: {}".format(grid_expanded.shape)
             raise exceptions.MalformedGridError(empty_grid_expanded_err_msg)
 
-        n_classes = model.n_classes
+        n_classes = modelinstance.n_classes
         pd_list = []
 
-        predict_fn = build_static_predictor(model)
+        predict_fn = get_predictor(modelinstance)
 
         n_jobs = None if n_jobs < 0 else n_jobs
-        pd_func = functools.partial(_compute_pd, estimator_fn=predict_fn,
-                                                              grid_expanded=grid_expanded, pd_metadata=_pdp_metadata,
-                                                              input_data=data_sample)
+        pd_func = functools.partial(_compute_pd,
+                                    estimator_fn=predict_fn,
+                                    grid_expanded=grid_expanded,
+                                    pd_metadata=_pdp_metadata,
+                                    input_data=data_sample)
         arg_list = [i for i in range(grid_expanded.shape[0])]
         executor_instance = Pool(n_jobs)
 
         try:
             pd_list = executor_instance.map(pd_func, arg_list)
-        # except:
-        #     pd_list = map(pd_func, arg_list)
+        except:
+            pd_list = map(pd_func, arg_list)
         finally:
             executor_instance.close()
             executor_instance.join()
@@ -322,12 +314,11 @@ class PartialDependence(BaseGlobalInterpretation):
             return pd.DataFrame(pd_list)
 
 
-    def plot_partial_dependence(self, feature_ids, predict_fn, class_names=None,
-                                grid=None, grid_resolution=None,
-                                grid_range=None, sample=False,
-                                sampling_strategy='uniform-over-similarity-ranks',
-                                n_samples=5000, bin_count=50, samples_per_bin=10,
-                                with_variance=False, n_jobs=-1):
+    def plot_partial_dependence(self, feature_ids, modelinstance, grid=None,
+                                grid_resolution=None, grid_range=None, n_jobs=-1,
+                                sample=True, sampling_strategy='random-choice',
+                                n_samples=10000, bin_count=50, samples_per_bin=10,
+                                with_variance=False):
         """
         Computes partial_dependence of a set of variables. Essentially approximates
         the partial partial_dependence of the predict_fn with respect to the variables
@@ -335,55 +326,61 @@ class PartialDependence(BaseGlobalInterpretation):
 
         Parameters:
         -----------
-        feature_ids(list):
-            the names/ids of the features for which we compute partial dependence.
+        feature_ids: list
+            the names/ids of the features for which partial dependence is to be computed.
             Note that the algorithm's complexity scales exponentially with additional
             features, so generally one should only look at one or two features at a
-            time. These feature ids must be avaiable in the class's associated DataSet.
+            time. These feature ids must be available in the class's associated DataSet.
             As of now, we only support looking at 1 or 2 features at a time.
-        predict_fn(predict_fn):
+        modelinstance: pyinterpret.model.model.Model subtype
             an estimator function of a fitted model used to derive prediction. Supports
             classification and regression. Supports classification(binary, multi-class) and regression.
-        grid(numpy.ndarray):
+            predictions = predict_fn(data)
+
+            Can either by a pyinterpret.model.remote.DeployedModel or a
+            pyinterpret.model.local.InMemoryModel
+        grid: numpy.ndarray
             2 dimensional array on which we fix values of features. Note this is
             determined automatically if not given based on the percentiles of the
             dataset.
-        grid_resolution(int):
+        grid_resolution: int
             how many unique values to include in the grid. If the percentile range
             is 5% to 95%, then that range will be cut into <grid_resolution>
             equally size bins. Defaults to 100 for 1D and 30 for 2D.
-        grid_range(tuple):
+        grid_range: tuple
             the percentile extrama to consider. 2 element tuple, increasing, bounded
             between 0 and 1.
-        sample(bool):
-            whether to sample from the original dataset.
-        sampling_strategy(string):
+        n_jobs: int
+            The number of CPUs to use to compute the PDs. -1 means 'all CPUs'.
+            Defaults to using all cores(-1).
+        sample: boolean
+            Whether to sample from the original dataset.
+        sampling_strategy: string
             If sampling, which approach to take. See DataSet.generate_sample for
             details.
-        n_samples(int):
+        n_samples: int
             The number of samples to use from the original dataset. Note this is
             only active if sample = True and sampling strategy = 'uniform'. If
             using 'uniform-over-similarity-ranks', use samples per bin
-        bin_count(int):
+        bin_count: int
             The number of bins to use when using the similarity based sampler. Note
             this is only active if sample = True and
             sampling_strategy = 'uniform-over-similarity-ranks'.
             total samples = bin_count * samples per bin.
-        samples_per_bin(int):
+        samples_per_bin: int
             The number of samples to collect for each bin within the sampler. Note
             this is only active if sample = True and
             sampling_strategy = 'uniform-over-similarity-ranks'. If using
             sampling_strategy = 'uniform', use n_samples.
             total samples = bin_count * samples per bin.
+
+
         with_variance(bool):
             whether to include pdp error bars in the plots. Currently disabled for 3D
             plots for visibility. If you have a use case where you'd like error bars for
             3D pdp plots, let us know!
         plot_title(string):
             title for pdp plots
-        n_jobs(int):
-            The number of CPUs to use to compute the PDs. -1 means 'all CPUs'.
-            Defaults to using all cores(-1).
 
         Example
         --------
@@ -403,7 +400,9 @@ class PartialDependence(BaseGlobalInterpretation):
         >>> print("Feature name: {}".format(names))
         >>> interpreter.load_data(X_train, feature_names=names)
         >>> print("Input feature name: {}".format[names[1], names[5]])
-        >>> interpreter.partial_dependence.plot_partial_dependence([names[1], names[5]], clf.predict,
+        >>> from pyinterpret.model import InMemoryModel
+        >>> model = InMemoryModel(clf.predict, examples = X_train)
+        >>> interpreter.partial_dependence.plot_partial_dependence([names[1], names[5]], model,
         >>>                                                         n_samples=100, n_jobs=1)
 
         """
@@ -411,14 +410,13 @@ class PartialDependence(BaseGlobalInterpretation):
         # in the event that a user wants a 3D pdp with multiple classes, how should
         # we handle this? currently each class will get its own figure
         if not hasattr(feature_ids, "__iter__"):
-            pd_df, metadata = self.partial_dependence(feature_ids, predict_fn,
-                                                      class_names=class_names,
-                                            grid=grid, grid_resolution=grid_resolution,
-                                            grid_range=grid_range, sample=sample,
-                                            sampling_strategy=sampling_strategy,
-                                            n_samples=n_samples, bin_count=bin_count,
-                                            samples_per_bin=samples_per_bin, n_jobs=n_jobs,
-                                            return_metadata=True)
+            pd_df, metadata = self.partial_dependence(feature_ids, modelinstance, grid=grid,
+                                                      grid_resolution=grid_resolution,
+                                                      grid_range=grid_range, sample=sample,
+                                                      sampling_strategy=sampling_strategy,
+                                                      n_samples=n_samples, bin_count=bin_count,
+                                                      samples_per_bin=samples_per_bin,
+                                                      n_jobs=n_jobs, return_metadata=True)
 
             self.interpreter.logger.info("done computing pd, now plotting ...")
             ax = self._plot_pdp_from_df(pd_df, metadata, with_variance=with_variance)
@@ -426,14 +424,14 @@ class PartialDependence(BaseGlobalInterpretation):
         else:
             ax_list = []
             for feature_or_feature_pair in feature_ids:
-                pd_df, metadata = self.partial_dependence(feature_or_feature_pair, predict_fn,
-                                                          class_names=class_names,
-                                                grid=grid, grid_resolution=grid_resolution,
-                                                grid_range=grid_range, sample=sample,
-                                                sampling_strategy=sampling_strategy,
-                                                n_samples=n_samples, bin_count=bin_count,
-                                                samples_per_bin=samples_per_bin, n_jobs=n_jobs,
-                                                return_metadata=True)
+                pd_df, metadata = self.partial_dependence(feature_or_feature_pair, modelinstance,
+                                                          grid=grid,
+                                                          grid_resolution=grid_resolution,
+                                                          grid_range=grid_range, sample=sample,
+                                                          sampling_strategy=sampling_strategy,
+                                                          n_samples=n_samples, bin_count=bin_count,
+                                                          samples_per_bin=samples_per_bin,
+                                                          n_jobs=n_jobs, return_metadata=True)
 
                 self.interpreter.logger.info("done computing pd, now plotting ...")
                 ax = self._plot_pdp_from_df(pd_df, metadata, with_variance=with_variance)

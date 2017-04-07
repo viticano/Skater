@@ -1,10 +1,10 @@
 from functools import partial
 
-from ..model.remote import DeployedModel
+from ..model.deploy import DeployedModel
 from ..model.local import InMemoryModel
 
 
-def build_static_predictor(model):
+def get_predictor(model):
     """Takes a model object, creates an independent prediction
     function
 
@@ -15,6 +15,7 @@ def build_static_predictor(model):
         or pyinterpret.model.local.InMemoryModel
 
     Returns:
+    ----------
     predict_fn: callable
         Static prediction function that takes (data) as an argument.
 
@@ -25,7 +26,7 @@ def build_static_predictor(model):
         input_formatter = model.input_formatter
         output_formatter = model.output_formatter
         formatter=model.formatter
-        predict_fn = partial(DeployedModel.static_predict,
+        predict_fn = partial(DeployedModel._predict,
                              uri=uri,
                              input_formatter=input_formatter,
                              output_formatter=output_formatter,
@@ -34,7 +35,9 @@ def build_static_predictor(model):
     elif isinstance(model, InMemoryModel):
         formatter = model.formatter
         prediction_fn = model.prediction_fn
-        predict_fn = partial(InMemoryModel.static_predict,
+        predict_fn = partial(InMemoryModel._predict,
                              formatter=formatter,
                              predict_fn=prediction_fn)
         return predict_fn
+    else:
+        return None

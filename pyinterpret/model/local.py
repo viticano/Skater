@@ -1,10 +1,10 @@
 """Model subclass for in memory predict functions"""
 
-from .model import Model
+from .model import ModelType
 from ..util import exceptions
 
 
-class InMemoryModel(Model):
+class InMemoryModel(ModelType):
     """
     This model can be called directly from memory
     """
@@ -28,14 +28,16 @@ class InMemoryModel(Model):
             prediction_fn must be able to take examples as an
             argument.
         """
-        super(InMemoryModel, self).__init__(log_level=log_level, class_names=class_names)
-        self.prediction_fn = prediction_fn
 
         if not hasattr(prediction_fn, "__call__"):
             raise exceptions.ModelError("Predict function must be callable")
-        examples = self.set_examples(examples)
-        if examples.any():
-            self.check_output_signature(examples)
+
+        self.prediction_fn = prediction_fn
+        super(InMemoryModel, self).__init__(log_level=log_level,
+                                            class_names=class_names,
+                                            examples=examples)
+
+
 
     def predict(self, *args, **kwargs):
         """
@@ -43,8 +45,9 @@ class InMemoryModel(Model):
         """
         return self.formatter(self.prediction_fn(*args, **kwargs))
 
+
     @staticmethod
-    def static_predict(data, formatter, predict_fn):
+    def _predict(data, predict_fn, formatter):
         """Static prediction function for multiprocessing usecases
 
         Parameters
@@ -61,4 +64,8 @@ class InMemoryModel(Model):
         -----------
         predictions: arraytype
         """
-        return formatter(predict_fn(data))
+        results = predict_fn(data)
+        if formatter:
+            return formatter(results)
+        else:
+            return results

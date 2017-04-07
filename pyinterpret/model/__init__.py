@@ -1,8 +1,11 @@
-"""The modules responsible for wrapping models through a common interface. Useful
-If wed like to use the same api for models of different types (classifier v reg) or local
-vs deployed."""
+"""The modules responsible for wrapping models through a common interface. To enable support
+fot classification models with heterogenous output types, and for deployed models that are
+accessible through api calls, we need to contruct various patterns of prediction pipelines
+and of converting data throughout. Once a prediction pipeline is defined, we use the base Model class
+to define how to type inference.
+"""
 
 from .local import InMemoryModel
-from .remote import DeployedModel
+from .deploy import DeployedModel
 
 __all__ = ['InMemoryModel','DeployedModel']

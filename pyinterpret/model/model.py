@@ -11,7 +11,7 @@ from ..util.logger import build_logger
 from ..util import exceptions
 
 
-class Model(object):
+class ModelType(object):
     """What is a model? A model needs to make predictions, so a means of
     passing data into the model, and receiving results.
 
@@ -23,7 +23,7 @@ class Model(object):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, log_level=30, class_names=None):
+    def __init__(self, log_level=30, class_names=None, examples=None):
         """
         Base model class for wrapping prediction functions. Common methods
         involve output type inference in requiring predict methods
@@ -53,6 +53,12 @@ class Model(object):
         self.one_hot_encoder = OneHotEncoder()
         self.class_names = class_names
 
+        examples = self.set_examples(examples)
+        if examples.any():
+            self._check_output_signature(examples)
+        else:
+            self.logger.warn("No examples provided, cannot infer model type")
+
     @abc.abstractmethod
     def predict(self, *args, **kwargs):
         """
@@ -74,7 +80,7 @@ class Model(object):
         """
         return np.array(examples)
 
-    def check_output_signature(self, examples):
+    def _check_output_signature(self, examples):
         """
         Determines the model_type, output_type. Side effects
         of this method are to mutate object's attributes (model_type,
@@ -88,6 +94,7 @@ class Model(object):
             about the types of outputs the function generally makes.
 
         """
+        self.logger.debug("Beginning output checks")
         examples = self.set_examples(examples)
         if not examples.any():
             err_msg = "Examples have not been provided. Cannot check outputs"
