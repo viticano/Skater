@@ -1,8 +1,8 @@
 from matplotlib import colors, cm, patches, pyplot
 import numpy as np
+import math
 
 COLORS = ['#328BD5', '#404B5A', '#3EB642', '#E04341', '#8665D0']
-
 
 class ColorMap(object):
     """
@@ -45,9 +45,10 @@ class ColorMap(object):
         scalarMapx.set_array(array_1d)
         return scalarMapx.to_rgba(array_1d)
 
-
-
-def coordinate_gradients_to_1d_colorscale(dx, dy, x_buffer=.5, y_buffer=.5, norm='separate'):
+    
+def coordinate_gradients_to_1d_colorscale(dx, dy,
+                                          x_buffer_prop=.1, y_buffer_prop=.1,
+                                          norm='separate'):
     """
     Map x and y gradients to single array of colors based on 2D color scale
 
@@ -57,8 +58,8 @@ def coordinate_gradients_to_1d_colorscale(dx, dy, x_buffer=.5, y_buffer=.5, norm
         x component of gradient
     dy: array type
         y component of gradient
-    x_buffer:
-    y_buffer:
+    x_buffer_prop:
+    y_buffer_prop:
     norm: string
         whether to normalize colors based on differences in x and y scales.
         if separate, each component gets its own scaling (default)
@@ -68,16 +69,16 @@ def coordinate_gradients_to_1d_colorscale(dx, dy, x_buffer=.5, y_buffer=.5, norm
     ----------
     color_array, xmin, xmax, ymin, ymax
     """
-    xmin, xmax = dx.min(), dx.max()
-    ymin, ymax = dy.min(), dy.max()
+    xmin, xmax, xbuffer = build_buffer(dx)
+    ymin, ymax, ybuffer = build_buffer(dy)
     global_min = min(xmin, ymin)
     global_max = max(xmax, ymax)
     if norm == 'separate':
-        normx = colors.Normalize(xmin-x_buffer, xmax+x_buffer)
-        normy = colors.Normalize(ymin-y_buffer, ymax+y_buffer)
+        normx = colors.Normalize(xmin, xmax)
+        normy = colors.Normalize(ymin, ymax)
     elif norm == 'shared':
-        normx = colors.Normalize(global_min-x_buffer, global_max+x_buffer)
-        normy = colors.Normalize(global_min-x_buffer, global_max+x_buffer)
+        normx = colors.Normalize(global_min, global_max)
+        normy = colors.Normalize(global_min, global_max)
     else:
         raise KeyError("keyword norm must be in ('separate', 'shared')")
 
@@ -92,9 +93,11 @@ def coordinate_gradients_to_1d_colorscale(dx, dy, x_buffer=.5, y_buffer=.5, norm
 
     color = np.array(colorx) + np.array(colory)
     color[:, :, 3] = 1.
-    return color, xmin-x_buffer, xmax+x_buffer, ymin-y_buffer, ymax+y_buffer
+    return color, xmin+xbuffer, xmax-xbuffer, ymin+ybuffer, ymax-ybuffer
 
-def plot_2d_color_scale(x1_min, x1_max, x2_min, x2_max, resolution=10, ax=None):
+
+def plot_2d_color_scale(x1_min, x1_max, x2_min, x2_max, plot_point=None,
+                        resolution=10, ax=None):
     """
     Return a generic plot of a 2D color scale
 
@@ -134,7 +137,17 @@ def plot_2d_color_scale(x1_min, x1_max, x2_min, x2_max, resolution=10, ax=None):
             color = colors_for_scale[i, j]
             rect = patches.Rectangle(
                 xy, x1_diff, x2_diff,
-                alpha=None, facecolor=color,
+                alpha=.8, facecolor=color,zorder=1
             )
             ax.add_patch(rect)
+    if plot_point:
+        ax.scatter([plot_point[0]], [plot_point[1]], s=75.
+                   , color='yellow', alpha=1, zorder=2)
     return ax
+
+
+def build_buffer(x, buffer_prop=.1):
+    xmin, xmax = min(0, np.percentile(x, 3)), max(np.percentile(x, 97), 0)
+    buffer = (xmax - xmin) * buffer_prop / 2.
+    xmin, xmax = xmin - buffer, xmax + buffer
+    return xmin, xmax, buffer

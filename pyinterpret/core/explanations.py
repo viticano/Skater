@@ -3,7 +3,7 @@
 from .global_interpretation.partial_dependence import PartialDependence
 from .local_interpretation.local_interpreter import LocalInterpreter
 from .global_interpretation.feature_importance import FeatureImportance
-from ..data.dataset import DataSet
+from ..data.dataset import DataManager
 from ..model.local import InMemoryModel
 from ..util.logger import build_logger
 
@@ -37,7 +37,7 @@ class Interpretation(object):
     interpreter.partial_dependence([feature_id1, feature_id2], regressor.predict)
     """
 
-    def __init__(self, log_level='WARNING'):
+    def __init__(self, log_level=30):
         """
         Attaches local and global interpretations
         to Interpretation object.
@@ -55,6 +55,7 @@ class Interpretation(object):
         self.partial_dependence = PartialDependence(self)
         self.feature_importance = FeatureImportance(self)
         self.data_set = None
+
 
     def load_data(self, training_data, feature_names=None, index=None):
         """
@@ -79,7 +80,7 @@ class Interpretation(object):
         """
 
         self.logger.info("Loading Data")
-        self.data_set = DataSet(training_data,
+        self.data_set = DataManager(training_data,
                                 feature_names=feature_names,
                                 index=index,
                                 log_level=self._log_level)
@@ -87,7 +88,7 @@ class Interpretation(object):
         self.logger.debug("Data shape: {}".format(self.data_set.data.shape))
         self.logger.debug("Dataset Feature_ids: {}".format(self.data_set.feature_ids))
 
-    def build_annotated_model(self, prediction_function, examples=None):
+    def build_annotated_model(self, prediction_function, class_names=None, examples=None):
         """
         Returns a callable model that has annotations.
         Uses examples from the Interpreter's dataset if available
@@ -110,6 +111,7 @@ class Interpretation(object):
             self.logger.warn('Model will not be annotated, no examples provided.')
 
         annotated_model = InMemoryModel(prediction_function,
+                                        class_names=class_names,
                                         examples=examples,
                                         log_level=self._log_level)
         return annotated_model

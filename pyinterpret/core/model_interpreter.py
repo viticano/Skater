@@ -23,7 +23,7 @@ class ModelInterpreter(object):
         """.consider routes to Interpreter's .consider"""
         self.interpreter.consider(training_data, index=index, feature_names=feature_names)
 
-    def build_annotated_model(self, prediction_function, examples=None):
+    def build_annotated_model(self, prediction_function, class_names=None, examples=None):
         """
         returns pyinterpret.model.InMemoryModel
         Parameters
@@ -41,4 +41,6 @@ class ModelInterpreter(object):
                 Examples to pass through the prediction_function to make inferences
                 about what it outputs
         """
-        return self.interpreter.build_annotated_model(prediction_function, examples=examples)
+        return self.interpreter.build_annotated_model(prediction_function,
+                                                      class_names=class_names,
+                                                      examples=examples)

@@ -28,7 +28,7 @@ class FeatureImportance(BaseGlobalInterpretation):
         }
 
 
-    def feature_importance(self, predict_fn):
+    def feature_importance(self, modelinstance):
 
         """
         Computes partial_dependence of a set of variables. Essentially approximates
@@ -45,18 +45,22 @@ class FeatureImportance(BaseGlobalInterpretation):
 
             As of now, we only support looking at 1 or 2 features at a time.
 
-        predict_fn(function):
+        modelinstance: pyinterpret.model.model.Model subtype
             the machine learning model "prediction" function to explain, such that
             predictions = predict_fn(data).
 
             For instance:
+            from pyinterpret.model import InMemoryModel
+            from pyinterpret.core.explanations import Interpretation
             from sklearn.ensemble import RandomForestClassier
             rf = RandomForestClassier()
             rf.fit(X,y)
 
-            partial_dependence(feature_ids, rf.predict)
-            or
-            partial_dependence(feature_ids, rf.predict_proba)
+
+            model = InMemoryModel(rf, examples = X)
+            interpreter = Interpretation()
+            interpreter.load_data(X)
+            interpreter.feature_importance.feature_importance(model)
 
             are acceptable use cases. Output types need to be 1D or 2D numpy arrays.
 
@@ -103,29 +107,24 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         """
 
-        predict_fn = self.build_annotated_model(predict_fn, examples=self.data_set.data.values)
-
         importances = {}
-        raw_predictions = predict_fn(self.data_set.data.values)
+        original_predictions = modelinstance.predict(self.data_set.data.values)
 
-        n = raw_predictions.shape[0]
+        n = original_predictions.shape[0]
 
         # instead of copying the whole dataset, should we copy a column, change column values,
         # revert column back to copy?
         for feature_id in self.data_set.feature_ids:
             X_mutable = self.data_set.data.copy()
             samples = self.data_set.generate_column_sample(feature_id, n_samples=n, method='random-choice')
-            deltas = X_mutable[feature_id].values - samples
+            feature_perturbations = X_mutable[feature_id].values - samples
             X_mutable[feature_id] = samples
-            new_predictions = predict_fn(X_mutable.values)
-            idx = np.where(deltas != 0)[0]
-            changes_in_predictions = ((raw_predictions[idx] - new_predictions[idx]) / deltas[idx]) ** 2
-            diff_magnitude = sum(changes_in_predictions) / len(idx)
-            importances[feature_id] = diff_magnitude
-            #return raw_predictions, X_mutable, samples, deltas, new_predictions, changes_in_predictions, diff_magnitude
+            new_predictions = modelinstance.predict(X_mutable.values)
+            changes_in_predictions = new_predictions - original_predictions
+            importance = np.mean(np.std(changes_in_predictions, axis=0))
+            importances[feature_id] = importance
 
-
-        importances =  pd.Series(importances)
+        importances =  pd.Series(importances).sort_values()
         importances = importances / importances.sum()
         return importances
 
