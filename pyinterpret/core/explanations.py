@@ -2,6 +2,7 @@
 
 from .global_interpretation.partial_dependence import PartialDependence
 from .local_interpretation.local_interpreter import LocalInterpreter
+from .global_interpretation.feature_importance import FeatureImportance
 from ..data.dataset import DataManager
 from ..model.local import InMemoryModel
 from ..util.logger import build_logger
@@ -36,7 +37,7 @@ class Interpretation(object):
     interpreter.partial_dependence([feature_id1, feature_id2], regressor.predict)
     """
 
-    def __init__(self, log_level='WARNING'):
+    def __init__(self, log_level=30):
         """
         Attaches local and global interpretations
         to Interpretation object.
@@ -52,7 +53,9 @@ class Interpretation(object):
         self.logger = build_logger(log_level, __name__)
         self.local_interpreter = LocalInterpreter(self)
         self.partial_dependence = PartialDependence(self)
-        self.data_manager = None
+        self.feature_importance = FeatureImportance(self)
+        self.data_set = None
+
 
     def load_data(self, training_data, feature_names=None, index=None):
         """
