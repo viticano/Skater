@@ -14,7 +14,8 @@ from ...util.kernels import flatten
 
 COLORS = ['#328BD5', '#404B5A', '#3EB642', '#E04341', '#8665D0']
 plt.rcParams['figure.autolayout'] = True
-
+plt.rcParams['figure.figsize'] = (16, 7)
+plt.style.use('ggplot')
 
 class FeatureImportance(BaseGlobalInterpretation):
     """Contains methods for feature importance. Subclass of BaseGlobalInterpretation"""

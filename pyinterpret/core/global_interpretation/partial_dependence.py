@@ -23,6 +23,8 @@ from ...util.kernels import flatten
 from ...util.plotting import COLORS, ColorMap, coordinate_gradients_to_1d_colorscale, plot_2d_color_scale
 
 plt.rcParams['figure.autolayout'] = True
+plt.rcParams['figure.figsize'] = (16, 7)
+plt.style.use('ggplot')
 
 #if we want to employ instance methods in multiprocessing, enable this code:
 #copy_reg.pickle(types.MethodType, pickle_method, unpickle_method)
