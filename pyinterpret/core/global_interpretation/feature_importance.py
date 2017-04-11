@@ -128,9 +128,12 @@ class FeatureImportance(BaseGlobalInterpretation):
         importances = importances / importances.sum()
         return importances
 
-    def plot_feature_importance(self, predict_fn):
+    def plot_feature_importance(self, predict_fn, ax=None):
         importances = self.feature_importance(predict_fn)
-        f, ax = plt.subplots(1)
+        if ax is None:
+            f, ax = plt.subplots(1)
+        else:
+            f = ax.figure
         colors = cycle(COLORS)
         color = colors.next()
         importances.sort_values().plot(kind = 'barh',ax=ax, color=color)
