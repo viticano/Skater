@@ -20,7 +20,7 @@ def predict():
     print query.shape
     prediction = clf.predict(query)
     print prediction
-    return jsonify({'prediction': list(prediction)})
+    return jsonify({'predictions': list(prediction)})
 
 if __name__ == '__main__':
      clf = joblib.load('../models/model.pkl')

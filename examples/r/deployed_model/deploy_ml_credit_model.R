@@ -13,17 +13,24 @@ health.check <- function() {
 
 #* @post /predict
 predict.default.rate <- function(
-  Status.of.existing.checking.account
+d=list(Status.of.existing.checking.account
   , Duration.in.month
   , Credit.history
-  , Savings.account.bonds
+  , Savings.account.bonds)
 ) {
-  data <- list(
-    Status.of.existing.checking.account=Status.of.existing.checking.account
-    , Duration.in.month=Duration.in.month
-    , Credit.history=Credit.history
-    , Savings.account.bonds=Savings.account.bonds
-  )
-  prediction <- predict(decision.tree, data)
-  return(list(default.probability=unbox(prediction[1, 2])))
+  data <- d
+#  data <- c(
+#    Status.of.existing.checking.account=Status.of.existing.checking.account
+#    , Duration.in.month=Duration.in.month
+#    , Credit.history=Credit.history
+#    , Savings.account.bonds=Savings.account.bonds
+#  )
+  Status.of.existing.checking.account = c("A14", "A15", "A11")
+  Duration.in.month = c(12, 11, 10)
+  Credit.history = c("A34", "A33", "A31")
+  Savings.account.bonds = c("A64", "A61", "A60")
+  df = data.frame(Status.of.existing.checking.account, Duration.in.month, Credit.history, Savings.account.bonds)
+  df.list <- as.list(as.data.frame(t(df)))
+  prediction <- predict(decision.tree, df.list)
+  return(list(default.probability=unbox(prediction[1, 1])))
 }
