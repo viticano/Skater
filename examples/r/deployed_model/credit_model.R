@@ -18,7 +18,6 @@ url
 
 library(rpart)
 # Build a tree
-# I already figured these significant variables from my first iteration (not shown in this code for simplicity)
 decision.tree <- rpart(
 Status ~ Status.of.existing.checking.account + Duration.in.month + Credit.history + Savings.account.bonds
 , method="class"
