@@ -1,8 +1,27 @@
 from matplotlib import colors, cm, patches, pyplot
 import numpy as np
 import math
+from functools import wraps
 
 COLORS = ['#328BD5', '#404B5A', '#3EB642', '#E04341', '#8665D0']
+
+
+def if_matplotlib(func):
+    """Test decorator that skips test if matplotlib not installed."""
+    @wraps(func)
+    def run_test(*args, **kwargs):
+        try:
+            import matplotlib
+
+            # this fails if no $DISPLAY specified
+            import matplotlib.pyplot as plt
+            plt.figure()
+        except ImportError:
+            raise SkipTest('Matplotlib not available.')
+        else:
+            return func(*args, **kwargs)
+    return run_test
+
 
 class ColorMap(object):
     """
@@ -151,3 +170,5 @@ def build_buffer(x, buffer_prop=.1):
     buffer = (xmax - xmin) * buffer_prop / 2.
     xmin, xmax = xmin - buffer, xmax + buffer
     return xmin, xmax, buffer
+
+
