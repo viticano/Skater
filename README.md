@@ -1,9 +1,9 @@
-# PyInterpret
+# pyInterpret
 ##### Master: ![Build Status-master](https://api.travis-ci.com/repositories/datascienceinc/model-interpretation.svg?token=okdWYn5kDgeoCPJZGPEz&branch=master)
-###Layout
 
-![layout](../master/PyInterpret.png?raw=true)
+<!--![layout](../master/PyInterpret.png?raw=true)
 =======
+-->
 
 ### Dev Installation
 ```
@@ -42,10 +42,12 @@ regressor.fit(X, y)
 
 #partial dependence
 from pyinterpret.core.explanations import Interpretation
+from pyinterpret.model import InMemoryModel
 i = Interpretation()
 i.load_data(X, feature_names = feature_names)
+model = InMemoryModel(regressor.predict, examples = X)
 i.partial_dependence.plot_partial_dependence([feature_names[0], feature_names[1]],
-                                            regressor.predict)
+                                            model)
 
 #local interpretation
 from pyinterpret.core.local_interpretation.lime.lime_tabular import LimeTabularExplainer
@@ -56,5 +58,10 @@ explainer.explain_instance(example,  regressor.predict).show_in_notebook()
 
 ### Testing
 ```
-python pyinterpret/tests/test_all.py --debug --n=1000 --dim=3 --seed=1
+python pyinterpret/tests/all_tests.py --debug --n=1000 --dim=3 --seed=1
+```
+
+### API documentation
+```
+https://datascienceinc.github.io/model-interpretation/py-modindex.html
 ```

@@ -7,10 +7,12 @@ from sklearn.metrics.pairwise import cosine_distances
 from ..util.logger import build_logger
 from ..util import exceptions
 
-class DataSet(object):
+__all__ = ['DataManager']
+
+class DataManager(object):
     """Module for passing around data to interpretation objects"""
 
-    def __init__(self, data, feature_names=None, index=None, log_level = 30):
+    def __init__(self, data, feature_names=None, index=None, log_level=30):
         """
         The abstraction around using, accessing, sampling data for interpretation purposes.
         Used by interpretation objects to grab data, collect samples, and handle
@@ -109,7 +111,7 @@ class DataSet(object):
             for feature_id in feature_ids:
                 if feature_id not in self.feature_ids:
                     missing_features.append(feature_id)
-            err_msg = "Feature ids {} not found in DataSet.feature_ids".format(missing_features)
+            err_msg = "Feature ids {} not found in DataManager.feature_ids".format(missing_features)
             raise KeyError(err_msg)
 
         grid_range = [x * 100 for x in grid_range]
@@ -121,10 +123,11 @@ class DataSet(object):
             if len(uniques) ==2:
                 vals = uniques.copy()
             else:
-                vals = np.percentile(self[feature_id], bins)
+                vals = np.unique(np.percentile(self[feature_id], bins))
             grid.append(vals)
         grid = np.array(grid)
-        self.logger.info('Generated grid of shape {}'.format(grid.shape))
+        grid_shape = [(1, i) for i in [row.shape[0] for row in grid]]
+        self.logger.info('Generated grid of shape {}'.format(grid_shape))
         return grid
 
     def _build_metastore(self, bin_count):
@@ -211,9 +214,7 @@ class DataSet(object):
             raise NotImplementedError("We havent coded this yet.")
 
         elif strategy == 'uniform-over-similarity-ranks':
-
             metastore = self._build_metastore(bin_count)
-
             data_distance_ranks = metastore['ranks_rounded']
             n_rows = metastore['n_rows']
             unique_ranks = metastore['unique_ranks']
@@ -226,3 +227,22 @@ class DataSet(object):
                     new_samples = np.random.choice(idx, replace=True, size=samples_per_bin)
                     samples.extend(self.data.loc[new_samples].values)
             return pd.DataFrame(samples, columns=self.feature_ids)
+
+    def generate_column_sample(self, feature_id, n_samples=None, method='random-choice'):
+        if method == 'random-choice':
+            return self._generate_column_sample_random_choice(feature_id, n_samples=n_samples)
+
+    def _generate_column_sample_random_choice(self, feature_id, n_samples=None):
+        return np.random.choice(self[feature_id].values, size=n_samples)
+
+    def _generate_column_sample_stratified(self, feature_id, n_samples=None):
+        """
+        Tries to capture all relevant regions of space, relative to how many samples are allowed.
+        :param feature_id:
+        :param n_samples:
+        :return:
+        """
+        pass
+
+    def _generate_column_sample_modeled(self, feature_id, n_samples=None):
+        pass
