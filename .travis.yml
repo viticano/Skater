@@ -2,34 +2,27 @@ language: python
 dist: trusty
 cache: pip
 python:
-  - "2.7"
-  - "3.3"
-  - "3.4"
-cache: pip
-
-os: 
-  - linux
-
+- '2.7'
+- '3.5'
+- '3.6'
+os:
+- linux
 virtualenv:
   system_site_packages: true
-
 before_install:
- - sudo apt-get build-dep python-scipy
- - sudo pip install scipy
- # - sudo apt-get install -qq python-numpy python-scipy
-
-# command to install dependencies
+- sudo apt-get build-dep python-scipy
+- sudo pip install scipy
 install:
-  - sudo python setup.py install
-  # make sure that scipy is OK before anything else
-  - python -c "import scipy"
-  - python -c "import numpy"
-  - python -c "import lime"
-
-# command to run tests
+- sudo python setup.py install
+- python -c "import scipy"
+- python -c "import numpy"
+- python -c "import lime"
 script:
-  - . run_test.sh
+- ". run_test.sh"
 branches:
   only:
-    - master
-    - v1-dev
+  - master
+  - v1-dev
+notifications:
+  slack:
+    secure: V4O0kP3vXa0IXJUYc6efzolqmhmp7q6j9R8qplUofOUof2rCr5VwF8XWCVtoZ46L84SujtIkeeG2vKftzg5NnzTGxEqtsaQp+lHs3uV+Gkwx/0DX9b5pZ4lp7vAVUmuMbmyyf+3ALVNwU7lkfjXqf/o4o9+5OjgJbUaBzmT76rssNXhcU6XSNZE03o7onW00j0SDwJhClejmEdy9L5iK68zxPhV/++ASkdTn2aSAH1sLVtF78HCGuFr9jUVqSOaO3T6SrkZXUGkGXts07R8k9RVm+CzqjIrVws/T3mYYwGGVx5FqwsIz5dESFUJHQeW5T9HXlU8brps6b3rW8ZyGuUGnPETYl8kytj4iIS1Fm2137XvaphpU4JR/UVsHaSlzCdzNPQTNHkzhOMv2rMvQgwddK1utz+pnR+OZVyrzAB9k6bS7aGy8sQejQhibeV5sDsErH84yUbOVogT1FvQTt7N9lS7mWeO5bU9wjyDwKThj8APcm/uPHFWvXCxf582M5UeBimqQ67OL2KKi08ytiur3XJJW3etDPg/SheMb95YqPO1WWfJ1eBeq88fOZ2ukiULw6/d1FRw00LFnr8Bcs+beKJq72B8wBWzhk/FUphROsVwdq2jW7B2ZKWblo11YOnyaSo3YInxSnWI0H15p5udfkQoHE1lzTiW+GvRTsc4=
