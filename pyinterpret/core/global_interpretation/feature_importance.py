@@ -11,6 +11,7 @@ from .base import BaseGlobalInterpretation
 from ...util.static_types import StaticTypes
 from ...util import exceptions
 from ...util.kernels import flatten
+from ...util.plotting import if_matplotlib
 
 COLORS = ['#328BD5', '#404B5A', '#3EB642', '#E04341', '#8665D0']
 plt.rcParams['figure.autolayout'] = True
@@ -129,6 +130,7 @@ class FeatureImportance(BaseGlobalInterpretation):
         importances = importances / importances.sum()
         return importances
 
+    @if_matplotlib
     def plot_feature_importance(self, predict_fn, ax=None):
         importances = self.feature_importance(predict_fn)
         if ax is None:

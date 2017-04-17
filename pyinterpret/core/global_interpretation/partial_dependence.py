@@ -20,7 +20,8 @@ from ...util import exceptions
 from ...util.data_structures import ControlledDict
 from ...util.model import get_predictor
 from ...util.kernels import flatten
-from ...util.plotting import COLORS, ColorMap, coordinate_gradients_to_1d_colorscale, plot_2d_color_scale
+from ...util.plotting import if_matplotlib,COLORS, ColorMap, \
+    coordinate_gradients_to_1d_colorscale, plot_2d_color_scale
 
 plt.rcParams['figure.autolayout'] = True
 plt.rcParams['figure.figsize'] = (16, 7)
@@ -315,7 +316,7 @@ class PartialDependence(BaseGlobalInterpretation):
         else:
             return pd.DataFrame(pd_list)
 
-
+    @if_matplotlib
     def plot_partial_dependence(self, feature_ids, modelinstance, grid=None,
                                 grid_resolution=None, grid_range=None, n_jobs=-1,
                                 sample=True, sampling_strategy='random-choice',
