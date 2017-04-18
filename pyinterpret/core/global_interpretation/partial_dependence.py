@@ -4,12 +4,7 @@ from itertools import product, cycle
 import numpy as np
 import pandas as pd
 import re
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.ticker import ScalarFormatter
 from pathos.multiprocessing import Pool
-from matplotlib.axes._subplots import Axes as mpl_axes
-from matplotlib import cm
 import functools
 from six.moves import copyreg as copy_reg
 import types
@@ -22,10 +17,6 @@ from ...util.model import get_predictor
 from ...util.kernels import flatten
 from ...util.plotting import if_matplotlib,COLORS, ColorMap, \
     coordinate_gradients_to_1d_colorscale, plot_2d_color_scale
-
-plt.rcParams['figure.autolayout'] = True
-plt.rcParams['figure.figsize'] = (16, 7)
-plt.style.use('ggplot')
 
 #if we want to employ instance methods in multiprocessing, enable this code:
 #copy_reg.pickle(types.MethodType, pickle_method, unpickle_method)
@@ -441,6 +432,7 @@ class PartialDependence(BaseGlobalInterpretation):
                 ax_list.append(ax)
             return ax_list
 
+    @if_matplotlib
     def _plot_pdp_from_df(self, pdp, pd_metadata,
                           with_variance=False, plot_title=None,
                           disable_offset=True):
@@ -465,7 +457,7 @@ class PartialDependence(BaseGlobalInterpretation):
                   "{}: {}".format(*[n_features, feature_columns])
             raise(ValueError(msg))
 
-
+    @if_matplotlib
     def _2d_pdp_plot(self, pdp, feature_name, sd_col, class_columns,
                      with_variance=False, plot_title=None, disable_offset=True):
         colors = cycle(COLORS)
@@ -522,7 +514,7 @@ class PartialDependence(BaseGlobalInterpretation):
         else:
             return False
 
-
+    @if_matplotlib
     def _3d_pdp_plot(self, pdp, feature1, feature2, sd_column, class_columns,
 
                      with_variance=False, plot_title=None, disable_offset=True):
@@ -538,9 +530,9 @@ class PartialDependence(BaseGlobalInterpretation):
         feature_2_is_binary = len(np.unique(feature_2_data)) == 2
 
         if not feature_1_is_binary and not feature_2_is_binary:
-            plot_objects = self._plot_3d_full_mesh(pdp, feature1, feature2,
+            plot_objects = if_matplotlib(self._plot_3d_full_mesh(pdp, feature1, feature2,
                                                    sd_column, class_columns,
-                                                   with_variance=with_variance)
+                                                   with_variance=with_variance))
 
         elif feature_1_is_binary and feature_2_is_binary:
             plot_objects = self._plot_2d_2_binary_feature(pdp,
@@ -571,7 +563,7 @@ class PartialDependence(BaseGlobalInterpretation):
                 # so the origin is front and center
         return plot_objects
 
-
+    @if_matplotlib
     def _plot_3d_full_mesh(self, pdp, feature1, feature2,
                            sd_column, class_columns,
                            with_variance=False, alpha=.7):
@@ -617,7 +609,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
         return flatten([figure_list, axis_list])
 
-
+    @if_matplotlib
     def _plot_3d_2_binary_feature(self, pdp, feature1, feature2, sd_column,
                                   class_columns, with_variance=False):
         colors = cycle(COLORS)

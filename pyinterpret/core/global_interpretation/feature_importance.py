@@ -2,21 +2,12 @@
 from itertools import product, cycle
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.ticker import ScalarFormatter
-from matplotlib.axes._subplots import Axes as mpl_axes
 
 from .base import BaseGlobalInterpretation
 from ...util.static_types import StaticTypes
 from ...util import exceptions
 from ...util.kernels import flatten
-from ...util.plotting import if_matplotlib
-
-COLORS = ['#328BD5', '#404B5A', '#3EB642', '#E04341', '#8665D0']
-plt.rcParams['figure.autolayout'] = True
-plt.rcParams['figure.figsize'] = (16, 7)
-plt.style.use('ggplot')
+from ...util.plotting import if_matplotlib, COLORS
 
 class FeatureImportance(BaseGlobalInterpretation):
     """Contains methods for feature importance. Subclass of BaseGlobalInterpretation"""

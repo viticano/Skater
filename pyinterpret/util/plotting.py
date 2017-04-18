@@ -15,8 +15,19 @@ def if_matplotlib(func):
             global cm
             global patches
             global pyplot
+            global ScalarFormatter
+            global Axes3D
+            global mpl_axes
+            from matplotlib.axes._subplots import Axes as mpl_axes
+            from mpl_toolkits.mplot3d import Axes3D
             import matplotlib.pyplot as plt
             from matplotlib import colors, cm, patches, pyplot
+            from matplotlib.ticker import ScalarFormatter
+
+            plt.rcParams['figure.autolayout'] = True
+            plt.rcParams['figure.figsize'] = (16, 7)
+            plt.style.use('ggplot')
+            print('HELLO!')
         except ImportError:
             raise ImportError("Matplotlib required for draw()")
         except RuntimeError:
