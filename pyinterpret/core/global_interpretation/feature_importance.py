@@ -132,7 +132,10 @@ class FeatureImportance(BaseGlobalInterpretation):
     def plot_feature_importance(self, predict_fn, ax=None):
         importances = self.feature_importance(predict_fn)
 
-        f, ax = plt.subplots(1) if ax is None else f, ax = ax.figure
+        if ax is None:
+            f, ax = plt.subplots(1)
+        else:
+            f = ax.figure
 
         colors = cycle(COLORS)
         color = colors.next()
