@@ -8,22 +8,18 @@ load("decision_tree_for_german_credit_data.RData")
 
 #* @get /
 health.check <- function() {
-    return("ok")
+  return("ok")
 }
 
 #* @post /predict
-predict.default.rate <- function(
-  Status.of.existing.checking.account
-  , Duration.in.month
-  , Credit.history
-  , Savings.account.bonds
-) {
-  data <- list(
-    Status.of.existing.checking.account=Status.of.existing.checking.account
-    , Duration.in.month=Duration.in.month
-    , Credit.history=Credit.history
-    , Savings.account.bonds=Savings.account.bonds
-  )
-  prediction <- predict(decision.tree, data)
-  return(list(default.probability=unbox(prediction[1, 2])))
+predict.default.rate <- function(input) {
+  input_data = sapply(input,rbind)
+  df = data.frame(input_data)
+  # manintaining types is very important, taking a shortcut below as this is just an example. But, this is where
+  # explicitly mentioning types outlasts the pain one may encounter later
+  df$Duration.in.month <- as.numeric(as.character(df$Duration.in.month))
+  prediction <- predict(decision.tree, df)
+
+  # For simplification just returning a single prediction
+  return(list(probability=prediction[,1]))
 }
