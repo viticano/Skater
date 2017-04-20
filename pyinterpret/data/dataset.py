@@ -33,7 +33,7 @@ class DataManager(object):
         if not isinstance(data, (np.ndarray, pd.DataFrame)):
             err_msg = 'Invalid Data: expected data to be a numpy array or pandas dataframe but got ' \
                       '{}'.format(type(data))
-            raise exceptions.DataSetError(err_msg)
+            raise(exceptions.DataSetError(err_msg))
 
         ndim = len(data.shape)
         self.logger.debug("__init__ data.shape: {}".format(data.shape))
@@ -44,7 +44,7 @@ class DataManager(object):
         elif ndim >= 3:
             err_msg = "Invalid Data: expected data to be 1 or 2 dimensions, " \
                       "Data.shape: {}".format(ndim)
-            raise exceptions.DataSetError(err_msg)
+            raise(exceptions.DataSetError(err_msg))
 
         self.n_rows, self.dim = data.shape
         self.logger.debug("after transform data.shape: {}".format(data.shape))
@@ -66,9 +66,9 @@ class DataManager(object):
             self.index = index
 
         else:
-            raise ValueError("Invalid: currently we only support pandas dataframes and numpy arrays"
+            raise(ValueError("Invalid: currently we only support pandas dataframes and numpy arrays"
                              "If you would like support for additional data structures let us "
-                             "know!")
+                             "know!"))
 
         self.data = pd.DataFrame(data, columns=self.feature_ids, index=self.index)
         self.metastore = None
@@ -100,11 +100,11 @@ class DataManager(object):
         if not all(i >= 0 and i <= 1 for i in grid_range):
             err_msg = "Grid range values must be between 0 and 1 but got:" \
                                  "{}".format(grid_range)
-            raise exceptions.MalformedGridRangeError(err_msg)
+            raise(exceptions.MalformedGridRangeError(err_msg))
 
         if not isinstance(grid_resolution, int) and grid_resolution > 0:
             err_msg = "Grid resolution {} is not a positive integer".format(grid_resolution)
-            raise exceptions.MalformedGridRangeError(err_msg)
+            raise(exceptions.MalformedGridRangeError(err_msg))
 
         if not all(feature_id in self.feature_ids for feature_id in feature_ids):
             missing_features = []
@@ -112,7 +112,7 @@ class DataManager(object):
                 if feature_id not in self.feature_ids:
                     missing_features.append(feature_id)
             err_msg = "Feature ids {} not found in DataManager.feature_ids".format(missing_features)
-            raise KeyError(err_msg)
+            raise(KeyError(err_msg))
 
         grid_range = [x * 100 for x in grid_range]
         bins = np.linspace(*grid_range, num=grid_resolution)
@@ -162,7 +162,7 @@ class DataManager(object):
 
         if not key in self.feature_ids:
             err_msg = "The key {} is not the set of feature_ids {}".format(*[key, self.feature_ids])
-            raise KeyError(err_msg)
+            raise(KeyError(err_msg))
         return self.data.__getitem__(key)
 
     def __setitem__(self, key, newval):
@@ -211,7 +211,7 @@ class DataManager(object):
             return pd.DataFrame(values, columns=self.feature_ids)
 
         elif strategy == 'uniform-from-percentile':
-            raise NotImplementedError("We havent coded this yet.")
+            raise(NotImplementedError("We havent coded this yet."))
 
         elif strategy == 'uniform-over-similarity-ranks':
             metastore = self._build_metastore(bin_count)

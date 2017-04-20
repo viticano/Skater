@@ -30,7 +30,7 @@ class InMemoryModel(ModelType):
         """
 
         if not hasattr(prediction_fn, "__call__"):
-            raise exceptions.ModelError("Predict function must be callable")
+            raise(exceptions.ModelError("Predict function must be callable"))
 
         self.prediction_fn = prediction_fn
         super(InMemoryModel, self).__init__(log_level=log_level,

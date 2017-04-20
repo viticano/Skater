@@ -4,14 +4,9 @@ from itertools import product, cycle
 import numpy as np
 import pandas as pd
 import re
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.ticker import ScalarFormatter
 from pathos.multiprocessing import Pool
-from matplotlib.axes._subplots import Axes as mpl_axes
-from matplotlib import cm
 import functools
-import copy_reg
+from six.moves import copyreg as copy_reg
 import types
 
 from .base import BaseGlobalInterpretation
@@ -20,11 +15,9 @@ from ...util import exceptions
 from ...util.data_structures import ControlledDict
 from ...util.model import get_predictor
 from ...util.kernels import flatten
-from ...util.plotting import COLORS, ColorMap, coordinate_gradients_to_1d_colorscale, plot_2d_color_scale
-
-plt.rcParams['figure.autolayout'] = True
-plt.rcParams['figure.figsize'] = (16, 7)
-plt.style.use('ggplot')
+from ...util.plotting import COLORS, ColorMap, \
+    coordinate_gradients_to_1d_colorscale, plot_2d_color_scale
+from ...util.exceptions import *
 
 #if we want to employ instance methods in multiprocessing, enable this code:
 #copy_reg.pickle(types.MethodType, pickle_method, unpickle_method)
@@ -192,33 +185,33 @@ class PartialDependence(BaseGlobalInterpretation):
 
         # TODO: There might be a better place to do this check
         if not isinstance(modelinstance, ModelType):
-            raise exceptions.ModelError("Incorrect estimator function used for computing partial dependence, try one "
+            raise(exceptions.ModelError("Incorrect estimator function used for computing partial dependence, try one "
                                         "creating one with pyinterpret.model.local.InMemoryModel or"
-                                        "pyinterpret.model.remote.DeployedModel")
+                                        "pyinterpret.model.remote.DeployedModel"))
 
         if modelinstance.model_type == 'classifier' and modelinstance.probability == False:
-            raise exceptions.ModelError("Incorrect estimator function used for computing partial dependence, try one "
-                                        "with which give probability estimates")
+            raise(exceptions.ModelError("Incorrect estimator function used for computing partial dependence, try one "
+                                        "with which give probability estimates"))
 
         if len(feature_ids) >= 3:
             too_many_features_err_msg = "Pass in at most 2 features for pdp. If you have a " \
                                         "use case where you'd like to look at 3 simultaneously" \
                                         ", please let us know."
-            raise exceptions.TooManyFeaturesError(too_many_features_err_msg)
+            raise(exceptions.TooManyFeaturesError(too_many_features_err_msg))
 
         if len(feature_ids) == 0:
             empty_features_err_msg = "Feature ids must have non-zero length"
-            raise exceptions.EmptyFeatureListError(empty_features_err_msg)
+            raise(exceptions.EmptyFeatureListError(empty_features_err_msg))
 
         if len(set(feature_ids)) != len(feature_ids):
             duplicate_features_error_msg = "feature_ids cannot contain duplicate values"
-            raise exceptions.DuplicateFeaturesError(duplicate_features_error_msg)
+            raise(exceptions.DuplicateFeaturesError(duplicate_features_error_msg))
 
         if self.data_set is None:
             load_data_not_called_err_msg = "self.interpreter.data_set not found. " \
                                            "Please call Interpretation.load_data " \
                                            "before running this method."
-            raise exceptions.DataSetNotLoadedError(load_data_not_called_err_msg)
+            raise(exceptions.DataSetNotLoadedError(load_data_not_called_err_msg))
 
         # TODO: This we can change easily to functional style
         missing_feature_ids = []
@@ -230,14 +223,14 @@ class PartialDependence(BaseGlobalInterpretation):
             missing_feature_id_err_msg = "Features {0} not found in " \
                                          "Interpretation.data_set.feature_ids" \
                                          "{1}".format(missing_feature_ids, self.data_set.feature_ids)
-            raise KeyError(missing_feature_id_err_msg)
+            raise(KeyError(missing_feature_id_err_msg))
 
         if grid_range is None:
             grid_range = (.05, 0.95)
         else:
             if not hasattr(grid_range, "__iter__"):
                 err_msg = "Grid range {} needs to be an iterable".format(grid_range)
-                raise exceptions.MalformedGridRangeError(err_msg)
+                raise(exceptions.MalformedGridRangeError(err_msg))
 
         self._check_grid_range(grid_range)
 
@@ -286,7 +279,7 @@ class PartialDependence(BaseGlobalInterpretation):
         if grid_expanded.shape[0] <= 0:
             empty_grid_expanded_err_msg = "Must have at least 1 pdp value" \
                                           "grid shape: {}".format(grid_expanded.shape)
-            raise exceptions.MalformedGridError(empty_grid_expanded_err_msg)
+            raise(exceptions.MalformedGridError(empty_grid_expanded_err_msg))
 
         n_classes = modelinstance.n_classes
         pd_list = []
@@ -409,6 +402,22 @@ class PartialDependence(BaseGlobalInterpretation):
 
         """
 
+        try:
+            global pyplot
+            global ScalarFormatter
+            global Axes3D
+            global mpl_axes
+            global cm
+            from matplotlib.axes._subplots import Axes as mpl_axes
+            from matplotlib.ticker import ScalarFormatter
+            from mpl_toolkits.mplot3d import Axes3D
+            from matplotlib import pyplot, cm
+        except ImportError:
+            raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on your system."))
+        except RuntimeError:
+            raise (MatplotlibDisplayError("Matplotlib unable to open display"))
+
+
         # in the event that a user wants a 3D pdp with multiple classes, how should
         # we handle this? currently each class will get its own figure
         if not hasattr(feature_ids, "__iter__"):
@@ -440,6 +449,7 @@ class PartialDependence(BaseGlobalInterpretation):
                 ax_list.append(ax)
             return ax_list
 
+
     def _plot_pdp_from_df(self, pdp, pd_metadata,
                           with_variance=False, plot_title=None,
                           disable_offset=True):
@@ -462,7 +472,7 @@ class PartialDependence(BaseGlobalInterpretation):
             msg = "Something went wrong. Expected either a single feature, " \
                   "or a 1-2 element array of features, got array of size:" \
                   "{}: {}".format(*[n_features, feature_columns])
-            raise ValueError(msg)
+            raise(ValueError(msg))
 
 
     def _2d_pdp_plot(self, pdp, feature_name, sd_col, class_columns,
@@ -477,7 +487,7 @@ class PartialDependence(BaseGlobalInterpretation):
         for class_column in class_columns:
             # if class_name is None:
             #     raise ValueError("Could not parse class name from {}".format(mean_col))
-            f, ax = plt.subplots(1)
+            f, ax = pyplot.subplots(1)
             figure_list.append(f)
             axis_list.append(ax)
             color = next(colors)
@@ -523,6 +533,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
 
     def _3d_pdp_plot(self, pdp, feature1, feature2, sd_column, class_columns,
+
                      with_variance=False, plot_title=None, disable_offset=True):
 
         # if there are just 2 classes, pick the last one.
@@ -580,20 +591,22 @@ class PartialDependence(BaseGlobalInterpretation):
         for class_column in class_columns:
             gradient_x, gradient_y, X, Y, Z = self.compute_3d_gradients(pdp, class_column, feature1, feature2)
             color_gradient, xmin, xmax, ymin, ymax = coordinate_gradients_to_1d_colorscale(gradient_x, gradient_y)
-            plt.figure()
-            ax = plt.subplot2grid((3, 3), (0, 0), colspan=2, rowspan=3, projection='3d')
+            pyplot.figure()
+            ax = pyplot.subplot2grid((3, 3), (0, 0), colspan=2, rowspan=3, projection='3d')
             figure_list.append(ax.figure)
             axis_list.append(ax)
+
             surface = ax.plot_surface(X, Y, Z, alpha=alpha, facecolors=color_gradient, linewidth=0., rstride=1, cstride=1)
             dx_mean = np.mean(gradient_x)
             dy_mean = np.mean(gradient_y)
             mean_point = (dx_mean, dy_mean)
 
             #add 2D color scale
-            ax_colors = plt.subplot2grid((3, 3), (1, 2), colspan=1, rowspan=1)
+            ax_colors = pyplot.subplot2grid((3, 3), (1, 2), colspan=1, rowspan=1)
             ax_colors = plot_2d_color_scale(xmin, xmax, ymin, ymax, plot_point=mean_point,ax=ax_colors)
             ax_colors.set_xlabel("Local Impact {}".format(feature1))
             ax_colors.set_ylabel("Local Impact {}".format(feature2))
+
 
             if with_variance:
                 var_color = next(colors)
@@ -619,7 +632,7 @@ class PartialDependence(BaseGlobalInterpretation):
         colors = cycle(COLORS)
         figure_list, axis_list = [], []
         for class_column in class_columns:
-            fig = plt.figure()
+            fig = pyplot.figure()
             ax = fig.add_subplot(111, projection='3d')
 
             for val in np.unique(pdp[feature2]):
@@ -645,7 +658,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
         std_error = pdp.set_index([feature1, feature2])[sd_col].unstack()
         for class_column in class_columns:
-            f = plt.figure()
+            f = pyplot.figure()
             ax = f.add_subplot(111)
             #feature2 is columns
             #feature1 is index
@@ -705,14 +718,14 @@ class PartialDependence(BaseGlobalInterpretation):
     def _check_grid(grid, feature_ids):
         if not isinstance(grid, np.ndarray):
             err_msg = "Grid of type {} must be a numpy array".format(type(grid))
-            raise exceptions.MalformedGridError(err_msg)
+            raise(exceptions.MalformedGridError(err_msg))
 
         if len(feature_ids) != grid.shape[0]:
             err_msg = "Given {0} features, there must be {1} rows in grid" \
                       "but {2} were found".format(len(feature_ids),
                                                   len(feature_ids),
                                                   grid.shape[0])
-            raise exceptions.MalformedGridError(err_msg)
+            raise(exceptions.MalformedGridError(err_msg))
 
 
     @staticmethod
@@ -724,7 +737,7 @@ class PartialDependence(BaseGlobalInterpretation):
         """
         if not isinstance(dataset, pd.DataFrame):
             err_msg = "Dataset.data must be a pandas.dataframe"
-            raise exceptions.DataSetError(err_msg)
+            raise(exceptions.DataSetError(err_msg))
 
 
     @staticmethod
@@ -736,11 +749,11 @@ class PartialDependence(BaseGlobalInterpretation):
         """
         if len(grid_range) != 2:
             err_msg = "Grid range {} must have 2 elements".format(grid_range)
-            raise exceptions.MalformedGridRangeError(err_msg)
+            raise(exceptions.MalformedGridRangeError(err_msg))
         if not all([i >= 0 and i <= 1 for i in grid_range]):
             err_msg = "All elements of grid range {} " \
                       "must be between 0 and 1".format(grid_range)
-            raise exceptions.MalformedGridRangeError(err_msg)
+            raise(exceptions.MalformedGridRangeError(err_msg))
 
     @staticmethod
     def compute_3d_gradients(pdp, mean_col, feature_1, feature_2, scaled=True):
@@ -800,6 +813,3 @@ class PartialDependence(BaseGlobalInterpretation):
             dx1 = np.apply_along_axis(lambda x: x / feature_1_diffs, 0, dx1)
             dx2 = np.apply_along_axis(lambda x: x / feature_2_diffs, 1, dx2)
         return dx1, dx2, x1_matrix, x2_matrix, z_matrix
-
-
-

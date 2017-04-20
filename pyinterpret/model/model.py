@@ -98,7 +98,7 @@ class ModelType(object):
         examples = self.set_examples(examples)
         if not examples.any():
             err_msg = "Examples have not been provided. Cannot check outputs"
-            raise exceptions.ModelError(err_msg)
+            raise(exceptions.ModelError(err_msg))
 
         outputs = self.predict(examples)
         self.input_shape = examples.shape
@@ -106,7 +106,7 @@ class ModelType(object):
 
         ndim = len(outputs.shape)
         if ndim > 2:
-            raise ValueError("Unsupported model type, output dim = {}".format(ndim))
+            raise(ValueError("Unsupported model type, output dim = {}".format(ndim)))
 
         try:
             #continuous, binary, continuous multioutput, multiclass, multilabel-indicator
