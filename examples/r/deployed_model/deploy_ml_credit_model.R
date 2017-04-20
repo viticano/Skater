@@ -13,6 +13,12 @@ health.check <- function() {
 
 #* @post /predict
 predict.default.rate <- function(input) {
+  if(typeof(input)=="character") {
+    in_data = fromJSON(input)
+  } else {
+    in_data = input
+  }
+
   input_data = sapply(input,rbind)
   df = data.frame(input_data)
   # manintaining types is very important, taking a shortcut below as this is just an example. But, this is where
