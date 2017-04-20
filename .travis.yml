@@ -2,18 +2,17 @@ language: python
 dist: trusty
 cache: pip
 python:
-- "2.7_with_system_site_packages"
-- '3.5_with_system_site_packages'
-- '3.6_with_system_site_packages'
+- "2.7"
+- '3.5'
+- '3.6'
 os:
 - linux
 
 install:
-- sudo apt-get build-dep python-scipy
-- sudo pip install scipy
-- sudo apt-get install python-matplotlib
-- sudo pip install matplotlib
-- sudo python setup.py install
+- pip install numpy
+- pip install scipy
+- pip install matplotlib
+- python setup.py install
 - python -c "import scipy"
 - python -c "import numpy"
 - python -c "import lime"
