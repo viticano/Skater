@@ -7,7 +7,8 @@ from .base import BaseGlobalInterpretation
 from ...util.static_types import StaticTypes
 from ...util import exceptions
 from ...util.kernels import flatten
-from ...util.plotting import if_matplotlib, COLORS
+from ...util.plotting import COLORS
+from ...util.exceptions import *
 
 class FeatureImportance(BaseGlobalInterpretation):
     """Contains methods for feature importance. Subclass of BaseGlobalInterpretation"""
@@ -121,14 +122,22 @@ class FeatureImportance(BaseGlobalInterpretation):
         importances = importances / importances.sum()
         return importances
 
-    @if_matplotlib
+
     def plot_feature_importance(self, predict_fn, ax=None):
+        try:
+            global pyplot
+            from matplotlib import pyplot
+        except ImportError:
+            raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on your system."))
+        except RuntimeError:
+            raise (MatplotlibDisplayError("Matplotlib unable to open display"))
+
         importances = self.feature_importance(predict_fn)
         if ax is None:
-            f, ax = plt.subplots(1)
+            f, ax = pyplot.subplots(1)
         else:
             f = ax.figure
         colors = cycle(COLORS)
         color = colors.next()
-        importances.sort_values().plot(kind = 'barh',ax=ax, color=color)
+        importances.sort_values().plot(kind='barh',ax=ax, color=color)
 

@@ -34,3 +34,6 @@ MalformedGridError = exception_factory("MalformedGridError",
 
 MalformedGridRangeError = exception_factory("MalformedGridRangeError",
                                             base_exception=PartialDependenceError)
+
+MatplotlibUnavailableError = exception_factory('MatplotlibUnavailableError', base_exception=ImportError)
+MatplotlibDisplayError = exception_factory('MatplotlibDisplayError', base_exception=RuntimeError)

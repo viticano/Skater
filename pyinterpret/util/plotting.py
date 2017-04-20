@@ -1,91 +1,68 @@
 import numpy as np
 import math
 from functools import wraps
+import importlib
+
+from .exceptions import MatplotlibDisplayError, MatplotlibUnavailableError
 
 COLORS = ['#328BD5', '#404B5A', '#3EB642', '#E04341', '#8665D0']
 
 
-def if_matplotlib(func):
-    """Test decorator that skips test if matplotlib not installed."""
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        try:
-            global plt
-            global colors
-            global cm
-            global patches
-            global pyplot
-            global ScalarFormatter
-            global Axes3D
-            global mpl_axes
-            from matplotlib.axes._subplots import Axes as mpl_axes
-            from mpl_toolkits.mplot3d import Axes3D
-            import matplotlib.pyplot as plt
-            from matplotlib import colors, cm, patches, pyplot
-            from matplotlib.ticker import ScalarFormatter
-
-            plt.rcParams['figure.autolayout'] = True
-            plt.rcParams['figure.figsize'] = (16, 7)
-            plt.style.use('ggplot')
-            print('HELLO!')
-        except ImportError:
-            raise ImportError("Matplotlib required for draw()")
-        except RuntimeError:
-            print("Matplotlib unable to open display")
-            raise
-        return func(*args, **kwargs)
-    return wrapper
-
-
 class LinearSegments(object):
-    @if_matplotlib
-    def __init__(self):
-        self.black_to_blue_dict = {
-            'red': ((0.0, 0.0, 0.0),
-                    (1.0, 0.0, 0.0)),
-            'blue': ((0.0, 0.0, 0.0),
-                     (1.0, 1.0, 0.0)),
-            'green': ((0.0, 0.0, 0.0),
-                      (1.0, 0.0, 0.0))}
 
-        self.black_to_green_dict = {
-            'red': ((0.0, 0.0, 0.0),
-                    (1.0, 0.0, 0.0)),
-            'blue': ((0.0, 0.0, 0.0),
-                     (1.0, 0.0, 0.0)),
-            'green': ((0.0, 0.0, 0.0),
-                      (1.0, 1.0, 0.0))}
+    black_to_blue_dict = {
+        'red': ((0.0, 0.0, 0.0),
+                (1.0, 0.0, 0.0)),
+        'blue': ((0.0, 0.0, 0.0),
+                 (1.0, 1.0, 0.0)),
+        'green': ((0.0, 0.0, 0.0),
+                  (1.0, 0.0, 0.0))}
 
-        self.red_to_green_dict = {
-            'red': ((0.0, 1.0, 1.0),
-                     (1.0, 0.0, 0.0)),
-            'blue': ((0.0, 0.0, 0.0),
-                      (1.0, 0.0, 0.0)),
-            'green': ((0.0, 0.0, 0.0),
-                       (1.0, 1.0, 0.0))}
+    black_to_green_dict = {
+        'red': ((0.0, 0.0, 0.0),
+                (1.0, 0.0, 0.0)),
+        'blue': ((0.0, 0.0, 0.0),
+                 (1.0, 0.0, 0.0)),
+        'green': ((0.0, 0.0, 0.0),
+                  (1.0, 1.0, 0.0))}
+
+    red_to_green_dict = {
+        'red': ((0.0, 1.0, 1.0),
+                 (1.0, 0.0, 0.0)),
+        'blue': ((0.0, 0.0, 0.0),
+                  (1.0, 0.0, 0.0)),
+        'green': ((0.0, 0.0, 0.0),
+                   (1.0, 1.0, 0.0))}
 
 
 class ColorMap(object):
     """
     Maps arrays to colors
     """
-
-    @if_matplotlib
     def __init__(self):
-        linear_segments = LinearSegments()
-        self.red_to_green = colors.LinearSegmentedColormap('my_colormap', linear_segments.red_to_green_dict, 100)
-        self.black_to_blue = colors.LinearSegmentedColormap('my_colormap', linear_segments.black_to_blue_dict, 100)
-        self.black_to_green = colors.LinearSegmentedColormap('my_colormap', linear_segments.black_to_green_dict, 100)
+        try:
+            global colors
+            global cm
+            from matplotlib import colors, cm
 
-    @if_matplotlib
-    def array_1d_to_color_scale(self,array_1d, colormap):
+        except ImportError:
+            raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on your system."))
+        except RuntimeError:
+            raise (MatplotlibDisplayError("Matplotlib unable to open display"))
+
+        self.red_to_green = colors.LinearSegmentedColormap('my_colormap', LinearSegments.red_to_green_dict, 100)
+        self.black_to_blue = colors.LinearSegmentedColormap('my_colormap', LinearSegments.black_to_blue_dict, 100)
+        self.black_to_green = colors.LinearSegmentedColormap('my_colormap', LinearSegments.black_to_green_dict, 100)
+
+
+    def array_1d_to_color_scale(self, array_1d, colormap):
         mmin, mmax = min(array_1d), max(array_1d)
         norm = colors.Normalize(mmin, mmax)
         scalarMapx = cm.ScalarMappable(norm=norm, cmap=colormap)
         scalarMapx.set_array(array_1d)
         return scalarMapx.to_rgba(array_1d)
 
-@if_matplotlib
+
 def coordinate_gradients_to_1d_colorscale(dx, dy,
                                           x_buffer_prop=.1, y_buffer_prop=.1,
                                           norm='separate'):
@@ -136,7 +113,6 @@ def coordinate_gradients_to_1d_colorscale(dx, dy,
     color[:, :, 3] = 1.
     return color, xmin+xbuffer, xmax-xbuffer, ymin+ybuffer, ymax-ybuffer
 
-@if_matplotlib
 def plot_2d_color_scale(x1_min, x1_max, x2_min, x2_max, plot_point=None,
                         resolution=10, ax=None):
     """
@@ -161,6 +137,16 @@ def plot_2d_color_scale(x1_min, x1_max, x2_min, x2_max, plot_point=None,
     ----------
     matplotlib.axes._subplots.AxesSubplot
     """
+
+    try:
+        global pyplot
+        global patches
+        from matplotlib import pyplot, patches
+    except ImportError:
+        raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on your system."))
+    except RuntimeError:
+        raise (MatplotlibDisplayError("Matplotlib unable to open display"))
+
     ax.set_xlim(x1_min, x1_max)
     ax.set_ylim(x2_min, x2_max)
     x1 = np.linspace(x1_min, x1_max, resolution+1)
