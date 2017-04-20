@@ -5,6 +5,7 @@ Reference:
 * Once the model is build, invoke the following steps to start the plumber
 daemon
     - library(plumber)
+    - source("credit_model.R")
     - r_example <- plumb("deploy_ml_credit_model.R")
     - r_example$run(port=8000)
     - **Note:** Its possible that if you have an existing process running on 
