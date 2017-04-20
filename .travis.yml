@@ -12,6 +12,7 @@ virtualenv:
 before_install:
 - sudo apt-get build-dep python-scipy
 - sudo pip install scipy
+- sudo apt-get install python-matplotlib
 install:
 - sudo python setup.py install
 - python -c "import scipy"
