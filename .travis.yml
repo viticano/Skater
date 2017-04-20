@@ -3,12 +3,11 @@ dist: trusty
 cache: pip
 python:
 - '2.7'
+- "2.7_with_system_site_packages"
 - '3.5'
 - '3.6'
 os:
 - linux
-virtualenv:
-  system_site_packages: true
 before_install:
 - sudo apt-get build-dep python-scipy
 - sudo pip install scipy
