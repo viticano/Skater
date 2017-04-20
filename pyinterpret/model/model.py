@@ -9,6 +9,7 @@ from functools import partial
 from ..util.static_types import StaticTypes, return_data_type
 from ..util.logger import build_logger
 from ..util import exceptions
+from ..data import DataManager
 
 
 class ModelType(object):
@@ -23,7 +24,7 @@ class ModelType(object):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, log_level=30, class_names=None, examples=None):
+    def __init__(self, log_level=30, class_names=None, examples=None, feature_names=None):
         """
         Base model class for wrapping prediction functions. Common methods
         involve output type inference in requiring predict methods
@@ -55,7 +56,7 @@ class ModelType(object):
 
         examples = self.set_examples(examples)
         if examples.any():
-            self._check_output_signature(examples)
+            self._check_output_signature(DataManager(examples, feature_names=feature_names))
         else:
             self.logger.warn("No examples provided, cannot infer model type")
 
@@ -80,7 +81,7 @@ class ModelType(object):
         """
         return np.array(examples)
 
-    def _check_output_signature(self, examples):
+    def _check_output_signature(self, dataset):
         """
         Determines the model_type, output_type. Side effects
         of this method are to mutate object's attributes (model_type,
@@ -95,13 +96,9 @@ class ModelType(object):
 
         """
         self.logger.debug("Beginning output checks")
-        examples = self.set_examples(examples)
-        if not examples.any():
-            err_msg = "Examples have not been provided. Cannot check outputs"
-            raise(exceptions.ModelError(err_msg))
 
-        outputs = self.predict(examples)
-        self.input_shape = examples.shape
+        outputs = self.predict(dataset.data)
+        self.input_shape = dataset.data.shape
         self.output_shape = outputs.shape
 
         ndim = len(outputs.shape)
@@ -151,14 +148,14 @@ class ModelType(object):
 
         else:
             err_msg = "Could not infer model type"
-            self.logger.debug("Inputs: {}".format(examples))
+            self.logger.debug("Inputs: {}".format(dataset.data))
             self.logger.debug("Outputs: {}".format(outputs))
             self.logger.debug("sklearn response: {}".format(self.output_type))
             exceptions.ModelError(err_msg)
 
         self.formatter = self.transformer_func_factory(outputs)
 
-        reports = self.model_report(examples)
+        reports = self.model_report(dataset.data)
         for report in reports:
             self.logger.debug(report)
 
