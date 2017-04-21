@@ -7,7 +7,7 @@ from .model import ModelType
 class DeployedModel(ModelType):
     """Model that gets predictions from a deployed model"""
     def __init__(self, uri, input_formatter, output_formatter,
-                 log_level=30, class_names=None, examples=None):
+                 log_level=30, class_names=None, examples=None, feature_names=None):
         """This model can be called by making http requests
         to the passed in uri.
 
@@ -40,7 +40,8 @@ class DeployedModel(ModelType):
         self.output_formatter = output_formatter
         super(DeployedModel, self).__init__(examples=examples,
                                             class_names=class_names,
-                                            log_level=log_level)
+                                            log_level=log_level,
+                                            feature_names=feature_names)
 
 
     @staticmethod
@@ -84,7 +85,6 @@ class DeployedModel(ModelType):
         -----------
         predictions: arraytype
         """
-
         query = input_formatter(data)
         response = requests.post(uri, json=query)
         results = output_formatter(response)

@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.utils.multiclass import type_of_target
 from functools import partial
+import pandas as pd
 
 from ..util.static_types import StaticTypes, return_data_type
 from ..util.logger import build_logger
@@ -54,11 +55,15 @@ class ModelType(object):
         self.label_encoder = LabelEncoder()
         self.one_hot_encoder = OneHotEncoder()
         self.class_names = class_names
+        self.feature_names=feature_names
 
-        examples = self.set_examples(examples)
-        if examples.any():
-            self._check_output_signature(DataManager(examples, feature_names=feature_names))
+
+        if examples is not None:
+            self.input_type = type(examples)
+            examples = DataManager(examples, feature_names=feature_names)
+            self._check_output_signature(examples)
         else:
+            self.input_type = None
             self.logger.warn("No examples provided, cannot infer model type")
 
 
@@ -74,7 +79,7 @@ class ModelType(object):
         return self.predict(*args, **kwargs)
 
 
-    def set_examples(self, examples):
+    def check_examples(self, examples):
         """
         Ties examples to self. equivalent to self.examples = np.array(examples).
         Parameters
@@ -83,7 +88,10 @@ class ModelType(object):
 
 
         """
-        return np.array(examples)
+        if isinstance(examples, (pd.DataFrame, np.ndarray)):
+            return examples
+        else:
+            return np.array(examples)
 
       
     def _check_output_signature(self, dataset):
@@ -102,7 +110,12 @@ class ModelType(object):
         """
         self.logger.debug("Beginning output checks")
 
-        outputs = self.predict(dataset.data)
+        if self.input_type in (None, pd.DataFrame):
+            outputs = self.predict(dataset.data)
+        elif self.input_type == np.ndarray:
+            outputs = self.predict(dataset.data)
+        else:
+            raise ValueError("Unrecognized input type: {}".format(self.input_type))
         self.input_shape = dataset.data.shape
         self.output_shape = outputs.shape
 
@@ -238,7 +251,7 @@ class ModelType(object):
             metadata about function.
 
         """
-        examples = self.set_examples(examples)
+        examples = DataManager(examples, feature_names=self.feature_names)
         reports = []
         if isinstance(self.examples, np.ndarray):
             raw_predictions = self.predict(examples)
