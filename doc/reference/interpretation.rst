@@ -24,7 +24,9 @@ and observation names, as well as providing various sampling algorithms.
 Currently load_data requires a numpy ndarray or pandas DataFrame, though we may add support for additional data structures in the future.
 For more details on what the DataManager does, please see the relevant documentation [PROVIDE LINK].
 
-.. automodule:: pyinterpret.core.explanations
-.. autoclass:: Interpretation
+.. currentmodule:: pyinterpret
 
-   .. automethod:: load_data
+
+.. autosummary::
+
+   core.explanations.Interpretation.load_data
