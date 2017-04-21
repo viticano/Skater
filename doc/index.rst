@@ -1,16 +1,28 @@
-.. pyinterpret documentation master file, created by
-   sphinx-quickstart on Wed Mar 29 17:31:14 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. _contents:
 
-Welcome to pyinterpret's documentation!
+PyInterpret documentation!
 =======================================
 
-.. toctree::
-   :maxdepth: 4
-   :caption: Contents:
+.. only:: html
 
-   pyinterpret
+    :Release: |version|
+    :Date: |today|
+
+
+
+.. toctree::
+   :maxdepth: 1
+
+   overview
+   install
+   tutorial
+   api
+
+
+
+.. only:: html
+
+   - `Gallery <gallery.html>`_
 
 
 Indices and tables
