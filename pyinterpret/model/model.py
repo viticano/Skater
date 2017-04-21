@@ -23,7 +23,8 @@ class ModelType(object):
         We want to infer whether the model is real valued, or classification (n classes?)
     """
     __metaclass__ = abc.ABCMeta
-
+    
+    
     def __init__(self, log_level=30, class_names=None, examples=None, feature_names=None):
         """
         Base model class for wrapping prediction functions. Common methods
@@ -60,6 +61,7 @@ class ModelType(object):
         else:
             self.logger.warn("No examples provided, cannot infer model type")
 
+
     @abc.abstractmethod
     def predict(self, *args, **kwargs):
         """
@@ -67,8 +69,10 @@ class ModelType(object):
         """
         return
 
+
     def __call__(self, *args, **kwargs):
         return self.predict(*args, **kwargs)
+
 
     def set_examples(self, examples):
         """
@@ -81,6 +85,7 @@ class ModelType(object):
         """
         return np.array(examples)
 
+      
     def _check_output_signature(self, dataset):
         """
         Determines the model_type, output_type. Side effects
@@ -159,6 +164,7 @@ class ModelType(object):
         for report in reports:
             self.logger.debug(report)
 
+
     def predict_function_transformer(self, output):
         """
         Call this method when model returns a 1D array of
@@ -183,6 +189,7 @@ class ModelType(object):
         output = self.one_hot_encoder.transform(_labels).todense()
         output = np.squeeze(np.asarray(output))
         return output
+
 
     def transformer_func_factory(self, outputs):
         """
@@ -213,6 +220,7 @@ class ModelType(object):
             return self.predict_function_transformer
         else:
             return lambda x: x
+
 
     def model_report(self, examples):
         """
