@@ -50,8 +50,6 @@ class TestLime(unittest.TestCase):
         self.classifier.fit(self.X, self.y_for_classifier)
 
         self.model_regressor = LinearRegression()
-        print len(np.unique(self.y_for_classifier))
-
 
     def test_regression_with_feature_names(self):
         """

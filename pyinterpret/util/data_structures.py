@@ -12,11 +12,11 @@ class ControlledDict(dict):
     def __setitem__(self, key, value):
 
         if self.__readonly:
-            raise TypeError, "__setitem__ is not supported"
+            raise(TypeError, "__setitem__ is not supported")
         return dict.__setitem__(self, key, value)
 
     def __delitem__(self, key):
 
         if self.__readonly:
-            raise TypeError, "__delitem__ is not supported"
+            raise(TypeError, "__delitem__ is not supported")
         return dict.__delitem__(self, key)
