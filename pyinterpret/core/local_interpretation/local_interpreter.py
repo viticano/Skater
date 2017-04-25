@@ -71,7 +71,7 @@ class LocalInterpreter(BaseLocalInterpretation):
         explainer_model = explainer_model()
 
         self._check_explainer_model_pre_train(explainer_model)
-        predict_fn = self.build_annotated_model(predict_fn, examples=self.data_set.data.values)
+        predict_fn = self.build_annotated_model(predict_fn, examples=self.data_set.data)
 
         # data that has been sampled
         neighborhood = self.interpreter.data_set.generate_sample(strategy=sampling_strategy,
@@ -80,7 +80,7 @@ class LocalInterpreter(BaseLocalInterpretation):
         self._check_neighborhood(neighborhood)
 
         if similarity_method == 'cosine-similarity':
-            weights = self._get_weights_from_cosine_similarity(neighborhood.values,
+            weights = self._get_weights_from_cosine_similarity(neighborhood,
                                                               data_row)
         elif similarity_method == 'unscaled-kernel-substitution':
             weights = self._get_weights_via_kernel_subtitution(neighborhood,

@@ -19,8 +19,7 @@ predict.default.rate <- function(input) {
     in_data = input
   }
 
-  input_data = sapply(input,rbind)
-  df = data.frame(input_data)
+  df = data.frame(in_data)
   # manintaining types is very important, taking a shortcut below as this is just an example. But, this is where
   # explicitly mentioning types outlasts the pain one may encounter later
   df$Duration.in.month <- as.numeric(as.character(df$Duration.in.month))
