@@ -4,9 +4,14 @@ Overview
 
 '''''''''''''''''''''''''''''
 
-.. raw:: html
 
 PyInterpret
 ~~~~~~~~~~~~~~~~
 
 PyInterpret is a python package for model agnostic interpretation of predictive models. With PyInterpret, you can unpack the internal mechanics of arbitrary models; as long as you can obtain inputs, and use a function to obtain outputs, you can use PyInterpret to learn about the models internal decision criteria.
+
+
+.. todo:: Models as black boxes, model agnostic interpretation
+
+
+.. todo:: Flavors of interpretation algorithms
