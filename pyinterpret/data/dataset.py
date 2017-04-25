@@ -73,8 +73,11 @@ class DataManager(object):
                              "If you would like support for additional data structures let us "
                              "know!"))
 
-        self.data = pd.DataFrame(data, columns=self.feature_ids, index=self.index)
+        #self.data = pd.DataFrame(data, columns=self.feature_ids, index=self.index)
+        self.data = data
+        self.data_type = type(data)
         self.metastore = None
+
 
     def generate_grid(self, feature_ids, grid_resolution=100, grid_range=(.05, .95)):
         """
@@ -136,10 +139,10 @@ class DataManager(object):
     def _build_metastore(self, bin_count):
 
         n_rows = self.data.shape[0]
-        medians = np.median(self.data.values, axis=0).reshape(1, self.dim)
+        medians = np.median(np.array(self.data), axis=0).reshape(1, self.dim)
 
         # how far each data point is from the global median
-        dists = cosine_distances(self.data.values, Y=medians).reshape(-1)
+        dists = cosine_distances(np.array(self.data), Y=medians).reshape(-1)
 
         # the percentile distance of each datapoint to the global median
         # dist_percentiles = map(lambda i: int(stats.percentileofscore(dists, i)), dists)
@@ -162,14 +165,58 @@ class DataManager(object):
         }
 
     def __getitem__(self, key):
+        if self.data_type == pd.DataFrame:
+            return self.__getitem_pandas__(key)
+        if self.data_type == np.ndarray:
+            return self.__getitem_ndarray__(key)
+        else:
+            raise ValueError("Can't get item for data of type {}".format(self.data_type))
 
-        if not key in self.feature_ids:
-            err_msg = "The key {} is not the set of feature_ids {}".format(*[key, self.feature_ids])
-            raise(KeyError(err_msg))
-        return self.data.__getitem__(key)
+    def __setitem__(self, key):
+        if self.data_type == pd.DataFrame:
+            return self.__setitem_pandas__(key)
+        if self.data_type == np.ndarray:
+            return self.__setitem_ndarray__(key)
+        else:
+            raise ValueError("Can't set item for data of type {}".format(self.data_type))
 
-    def __setitem__(self, key, newval):
-        self.data.__setitem__(key, newval)
+    def __getrows__(self, idx):
+        if self.data_type == pd.DataFrame:
+            return self.__getrows_pandas__(idx)
+        if self.data_type == np.ndarray:
+            return self.__getrows_ndarray__(idx)
+        else:
+            raise ValueError("Can't get rows for data of type {}".format(self.data_type))
+
+    def __getitem_pandas__(self, i):
+        """if you passed in a pandas dataframe, it has columns which are strings."""
+        return self.data[i]
+
+    def __getitem_ndarray__(self, i):
+        """if you passed in a pandas dataframe, it has columns which are strings."""
+        idx = self.feature_ids.index(i)
+        return self.data[:, idx]
+
+
+    def __setitem_pandas__(self, i, newval):
+        """if you passed in a pandas dataframe, it has columns which are strings."""
+        self.data[i] = newval
+
+
+    def __setitem_ndarray__(self, i, newval):
+        """if you passed in a pandas dataframe, it has columns which are strings."""
+        idx = self.feature_ids.index(i)
+        self.data[:, idx] = newval
+
+    def __getrows_pandas__(self, idx):
+        """if you passed in a pandas dataframe, it has columns which are strings."""
+        return self.data.iloc[idx]
+
+
+    def __getrows_ndarray__(self, idx):
+        """if you passed in a pandas dataframe, it has columns which are strings."""
+        return self.data[idx]
+
 
     def generate_sample(self, sample=True, strategy='random-choice', n_samples_from_dataset=1000,
                         replace=True, samples_per_bin=10, bin_count=50):
@@ -210,8 +257,8 @@ class DataManager(object):
 
         if strategy == 'random-choice':
             idx = np.random.choice(self.index, size=n_samples_from_dataset, replace=replace)
-            values = self.data.loc[idx].values
-            return pd.DataFrame(values, columns=self.feature_ids)
+            values = self.__getrows__(idx)
+            return values
 
         elif strategy == 'uniform-from-percentile':
             raise(NotImplementedError("We havent coded this yet."))
@@ -227,9 +274,13 @@ class DataManager(object):
             for rank in unique_ranks:
                 idx = np.where(data_distance_ranks == rank)[0]
                 if idx.any():
-                    new_samples = np.random.choice(idx, replace=True, size=samples_per_bin)
-                    samples.extend(self.data.loc[new_samples].values)
-            return pd.DataFrame(samples, columns=self.feature_ids)
+                    new_samples_idx = np.random.choice(idx, replace=True, size=samples_per_bin)
+                    new_samples = self.__getrows__(new_samples_idx)
+                    samples.extend(new_samples)
+            if self.data_type == pd.DataFrame:
+                return pd.DataFrame(samples, columns=self.feature_ids)
+            else:
+                return np.array(samples)
 
     def generate_column_sample(self, feature_id, n_samples=None, method='random-choice'):
         """Sample a single feature from the data set.

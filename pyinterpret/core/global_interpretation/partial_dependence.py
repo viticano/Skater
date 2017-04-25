@@ -49,13 +49,14 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data):
     feature_columns = pd_metadata['feature_columns']
     feature_ids= pd_metadata['feature_ids']
     class_columns = pd_metadata['class_columns']
-    data_sample = input_data.copy()
+    data_columns = pd_metadata['data_feature_ids']
+    data_sample = pd.DataFrame(input_data, columns=data_columns)
     new_row = grid_expanded[index]
 
     for feature_idx, feature_id in enumerate(feature_ids):
         data_sample[feature_id] = new_row[feature_idx]
 
-    predictions = estimator_fn(data_sample.values)
+    predictions = estimator_fn(data_sample)
     mean_prediction = np.mean(predictions, axis=0)
     std_prediction = np.std(predictions, axis=0)
 
@@ -92,16 +93,17 @@ class PartialDependence(BaseGlobalInterpretation):
     _predict_fn = None
 
 
-    def _build_metadata_dict(self, modelinstance, feature_ids):
+    def _build_metadata_dict(self, modelinstance, pd_feature_ids, data_feature_ids):
 
-        feature_columns = ['feature: {}'.format(i) for i in feature_ids]
+        feature_columns = ['feature: {}'.format(i) for i in pd_feature_ids]
         sd_col = 'sd'
         class_names = modelinstance.class_names
         metadata = ControlledDict({
             'sd_column': sd_col,
             'class_columns': class_names,
             'feature_columns': feature_columns,
-            'feature_ids':feature_ids
+            'feature_ids':pd_feature_ids,
+            'data_feature_ids': data_feature_ids,
         })
         metadata.block_setitem()
         return metadata
@@ -177,6 +179,7 @@ class PartialDependence(BaseGlobalInterpretation):
         >>> X = boston.data
         >>> y = boston.target
         >>> features = boston.feature_names
+
         >>> rf = RandomForestClassier()
         >>> rf.fit(X,y)
 
@@ -281,7 +284,8 @@ class PartialDependence(BaseGlobalInterpretation):
         # make sure data_set module is giving us correct data structure
         self._check_dataset_type(data_sample)
 
-        _pdp_metadata = self._build_metadata_dict(modelinstance, feature_ids)
+        self.interpreter.logger.debug("Feature Ids: {}".format(feature_ids))
+        _pdp_metadata = self._build_metadata_dict(modelinstance, feature_ids, self.data_set.feature_ids)
         self.interpreter.logger.debug("PD metadata: {}".format(_pdp_metadata))
 
         # cartesian product of grid
@@ -746,8 +750,8 @@ class PartialDependence(BaseGlobalInterpretation):
         :param dataset:
         :return:
         """
-        if not isinstance(dataset, pd.DataFrame):
-            err_msg = "Dataset.data must be a pandas.dataframe"
+        if not isinstance(dataset, (pd.DataFrame, np.ndarray)):
+            err_msg = "Dataset.data must be a pandas.DataFrame or numpy.ndarray"
             raise(exceptions.DataSetError(err_msg))
 
 
