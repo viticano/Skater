@@ -11,3 +11,5 @@ API Reference
    :maxdepth: 1
 
    reference/interpretation
+   reference/model
+   reference/data

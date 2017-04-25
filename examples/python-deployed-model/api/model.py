@@ -19,13 +19,9 @@ def predict():
     # Note:
     # This is not a scalable solution
     # Refer to DataScience Inc.'s product offering for a scalable solution
-    print request.get_json()
     query = json_to_model_input(request)
-    print query.shape
     prediction = estimator.predict(query)
-    print prediction
     return jsonify({'predictions': list(prediction)})
 
 if __name__ == '__main__':
      app.run("0.0.0.0", debug=True)
-

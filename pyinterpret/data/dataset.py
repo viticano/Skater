@@ -20,9 +20,12 @@ class DataManager(object):
 
         Parameters
         ----------
-            data: 1D or 2D numpy array.
+            data: 1D/2D numpy array, or pandas DataFrame
+                raw data
             feature_names: iterable of feature names
+                Optional keyword containing names of features.
             index: iterable of row names
+                Optional keyword containing names of indexes (rows).
 
         """
 
@@ -229,11 +232,31 @@ class DataManager(object):
             return pd.DataFrame(samples, columns=self.feature_ids)
 
     def generate_column_sample(self, feature_id, n_samples=None, method='random-choice'):
+        """Sample a single feature from the data set.
+
+        Parameters
+        ----------
+
+        feature_id: hashable
+            name of the feature to sample. If no feature names were passed, then
+            the features are accessible via their column index.
+
+        n_samples: int
+            the number of samples to generate
+
+        method: str
+            the sampling method. Currently only random-choice is implemented.
+
+
+        """
         if method == 'random-choice':
             return self._generate_column_sample_random_choice(feature_id, n_samples=n_samples)
+        else:
+            raise(NotImplementedError("Currenly we only support random-choice for column \
+                                       level sampling "))
 
     def _generate_column_sample_random_choice(self, feature_id, n_samples=None):
-        return np.random.choice(self[feature_id].values, size=n_samples)
+        return np.random.choice(self.__getitem__(feature_id), size=n_samples)
 
     def _generate_column_sample_stratified(self, feature_id, n_samples=None):
         """

@@ -168,13 +168,24 @@ class PartialDependence(BaseGlobalInterpretation):
             total samples = bin_count * samples per bin.
         return_metadata: boolean
 
-        Example
-        --------
+        :Example:
+        >>> from pyinterpret.model import InMemoryModel
+        >>> from pyinterpret.core.explanations import Interpretation
         >>> from sklearn.ensemble import RandomForestClassier
+        >>> from sklearn.datasets import load_boston
+        >>> boston = load_boston()
+        >>> X = boston.data
+        >>> y = boston.target
+        >>> features = boston.feature_names
         >>> rf = RandomForestClassier()
         >>> rf.fit(X,y)
-        >>> partial_dependence(feature_ids, rf.predict)
-        >>> partial_dependence(feature_ids, rf.predict_proba)
+
+
+        >>> model = InMemoryModel(rf, examples = X)
+        >>> interpreter = Interpretation()
+        >>> interpreter.load_data(X)
+        >>> feature_ids = ['ZN','CRIM']
+        >>> interpreter.partial_dependence.partial_dependence(features,model)
         """
 
         if not hasattr(feature_ids, "__iter__"):
@@ -759,7 +770,7 @@ class PartialDependence(BaseGlobalInterpretation):
     def compute_3d_gradients(pdp, mean_col, feature_1, feature_2, scaled=True):
         """
         Computes component-wise gradients of pdp dataframe.
-        
+
         Parameters
         ----------
         pdp: pandas.DataFrame
