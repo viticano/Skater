@@ -1,0 +1,188 @@
+.. raw:: html
+
+   <div class="wy-grid-for-nav">
+
+.. raw:: html
+
+   <div class="wy-side-nav-search">
+
+`pyinterpret <index.html>`__
+
+.. raw:: html
+
+   <div role="search">
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   <div class="wy-menu wy-menu-vertical" data-spy="affix"
+   role="navigation" aria-label="main navigation">
+
+-  `Overview <overview.html>`__
+
+   -  `PyInterpret <overview.html#pyinterpret>`__
+
+-  `Installation <install.html>`__
+
+   -  `Dev Installation <install.html#dev-installation>`__
+   -  `Prod Installation
+      (platform) <install.html#prod-installation-platform>`__
+   -  `Use this kind of this stuff to do cool
+      stuff. <install.html#use-this-kind-of-this-stuff-to-do-cool-stuff>`__
+   -  `Testing <install.html#testing>`__
+   -  `API documentation <install.html#api-documentation>`__
+
+-  `Tutorial <tutorial.html>`__
+
+   -  `The PyInterpret
+      workflow <tutorial.html#the-pyinterpret-workflow>`__
+
+-  `API Reference <api.html>`__
+
+   -  `Interpretation Object <api.html#interpretation-object>`__
+
+.. raw:: html
+
+   </div>
+
+ 
+** `pyinterpret <index.html>`__
+
+.. raw:: html
+
+   <div class="wy-nav-content">
+
+.. raw:: html
+
+   <div class="rst-content">
+
+.. raw:: html
+
+   <div role="navigation" aria-label="breadcrumbs navigation">
+
+-  `Docs <index.html>`__ »
+-  pyinterpret.core.global\_interpretation package
+-  `View page
+   source <_sources/pyinterpret.core.global_interpretation.txt>`__
+
+--------------
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   <div class="document" role="main">
+
+.. raw:: html
+
+   <div id="pyinterpret-core-global-interpretation-package"
+   class="section">
+
+pyinterpret.core.global\_interpretation package\ `¶ <#pyinterpret-core-global-interpretation-package>`__
+========================================================================================================
+
+.. raw:: html
+
+   <div id="submodules" class="section">
+
+Submodules\ `¶ <#submodules>`__
+-------------------------------
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   <div id="module-pyinterpret.core.global_interpretation.base"
+   class="section">
+
+pyinterpret.core.global\_interpretation.base module\ `¶ <#module-pyinterpret.core.global_interpretation.base>`__
+----------------------------------------------------------------------------------------------------------------
+
+Base method for all global interpretations. Is a subclass of base
+ModelInterpreter
+
+ *class*
+``pyinterpret.core.global_interpretation.base.``\ ``BaseGlobalInterpretation``\ (\ *interpreter*\ )\ `[source] <_modules/pyinterpret/core/global_interpretation/base.html#BaseGlobalInterpretation>`__\ `¶ <#pyinterpret.core.global_interpretation.base.BaseGlobalInterpretation>`__
+    Bases:
+    ```pyinterpret.core.model_interpreter.ModelInterpreter`` <pyinterpret.core.html#pyinterpret.core.model_interpreter.ModelInterpreter>`__
+
+    Base class for global model interpretations
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   <div
+   id="pyinterpret-core-global-interpretation-partial-dependence-module"
+   class="section">
+
+pyinterpret.core.global\_interpretation.partial\_dependence module\ `¶ <#pyinterpret-core-global-interpretation-partial-dependence-module>`__
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   <div id="module-pyinterpret.core.global_interpretation"
+   class="section">
+
+Module contents\ `¶ <#module-pyinterpret.core.global_interpretation>`__
+-----------------------------------------------------------------------
+
+Submodule for all interpretations that cover *regions* of the domain,
+rather than individual points.
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   </div>
+
+--------------
+
+.. raw:: html
+
+   <div role="contentinfo">
+
+© Copyright 2017, Author.
+
+.. raw:: html
+
+   </div>
+
+Built with `Sphinx <http://sphinx-doc.org/>`__ using a
+`theme <https://github.com/snide/sphinx_rtd_theme>`__ provided by `Read
+the Docs <https://readthedocs.org>`__.
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   </div>

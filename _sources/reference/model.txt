@@ -1,0 +1,38 @@
+Model Objects
+=======================================
+
+Overview
+---------------------------------------
+Pyinterpret contains an abstraction for predictive models. Models apis vary by implementation, thus
+the
+
+.. code-block:: python
+   :linenos:
+
+   from sklearn.datasets import load_breast_cancer
+   from sklearn.ensemble import GradientBoostedClassifier
+
+   breast_cancer = load_breast_cancer()
+   X = breast_cancer.data
+   y = breast_cancer.target
+
+   gb = GradientBoostedClassifier()
+   gb.fit(X,y)
+
+   from pyinterpret.model import InMemoryModel
+   model = InMemoryModel(gb.predict_proba, examples = X)
+
+
+InMemoryModel
+---------------------------------------
+[DESCRIPTION]
+
+
+
+
+DeployedModel
+---------------------------------------
+[DESCRIPTION]
+
+.. autoclass:: pyinterpret.model.DeployedModel
+.. automethod:: pyinterpret.model.DeployedModel.__init__

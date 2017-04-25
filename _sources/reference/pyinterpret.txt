@@ -1,0 +1,284 @@
+.. raw:: html
+
+   <div class="wy-grid-for-nav">
+
+.. raw:: html
+
+   <div class="wy-side-nav-search">
+
+`pyinterpret <index.html>`__
+
+.. raw:: html
+
+   <div role="search">
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   <div class="wy-menu wy-menu-vertical" data-spy="affix"
+   role="navigation" aria-label="main navigation">
+
+-  `Overview <overview.html>`__
+
+   -  `PyInterpret <overview.html#pyinterpret>`__
+
+-  `Installation <install.html>`__
+
+   -  `Dev Installation <install.html#dev-installation>`__
+   -  `Prod Installation
+      (platform) <install.html#prod-installation-platform>`__
+   -  `Use this kind of this stuff to do cool
+      stuff. <install.html#use-this-kind-of-this-stuff-to-do-cool-stuff>`__
+   -  `Testing <install.html#testing>`__
+   -  `API documentation <install.html#api-documentation>`__
+
+-  `Tutorial <tutorial.html>`__
+
+   -  `The PyInterpret
+      workflow <tutorial.html#the-pyinterpret-workflow>`__
+
+-  `API Reference <api.html>`__
+
+   -  `Interpretation Object <api.html#interpretation-object>`__
+
+.. raw:: html
+
+   </div>
+
+ 
+** `pyinterpret <index.html>`__
+
+.. raw:: html
+
+   <div class="wy-nav-content">
+
+.. raw:: html
+
+   <div class="rst-content">
+
+.. raw:: html
+
+   <div role="navigation" aria-label="breadcrumbs navigation">
+
+-  `Docs <index.html>`__ »
+-  pyinterpret package
+-  `View page source <_sources/pyinterpret.txt>`__
+
+--------------
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   <div class="document" role="main">
+
+.. raw:: html
+
+   <div id="pyinterpret-package" class="section">
+
+pyinterpret package\ `¶ <#pyinterpret-package>`__
+=================================================
+
+.. raw:: html
+
+   <div id="subpackages" class="section">
+
+Subpackages\ `¶ <#subpackages>`__
+---------------------------------
+
+.. raw:: html
+
+   <div class="toctree-wrapper compound">
+
+-  `pyinterpret.core package <pyinterpret.core.html>`__
+
+   -  `Subpackages <pyinterpret.core.html#subpackages>`__
+
+      -  `pyinterpret.core.global\_interpretation
+         package <pyinterpret.core.global_interpretation.html>`__
+
+         -  `Submodules <pyinterpret.core.global_interpretation.html#submodules>`__
+         -  `pyinterpret.core.global\_interpretation.base
+            module <pyinterpret.core.global_interpretation.html#module-pyinterpret.core.global_interpretation.base>`__
+         -  `pyinterpret.core.global\_interpretation.partial\_dependence
+            module <pyinterpret.core.global_interpretation.html#pyinterpret-core-global-interpretation-partial-dependence-module>`__
+         -  `Module
+            contents <pyinterpret.core.global_interpretation.html#module-pyinterpret.core.global_interpretation>`__
+
+      -  `pyinterpret.core.local\_interpretation
+         package <pyinterpret.core.local_interpretation.html>`__
+
+         -  `Subpackages <pyinterpret.core.local_interpretation.html#subpackages>`__
+
+            -  `pyinterpret.core.local\_interpretation.lime
+               package <pyinterpret.core.local_interpretation.lime.html>`__
+
+               -  `Submodules <pyinterpret.core.local_interpretation.lime.html#submodules>`__
+               -  `pyinterpret.core.local\_interpretation.lime.lime\_image
+                  module <pyinterpret.core.local_interpretation.lime.html#module-pyinterpret.core.local_interpretation.lime.lime_image>`__
+               -  `pyinterpret.core.local\_interpretation.lime.lime\_tabular
+                  module <pyinterpret.core.local_interpretation.lime.html#module-pyinterpret.core.local_interpretation.lime.lime_tabular>`__
+               -  `pyinterpret.core.local\_interpretation.lime.lime\_text
+                  module <pyinterpret.core.local_interpretation.lime.html#module-pyinterpret.core.local_interpretation.lime.lime_text>`__
+               -  `Module
+                  contents <pyinterpret.core.local_interpretation.lime.html#module-pyinterpret.core.local_interpretation.lime>`__
+
+         -  `Submodules <pyinterpret.core.local_interpretation.html#submodules>`__
+         -  `pyinterpret.core.local\_interpretation.base
+            module <pyinterpret.core.local_interpretation.html#module-pyinterpret.core.local_interpretation.base>`__
+         -  `pyinterpret.core.local\_interpretation.local\_interpreter
+            module <pyinterpret.core.local_interpretation.html#module-pyinterpret.core.local_interpretation.local_interpreter>`__
+         -  `Module
+            contents <pyinterpret.core.local_interpretation.html#module-pyinterpret.core.local_interpretation>`__
+
+   -  `Submodules <pyinterpret.core.html#submodules>`__
+   -  `pyinterpret.core.explanations
+      module <pyinterpret.core.html#pyinterpret-core-explanations-module>`__
+   -  `pyinterpret.core.model\_interpreter
+      module <pyinterpret.core.html#module-pyinterpret.core.model_interpreter>`__
+   -  `Module
+      contents <pyinterpret.core.html#module-pyinterpret.core>`__
+
+-  `pyinterpret.data package <pyinterpret.data.html>`__
+
+   -  `Submodules <pyinterpret.data.html#submodules>`__
+   -  `pyinterpret.data.dataset
+      module <pyinterpret.data.html#module-pyinterpret.data.dataset>`__
+   -  `Module
+      contents <pyinterpret.data.html#module-pyinterpret.data>`__
+
+-  `pyinterpret.model package <pyinterpret.model.html>`__
+
+   -  `Submodules <pyinterpret.model.html#submodules>`__
+   -  `pyinterpret.model.local
+      module <pyinterpret.model.html#module-pyinterpret.model.local>`__
+   -  `pyinterpret.model.model
+      module <pyinterpret.model.html#module-pyinterpret.model.model>`__
+   -  `pyinterpret.model.remote
+      module <pyinterpret.model.html#module-pyinterpret.model.remote>`__
+   -  `Module
+      contents <pyinterpret.model.html#module-pyinterpret.model>`__
+
+-  `pyinterpret.tests package <pyinterpret.tests.html>`__
+
+   -  `Submodules <pyinterpret.tests.html#submodules>`__
+   -  `pyinterpret.tests.all\_tests
+      module <pyinterpret.tests.html#module-pyinterpret.tests.all_tests>`__
+   -  `pyinterpret.tests.arg\_parser
+      module <pyinterpret.tests.html#module-pyinterpret.tests.arg_parser>`__
+   -  `pyinterpret.tests.test\_data
+      module <pyinterpret.tests.html#module-pyinterpret.tests.test_data>`__
+   -  `pyinterpret.tests.test\_lime
+      module <pyinterpret.tests.html#module-pyinterpret.tests.test_lime>`__
+   -  `pyinterpret.tests.test\_local\_interpreter
+      module <pyinterpret.tests.html#pyinterpret-tests-test-local-interpreter-module>`__
+   -  `pyinterpret.tests.test\_partial\_dependence
+      module <pyinterpret.tests.html#pyinterpret-tests-test-partial-dependence-module>`__
+   -  `Module
+      contents <pyinterpret.tests.html#module-pyinterpret.tests>`__
+
+-  `pyinterpret.util package <pyinterpret.util.html>`__
+
+   -  `Submodules <pyinterpret.util.html#submodules>`__
+   -  `pyinterpret.util.exceptions
+      module <pyinterpret.util.html#module-pyinterpret.util.exceptions>`__
+   -  `pyinterpret.util.kernels
+      module <pyinterpret.util.html#module-pyinterpret.util.kernels>`__
+   -  `pyinterpret.util.logger
+      module <pyinterpret.util.html#module-pyinterpret.util.logger>`__
+   -  `pyinterpret.util.static\_types
+      module <pyinterpret.util.html#module-pyinterpret.util.static_types>`__
+   -  `Module
+      contents <pyinterpret.util.html#module-pyinterpret.util>`__
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   <div id="submodules" class="section">
+
+Submodules\ `¶ <#submodules>`__
+-------------------------------
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   <div id="module-pyinterpret.test" class="section">
+
+pyinterpret.test module\ `¶ <#module-pyinterpret.test>`__
+---------------------------------------------------------
+
+ ``pyinterpret.test.``\ ``adder``\ (\ *a*,
+*b*\ )\ `[source] <_modules/pyinterpret/test.html#adder>`__\ `¶ <#pyinterpret.test.adder>`__
+    This is a function
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   <div id="module-pyinterpret" class="section">
+
+Module contents\ `¶ <#module-pyinterpret>`__
+--------------------------------------------
+
+Model Agnostic interpretations and explanations.
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   </div>
+
+--------------
+
+.. raw:: html
+
+   <div role="contentinfo">
+
+© Copyright 2017, Author.
+
+.. raw:: html
+
+   </div>
+
+Built with `Sphinx <http://sphinx-doc.org/>`__ using a
+`theme <https://github.com/snide/sphinx_rtd_theme>`__ provided by `Read
+the Docs <https://readthedocs.org>`__.
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   </div>
+
+.. raw:: html
+
+   </div>

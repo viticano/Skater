@@ -1,0 +1,37 @@
+pyinterpret.core.local_interpretation package
+=============================================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    pyinterpret.core.local_interpretation.lime
+
+Submodules
+----------
+
+pyinterpret.core.local_interpretation.base module
+-------------------------------------------------
+
+.. automodule:: pyinterpret.core.local_interpretation.base
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyinterpret.core.local_interpretation.local_interpreter module
+--------------------------------------------------------------
+
+.. automodule:: pyinterpret.core.local_interpretation.local_interpreter
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: pyinterpret.core.local_interpretation
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -89,9 +89,11 @@
               
             
             
-              <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../pyinterpret.html">pyinterpret package</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
 </ul>
 
             
@@ -160,12 +162,13 @@
 
 <span class="kn">from</span> <span class="nn">.global_interpretation.partial_dependence</span> <span class="k">import</span> <span class="n">PartialDependence</span>
 <span class="kn">from</span> <span class="nn">.local_interpretation.local_interpreter</span> <span class="k">import</span> <span class="n">LocalInterpreter</span>
-<span class="kn">from</span> <span class="nn">..data.dataset</span> <span class="k">import</span> <span class="n">DataSet</span>
+<span class="kn">from</span> <span class="nn">.global_interpretation.feature_importance</span> <span class="k">import</span> <span class="n">FeatureImportance</span>
+<span class="kn">from</span> <span class="nn">..data.dataset</span> <span class="k">import</span> <span class="n">DataManager</span>
 <span class="kn">from</span> <span class="nn">..model.local</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
 <span class="kn">from</span> <span class="nn">..util.logger</span> <span class="k">import</span> <span class="n">build_logger</span>
 
 
-<div class="viewcode-block" id="Interpretation"><a class="viewcode-back" href="../../../pyinterpret.core.html#pyinterpret.core.explanations.Interpretation">[docs]</a><span class="k">class</span> <span class="nc">Interpretation</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">Interpretation</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Interpretation class. Before calling interpretation subclasses like partial</span>
 <span class="sd">    dependence, one must call Interpretation.load_data().</span>
@@ -194,7 +197,7 @@
 <span class="sd">    interpreter.partial_dependence([feature_id1, feature_id2], regressor.predict)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="s">&#39;WARNING&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Attaches local and global interpretations</span>
 <span class="sd">        to Interpretation object.</span>
@@ -210,9 +213,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">build_logger</span><span class="p">(</span><span class="n">log_level</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">local_interpreter</span> <span class="o">=</span> <span class="n">LocalInterpreter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">partial_dependence</span> <span class="o">=</span> <span class="n">PartialDependence</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_importance</span> <span class="o">=</span> <span class="n">FeatureImportance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_set</span> <span class="o">=</span> <span class="k">None</span>
 
-<div class="viewcode-block" id="Interpretation.load_data"><a class="viewcode-back" href="../../../pyinterpret.core.html#pyinterpret.core.explanations.Interpretation.load_data">[docs]</a>    <span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">training_data</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Interpretation.load_data"><a class="viewcode-back" href="../../../reference/interpretation.html#pyinterpret.core.explanations.Interpretation.load_data">[docs]</a>    <span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">training_data</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a DataSet object from inputs, ties to interpretation object.</span>
 <span class="sd">        This will be exposed to all submodules.</span>
@@ -235,7 +240,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Loading Data&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_set</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">(</span><span class="n">training_data</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_set</span> <span class="o">=</span> <span class="n">DataManager</span><span class="p">(</span><span class="n">training_data</span><span class="p">,</span>
                                 <span class="n">feature_names</span><span class="o">=</span><span class="n">feature_names</span><span class="p">,</span>
                                 <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
                                 <span class="n">log_level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span><span class="p">)</span>
@@ -243,7 +248,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Data shape: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_set</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Dataset Feature_ids: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_set</span><span class="o">.</span><span class="n">feature_ids</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Interpretation.build_annotated_model"><a class="viewcode-back" href="../../../pyinterpret.core.html#pyinterpret.core.explanations.Interpretation.build_annotated_model">[docs]</a>    <span class="k">def</span> <span class="nf">build_annotated_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction_function</span><span class="p">,</span> <span class="n">examples</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">build_annotated_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction_function</span><span class="p">,</span> <span class="n">class_names</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">examples</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a callable model that has annotations.</span>
 <span class="sd">        Uses examples from the Interpreter&#39;s dataset if available</span>
@@ -266,9 +271,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;Model will not be annotated, no examples provided.&#39;</span><span class="p">)</span>
 
         <span class="n">annotated_model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">prediction_function</span><span class="p">,</span>
+                                        <span class="n">class_names</span><span class="o">=</span><span class="n">class_names</span><span class="p">,</span>
                                         <span class="n">examples</span><span class="o">=</span><span class="n">examples</span><span class="p">,</span>
                                         <span class="n">log_level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">annotated_model</span></div></div>
+        <span class="k">return</span> <span class="n">annotated_model</span>
 </pre></div>
 
            </div>

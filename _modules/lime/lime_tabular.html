@@ -1,0 +1,706 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>lime.lime_tabular &mdash; pyinterpret 0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="pyinterpret 0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pyinterpret
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pyinterpret</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>lime.lime_tabular</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for lime.lime_tabular</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Functions for explaining classifiers that use tabular data (matrices).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sklearn</span>
+<span class="kn">import</span> <span class="nn">sklearn.preprocessing</span>
+
+<span class="kn">from</span> <span class="nn">lime.discretize</span> <span class="k">import</span> <span class="n">QuartileDiscretizer</span>
+<span class="kn">from</span> <span class="nn">lime.discretize</span> <span class="k">import</span> <span class="n">DecileDiscretizer</span>
+<span class="kn">from</span> <span class="nn">lime.discretize</span> <span class="k">import</span> <span class="n">EntropyDiscretizer</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">explanation</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">lime_base</span>
+
+
+<span class="k">class</span> <span class="nc">TableDomainMapper</span><span class="p">(</span><span class="n">explanation</span><span class="o">.</span><span class="n">DomainMapper</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Maps feature ids to names, generates table views, etc&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">,</span> <span class="n">feature_values</span><span class="p">,</span> <span class="n">scaled_row</span><span class="p">,</span>
+                 <span class="n">categorical_features</span><span class="p">,</span> <span class="n">discretized_feature_names</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Init.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            feature_names: list of feature names, in order</span>
+<span class="sd">            feature_values: list of strings with the values of the original row</span>
+<span class="sd">            scaled_row: scaled row</span>
+<span class="sd">            categorical_features: list of categorical features ids (ints)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exp_feature_names</span> <span class="o">=</span> <span class="n">feature_names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">discretized_feature_names</span> <span class="o">=</span> <span class="n">discretized_feature_names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span> <span class="o">=</span> <span class="n">feature_names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_values</span> <span class="o">=</span> <span class="n">feature_values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaled_row</span> <span class="o">=</span> <span class="n">scaled_row</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_categorical</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">categorical_features</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">scaled_row</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span> <span class="o">=</span> <span class="n">categorical_features</span>
+
+    <span class="k">def</span> <span class="nf">map_exp_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Maps ids to feature names.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            exp: list of tuples [(id, weight), (id,weight)]</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list of tuples (feature_name, weight)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exp_feature_names</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretized_feature_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretized_feature_names</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">names</span><span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">exp</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">visualize_instance_html</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                <span class="n">exp</span><span class="p">,</span>
+                                <span class="n">label</span><span class="p">,</span>
+                                <span class="n">div_name</span><span class="p">,</span>
+                                <span class="n">exp_object_name</span><span class="p">,</span>
+                                <span class="n">show_table</span><span class="o">=</span><span class="k">True</span><span class="p">,</span>
+                                <span class="n">show_all</span><span class="o">=</span><span class="k">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Shows the current example in a table format.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">             exp: list of tuples [(id, weight), (id,weight)]</span>
+<span class="sd">             label: label id (integer)</span>
+<span class="sd">             div_name: name of div object to be used for rendering(in js)</span>
+<span class="sd">             exp_object_name: name of js explanation object</span>
+<span class="sd">             show_table: if False, don&#39;t show table visualization.</span>
+<span class="sd">             show_all: if True, show zero-weighted features in the table.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">show_table</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;&#39;</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">exp</span><span class="p">:</span>
+            <span class="n">weights</span><span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">out_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exp_feature_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_values</span><span class="p">,</span>
+                            <span class="n">weights</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">show_all</span><span class="p">:</span>
+            <span class="n">out_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">out_list</span><span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">exp</span><span class="p">]</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="s">u&#39;&#39;&#39;</span>
+<span class="s">            %s.show_raw_tabular(%s, %d, %s);</span>
+<span class="s">        &#39;&#39;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">exp_object_name</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">out_list</span><span class="p">),</span> <span class="n">label</span><span class="p">,</span> <span class="n">div_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+
+<div class="viewcode-block" id="LimeTabularExplainer"><a class="viewcode-back" href="../../reference/interpretation.html#pyinterpret.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer">[docs]</a><span class="k">class</span> <span class="nc">LimeTabularExplainer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Explains predictions on tabular (i.e. matrix) data.</span>
+<span class="sd">    For numerical features, perturb them by sampling from a Normal(0,1) and</span>
+<span class="sd">    doing the inverse operation of mean-centering and scaling, according to the</span>
+<span class="sd">    means and stds in the training data. For categorical features, perturb by</span>
+<span class="sd">    sampling according to the training distribution, and making a binary</span>
+<span class="sd">    feature that is 1 when the value is the same as the instance being</span>
+<span class="sd">    explained.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">training_data</span><span class="p">,</span> <span class="n">training_labels</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="k">None</span><span class="p">,</span>
+                 <span class="n">categorical_features</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">categorical_names</span><span class="o">=</span><span class="k">None</span><span class="p">,</span>
+                 <span class="n">kernel_width</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="k">False</span><span class="p">,</span> <span class="n">class_names</span><span class="o">=</span><span class="k">None</span><span class="p">,</span>
+                 <span class="n">feature_selection</span><span class="o">=</span><span class="s">&#39;auto&#39;</span><span class="p">,</span> <span class="n">discretize_continuous</span><span class="o">=</span><span class="k">True</span><span class="p">,</span>
+                 <span class="n">discretizer</span><span class="o">=</span><span class="s">&#39;quartile&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Init function.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            training_data: numpy 2d array</span>
+<span class="sd">            training_labels: labels for training data. Not required, but may be</span>
+<span class="sd">                used by discretizer.</span>
+<span class="sd">            feature_names: list of names (strings) corresponding to the columns</span>
+<span class="sd">                in the training data.</span>
+<span class="sd">            categorical_features: list of indices (ints) corresponding to the</span>
+<span class="sd">                categorical columns. Everything else will be considered</span>
+<span class="sd">                continuous. Values in these columns MUST be integers.</span>
+<span class="sd">            categorical_names: map from int to list of names, where</span>
+<span class="sd">                categorical_names[x][y] represents the name of the yth value of</span>
+<span class="sd">                column x.</span>
+<span class="sd">            kernel_width: kernel width for the exponential kernel.</span>
+<span class="sd">            If None, defaults to sqrt(number of columns) * 0.75</span>
+<span class="sd">            verbose: if true, print local prediction values from linear model</span>
+<span class="sd">            class_names: list of class names, ordered according to whatever the</span>
+<span class="sd">                classifier is using. If not present, class names will be &#39;0&#39;,</span>
+<span class="sd">                &#39;1&#39;, ...</span>
+<span class="sd">            feature_selection: feature selection method. can be</span>
+<span class="sd">                &#39;forward_selection&#39;, &#39;lasso_path&#39;, &#39;none&#39; or &#39;auto&#39;.</span>
+<span class="sd">                See function &#39;explain_instance_with_data&#39; in lime_base.py for</span>
+<span class="sd">                details on what each of the options does.</span>
+<span class="sd">            discretize_continuous: if True, all non-categorical features will</span>
+<span class="sd">                be discretized into quartiles.</span>
+<span class="sd">            discretizer: only matters if discretize_continuous is True. Options</span>
+<span class="sd">                are &#39;quartile&#39;, &#39;decile&#39; or &#39;entropy&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span> <span class="o">=</span> <span class="n">feature_names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">categorical_names</span> <span class="o">=</span> <span class="n">categorical_names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span> <span class="o">=</span> <span class="n">categorical_features</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_names</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">categorical_names</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">training_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span> <span class="o">=</span> <span class="k">None</span>
+        <span class="k">if</span> <span class="n">discretize_continuous</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">discretizer</span> <span class="o">==</span> <span class="s">&#39;quartile&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span> <span class="o">=</span> <span class="n">QuartileDiscretizer</span><span class="p">(</span>
+                    <span class="n">training_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span><span class="p">,</span>
+                    <span class="n">labels</span><span class="o">=</span><span class="n">training_labels</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">discretizer</span> <span class="o">==</span> <span class="s">&#39;decile&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span> <span class="o">=</span> <span class="n">DecileDiscretizer</span><span class="p">(</span>
+                    <span class="n">training_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span><span class="p">,</span>
+                    <span class="n">labels</span><span class="o">=</span><span class="n">training_labels</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">discretizer</span> <span class="o">==</span> <span class="s">&#39;entropy&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span> <span class="o">=</span> <span class="n">EntropyDiscretizer</span><span class="p">(</span>
+                    <span class="n">training_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span><span class="p">,</span>
+                    <span class="n">labels</span><span class="o">=</span><span class="n">training_labels</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="p">(</span><span class="s">&#39;&#39;&#39;Discretizer must be &#39;quartile&#39;, &#39;decile&#39; &#39;&#39;&#39;</span> <span class="o">+</span>
+                       <span class="sd">&#39;&#39;&#39;or &#39;entropy&#39; &#39;&#39;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">training_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">discretized_training_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span><span class="o">.</span><span class="n">discretize</span><span class="p">(</span>
+                <span class="n">training_data</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">kernel_width</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+            <span class="n">kernel_width</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">training_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="o">.</span><span class="mi">75</span>
+        <span class="n">kernel_width</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">kernel_width</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">kernel</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">d</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">kernel_width</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_selection</span> <span class="o">=</span> <span class="n">feature_selection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="o">=</span> <span class="n">lime_base</span><span class="o">.</span><span class="n">LimeBase</span><span class="p">(</span><span class="n">kernel</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span> <span class="o">=</span> <span class="k">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_names</span> <span class="o">=</span> <span class="n">class_names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span> <span class="o">=</span> <span class="n">feature_names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">preprocessing</span><span class="o">.</span><span class="n">StandardScaler</span><span class="p">(</span><span class="n">with_mean</span><span class="o">=</span><span class="k">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">training_data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_values</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_frequencies</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span><span class="p">:</span>
+            <span class="n">feature_count</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">)</span>
+            <span class="n">column</span> <span class="o">=</span> <span class="n">training_data</span><span class="p">[:,</span> <span class="n">feature</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
+                <span class="n">column</span> <span class="o">=</span> <span class="n">discretized_training_data</span><span class="p">[:,</span> <span class="n">feature</span><span class="p">]</span>
+                <span class="n">feature_count</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+                <span class="n">feature_count</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+                <span class="n">feature_count</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+                <span class="n">feature_count</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">column</span><span class="p">:</span>
+                <span class="n">feature_count</span><span class="p">[</span><span class="n">value</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">values</span><span class="p">,</span> <span class="n">frequencies</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">feature_count</span><span class="o">.</span><span class="n">items</span><span class="p">())))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_values</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_frequencies</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">frequencies</span><span class="p">)</span> <span class="o">/</span>
+                                                 <span class="nb">sum</span><span class="p">(</span><span class="n">frequencies</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="o">.</span><span class="n">mean_</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="o">.</span><span class="n">scale_</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">round_stuff</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s">&#39;%.2f&#39;</span> <span class="o">%</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">x</span><span class="p">]</span>
+
+<div class="viewcode-block" id="LimeTabularExplainer.explain_instance"><a class="viewcode-back" href="../../reference/interpretation.html#pyinterpret.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_instance">[docs]</a>    <span class="k">def</span> <span class="nf">explain_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_row</span><span class="p">,</span> <span class="n">classifier_fn</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span>
+                         <span class="n">top_labels</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">num_features</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span>
+                         <span class="n">distance_metric</span><span class="o">=</span><span class="s">&#39;euclidean&#39;</span><span class="p">,</span> <span class="n">model_regressor</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generates explanations for a prediction.</span>
+
+<span class="sd">        First, we generate neighborhood data by randomly perturbing features</span>
+<span class="sd">        from the instance (see __data_inverse). We then learn locally weighted</span>
+<span class="sd">        linear models on this neighborhood data to explain each of the classes</span>
+<span class="sd">        in an interpretable way (see lime_base.py).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_row: 1d numpy array, corresponding to a row</span>
+<span class="sd">            classifier_fn: classifier prediction probability function, which</span>
+<span class="sd">                takes a numpy array and outputs prediction probabilities.  For</span>
+<span class="sd">                ScikitClassifiers , this is classifier.predict_proba.</span>
+<span class="sd">            labels: iterable with labels to be explained.</span>
+<span class="sd">            top_labels: if not None, ignore labels and produce explanations for</span>
+<span class="sd">                the K labels with highest prediction probabilities, where K is</span>
+<span class="sd">                this parameter.</span>
+<span class="sd">            num_features: maximum number of features present in explanation</span>
+<span class="sd">            num_samples: size of the neighborhood to learn the linear model</span>
+<span class="sd">            distance_metric: the distance metric to use for weights.</span>
+<span class="sd">            model_regressor: sklearn regressor to use in explanation. Defaults</span>
+<span class="sd">            to Ridge regression in LimeBase. Must have model_regressor.coef_</span>
+<span class="sd">            and &#39;sample_weight&#39; as a parameter to model_regressor.fit()</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            An Explanation object (see explanation.py) with the corresponding</span>
+<span class="sd">            explanations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span><span class="p">,</span> <span class="n">inverse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data_inverse</span><span class="p">(</span><span class="n">data_row</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">)</span>
+        <span class="n">scaled_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="o">.</span><span class="n">mean_</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="o">.</span><span class="n">scale_</span>
+
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">pairwise_distances</span><span class="p">(</span>
+            <span class="n">scaled_data</span><span class="p">,</span>
+            <span class="n">scaled_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">metric</span><span class="o">=</span><span class="n">distance_metric</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+        <span class="n">yss</span> <span class="o">=</span> <span class="n">classifier_fn</span><span class="p">(</span><span class="n">inverse</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">yss</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">predict_proba</span> <span class="o">=</span> <span class="k">False</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">yss</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">predict_proba</span> <span class="o">=</span> <span class="k">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># raise exceptions.ModelException(&quot;Your model is outputting arrays with {} dimensions&quot;.format(len(yss.shape)))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Your model is outputting arrays with {} dimensions&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">yss</span><span class="o">.</span><span class="n">shape</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">predict_proba</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;LIME does not currently support classifier models without &quot;</span>
+                                      <span class="s">&quot;probability scores. If this conflicts with your use case,&quot;</span>
+                                      <span class="s">&quot;please let us know: &quot;</span>
+                                      <span class="s">&quot;https://github.com/datascienceinc/lime/issues/16&quot;</span><span class="p">)</span>
+            <span class="c"># the code below reflects what we might do if we did support this.</span>
+            <span class="c"># this is Dangertown USA. If predictions of samples do not include all classes,</span>
+            <span class="c"># then local interpretation will only report on classes that were identified.</span>
+            <span class="c"># label_encoder = sklearn.preprocessing.LabelEncoder()</span>
+            <span class="c"># _labels = label_encoder.fit_transform(yss)[:, np.newaxis]</span>
+            <span class="c"># self.class_names = self.class_names or label_encoder.classes_.tolist()</span>
+
+            <span class="c"># onehot_encoder = sklearn.preprocessing.OneHotEncoder()</span>
+            <span class="c"># yss = onehot_encoder.fit_transform(_labels).todense()</span>
+            <span class="c"># yss = np.squeeze(np.asarray(yss))</span>
+
+            <span class="c"># this implies that predictions of sampled points only belong to a single class</span>
+            <span class="c"># print(yss)</span>
+            <span class="c"># if len(yss.shape) == 1:</span>
+            <span class="c">#     yss = yss[:, np.newaxis]</span>
+
+
+        <span class="k">elif</span> <span class="n">predict_proba</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_names</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">class_names</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">yss</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">class_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">class_names</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">yss</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">):</span>
+                <span class="n">warn</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">                Predictions are not summing to 1, and</span>
+<span class="s">                thus does not constitute a probability space.</span>
+<span class="s">                Check that you classifier outputs probabilities</span>
+<span class="s">                (Not log_probas, or class predictions).</span>
+<span class="s">                &quot;&quot;&quot;</span><span class="p">)</span>
+        <span class="n">feature_names</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">feature_names</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+            <span class="n">feature_names</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_row</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+
+
+        <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">round_stuff</span><span class="p">(</span><span class="n">data_row</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span> <span class="ow">and</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span><span class="o">.</span><span class="n">lambdas</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data_row</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_names</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_names</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">feature_names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;%s=%s&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">feature_names</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">name</span><span class="p">)</span>
+            <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;True&#39;</span>
+        <span class="n">categorical_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span>
+        <span class="n">discretized_feature_names</span> <span class="o">=</span> <span class="k">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
+            <span class="n">categorical_features</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">discretized_instance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span><span class="o">.</span><span class="n">discretize</span><span class="p">(</span><span class="n">data_row</span><span class="p">)</span>
+            <span class="n">discretized_feature_names</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">feature_names</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+                <span class="n">discretized_feature_names</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="n">f</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span>
+                    <span class="n">discretized_instance</span><span class="p">[</span><span class="n">f</span><span class="p">])]</span>
+
+        <span class="n">domain_mapper</span> <span class="o">=</span> <span class="n">TableDomainMapper</span><span class="p">(</span>
+            <span class="n">feature_names</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">scaled_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">categorical_features</span><span class="o">=</span><span class="n">categorical_features</span><span class="p">,</span>
+            <span class="n">discretized_feature_names</span><span class="o">=</span><span class="n">discretized_feature_names</span><span class="p">)</span>
+        <span class="n">ret_exp</span> <span class="o">=</span> <span class="n">explanation</span><span class="o">.</span><span class="n">Explanation</span><span class="p">(</span><span class="n">domain_mapper</span><span class="o">=</span><span class="n">domain_mapper</span><span class="p">,</span>
+                                          <span class="n">class_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">class_names</span><span class="p">)</span>
+        <span class="n">ret_exp</span><span class="o">.</span><span class="n">predict_proba</span> <span class="o">=</span> <span class="n">yss</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">top_labels</span><span class="p">:</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">yss</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="o">-</span><span class="n">top_labels</span><span class="p">:]</span>
+            <span class="n">ret_exp</span><span class="o">.</span><span class="n">top_labels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+            <span class="n">ret_exp</span><span class="o">.</span><span class="n">top_labels</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">ret_exp</span><span class="o">.</span><span class="n">intercept</span><span class="p">[</span><span class="n">label</span><span class="p">],</span>
+             <span class="n">ret_exp</span><span class="o">.</span><span class="n">local_exp</span><span class="p">[</span><span class="n">label</span><span class="p">],</span>
+             <span class="n">ret_exp</span><span class="o">.</span><span class="n">score</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">explain_instance_with_data</span><span class="p">(</span>
+                <span class="n">scaled_data</span><span class="p">,</span> <span class="n">yss</span><span class="p">,</span> <span class="n">distances</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">num_features</span><span class="p">,</span>
+                <span class="n">model_regressor</span><span class="o">=</span><span class="n">model_regressor</span><span class="p">,</span>
+                <span class="n">feature_selection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_selection</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret_exp</span></div>
+
+    <span class="k">def</span> <span class="nf">__data_inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                       <span class="n">data_row</span><span class="p">,</span>
+                       <span class="n">num_samples</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generates a neighborhood around a prediction.</span>
+
+<span class="sd">        For numerical features, perturb them by sampling from a Normal(0,1) and</span>
+<span class="sd">        doing the inverse operation of mean-centering and scaling, according to</span>
+<span class="sd">        the means and stds in the training data. For categorical features,</span>
+<span class="sd">        perturb by sampling according to the training distribution, and making</span>
+<span class="sd">        a binary feature that is 1 when the value is the same as the instance</span>
+<span class="sd">        being explained.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_row: 1d numpy array, corresponding to a row</span>
+<span class="sd">            num_samples: size of the neighborhood to learn the linear model</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A tuple (data, inverse), where:</span>
+<span class="sd">                data: dense num_samples * K matrix, where categorical features</span>
+<span class="sd">                are encoded with either 0 (not equal to the corresponding value</span>
+<span class="sd">                in data_row) or 1. The first row is the original instance.</span>
+<span class="sd">                inverse: same as data, except the categorical features are not</span>
+<span class="sd">                binary, but categorical (as the original data)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">data_row</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">categorical_features</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_row</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span>
+                <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num_samples</span> <span class="o">*</span> <span class="n">data_row</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                <span class="n">num_samples</span><span class="p">,</span> <span class="n">data_row</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="o">.</span><span class="n">scale_</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="o">.</span><span class="n">mean_</span>
+            <span class="n">categorical_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span>
+            <span class="n">first_row</span> <span class="o">=</span> <span class="n">data_row</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">first_row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span><span class="o">.</span><span class="n">discretize</span><span class="p">(</span><span class="n">data_row</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_row</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">inverse</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">categorical_features</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_values</span><span class="p">[</span><span class="n">column</span><span class="p">]</span>
+            <span class="n">freqs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_frequencies</span><span class="p">[</span><span class="n">column</span><span class="p">]</span>
+            <span class="n">inverse_column</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span>
+                                              <span class="n">replace</span><span class="o">=</span><span class="k">True</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">freqs</span><span class="p">)</span>
+            <span class="n">binary_column</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="n">first_row</span><span class="p">[</span><span class="n">column</span><span class="p">]</span>
+                                      <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">inverse_column</span><span class="p">])</span>
+            <span class="n">binary_column</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">inverse_column</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[:,</span> <span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">binary_column</span>
+            <span class="n">inverse</span><span class="p">[:,</span> <span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">inverse_column</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
+            <span class="n">inverse</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span><span class="o">.</span><span class="n">undiscretize</span><span class="p">(</span><span class="n">inverse</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="n">inverse</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_row</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">inverse</span>
+
+<div class="viewcode-block" id="LimeTabularExplainer.explain_regressor_instance"><a class="viewcode-back" href="../../reference/interpretation.html#pyinterpret.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_regressor_instance">[docs]</a>    <span class="k">def</span> <span class="nf">explain_regressor_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_row</span><span class="p">,</span> <span class="n">predict_fn</span><span class="p">,</span> <span class="n">num_features</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                                   <span class="n">num_samples</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">distance_metric</span><span class="o">=</span><span class="s">&#39;euclidean&#39;</span><span class="p">,</span>
+                                   <span class="n">model_regressor</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">testing</span><span class="o">=</span><span class="k">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generates explanations for a prediction.</span>
+<span class="sd">        First, we generate neighborhood data by randomly perturbing features</span>
+<span class="sd">        from the instance (see __data_inverse). We then learn locally weighted</span>
+<span class="sd">        linear models on this neighborhood data to explain changes in the prediction</span>
+<span class="sd">        in an interpretable way (see lime_base.py).</span>
+<span class="sd">        Args:</span>
+<span class="sd">            data_row: 1d numpy array, corresponding to a row</span>
+<span class="sd">            predict_fn: prediction function, which</span>
+<span class="sd">                takes a numpy array and expected values.  For</span>
+<span class="sd">                ScikitRegressors , this is classifier.predict.</span>
+<span class="sd">            num_features: maximum number of features present in explanation</span>
+<span class="sd">            num_samples: size of the neighborhood to learn the linear model</span>
+<span class="sd">            distance_metric: the distance metric to use for weights.</span>
+<span class="sd">            model_regressor: sklearn regressor to use in explanation. Defaults</span>
+<span class="sd">            to Ridge regression in LimeBase. Must have model_regressor.coef_</span>
+<span class="sd">            and &#39;sample_weight&#39; as a parameter to model_regressor.fit()</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            An Explanation object (see explanation.py) with the corresponding</span>
+<span class="sd">            explanations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;negative&#39;</span><span class="p">,</span> <span class="s">&#39;positive&#39;</span><span class="p">]</span>
+
+
+        <span class="n">data</span><span class="p">,</span> <span class="n">inverse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data_inverse</span><span class="p">(</span><span class="n">data_row</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">)</span>
+
+        <span class="n">scaled_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="o">.</span><span class="n">mean_</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="o">.</span><span class="n">scale_</span>
+
+
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">pairwise_distances</span><span class="p">(</span>
+            <span class="n">scaled_data</span><span class="p">,</span>
+            <span class="n">scaled_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">metric</span><span class="o">=</span><span class="n">distance_metric</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+        <span class="n">yss</span> <span class="o">=</span> <span class="n">predict_fn</span><span class="p">(</span><span class="n">inverse</span><span class="p">)</span>
+        <span class="n">predicted_value</span> <span class="o">=</span> <span class="n">yss</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">min_y</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">yss</span><span class="p">)</span>
+        <span class="n">max_y</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">yss</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">yss</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span> <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">ModelException</span><span class="p">(</span><span class="s">&quot;Your model needs to output numpy arrays&quot;</span><span class="p">)</span>
+
+        <span class="c"># if predictions are a single column, then either the model is a predict_proba</span>
+        <span class="c">#with only a single class (where probabilities are all one),</span>
+        <span class="c">#or the model is predicting the most likely class. We will assume</span>
+        <span class="c">#its the latter case, but perhaps we eventually want to check for the former case.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">yss</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">ModelException</span><span class="p">(</span><span class="s">&quot;Your regressor model is outputting arrays with {} dimensions&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">yss</span><span class="o">.</span><span class="n">shape</span><span class="p">)))</span>
+
+        <span class="n">yss</span> <span class="o">=</span> <span class="n">yss</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="c">#add a dimension</span>
+
+        <span class="n">feature_names</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">feature_names</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+            <span class="n">feature_names</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_row</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+
+        <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">round_stuff</span><span class="p">(</span><span class="n">data_row</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span> <span class="ow">and</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span><span class="o">.</span><span class="n">lambdas</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data_row</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_names</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_names</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">feature_names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;%s=%s&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">feature_names</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">name</span><span class="p">)</span>
+            <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;True&#39;</span>
+        <span class="n">categorical_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span>
+        <span class="n">discretized_feature_names</span> <span class="o">=</span> <span class="k">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
+            <span class="n">categorical_features</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">discretized_instance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span><span class="o">.</span><span class="n">discretize</span><span class="p">(</span><span class="n">data_row</span><span class="p">)</span>
+            <span class="n">discretized_feature_names</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">feature_names</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+                <span class="n">discretized_feature_names</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretizer</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="n">f</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span>
+                    <span class="n">discretized_instance</span><span class="p">[</span><span class="n">f</span><span class="p">])]</span>
+
+        <span class="n">domain_mapper</span> <span class="o">=</span> <span class="n">TableDomainMapper</span><span class="p">(</span>
+            <span class="n">feature_names</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">scaled_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">categorical_features</span><span class="o">=</span><span class="n">categorical_features</span><span class="p">,</span>
+            <span class="n">discretized_feature_names</span><span class="o">=</span><span class="n">discretized_feature_names</span><span class="p">)</span>
+        <span class="n">ret_exp</span> <span class="o">=</span> <span class="n">explanation</span><span class="o">.</span><span class="n">RegressionsExplanation</span><span class="p">(</span><span class="n">domain_mapper</span><span class="o">=</span><span class="n">domain_mapper</span><span class="p">)</span>
+        <span class="n">ret_exp</span><span class="o">.</span><span class="n">predicted_value</span> <span class="o">=</span> <span class="n">predicted_value</span>
+        <span class="n">ret_exp</span><span class="o">.</span><span class="n">min_value</span> <span class="o">=</span> <span class="n">min_y</span>
+        <span class="n">ret_exp</span><span class="o">.</span><span class="n">max_value</span> <span class="o">=</span> <span class="n">max_y</span>
+
+
+
+
+        <span class="p">(</span><span class="n">ret_exp</span><span class="o">.</span><span class="n">intercept</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+         <span class="n">ret_exp</span><span class="o">.</span><span class="n">local_exp</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+         <span class="n">ret_exp</span><span class="o">.</span><span class="n">score</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">explain_instance_with_data</span><span class="p">(</span>
+            <span class="n">scaled_data</span><span class="p">,</span> <span class="n">yss</span><span class="p">,</span> <span class="n">distances</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">num_features</span><span class="p">,</span>
+            <span class="n">model_regressor</span><span class="o">=</span><span class="n">model_regressor</span><span class="p">,</span>
+            <span class="n">feature_selection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_selection</span><span class="p">)</span>
+
+        <span class="n">ret_exp</span><span class="o">.</span><span class="n">intercept</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret_exp</span><span class="o">.</span><span class="n">intercept</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ret_exp</span><span class="o">.</span><span class="n">local_exp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="ow">in</span> <span class="n">ret_exp</span><span class="o">.</span><span class="n">local_exp</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+        <span class="k">return</span> <span class="n">ret_exp</span></div></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Author.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

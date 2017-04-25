@@ -1,0 +1,251 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyinterpret.core.global_interpretation package¶ &mdash; pyinterpret 0 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="pyinterpret 0 documentation" href="../index.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="../index.html" class="fa fa-home"> pyinterpret</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../overview.html#pyinterpret">PyInterpret</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#dev-installation">Dev Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#prod-installation-platform">Prod Installation (platform)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#use-this-kind-of-this-stuff-to-do-cool-stuff">Use this kind of this stuff to do cool stuff.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#testing">Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#api-documentation">API documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorial.html#the-pyinterpret-workflow">The PyInterpret workflow</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="index.html">Reference</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">pyinterpret</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>pyinterpret.core.global_interpretation package¶</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="../_sources/reference/pyinterpret.core.global.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="wy-grid-for-nav"><div class="wy-side-nav-search"><p><a class="reference external" href="index.html">pyinterpret</a></p>
+<div role="search"></div></div><div class="wy-menu wy-menu-vertical" data-spy="affix"
+role="navigation" aria-label="main navigation"><ul class="simple">
+<li><a class="reference external" href="overview.html">Overview</a><ul>
+<li><a class="reference external" href="overview.html#pyinterpret">PyInterpret</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="install.html">Installation</a><ul>
+<li><a class="reference external" href="install.html#dev-installation">Dev Installation</a></li>
+<li><a class="reference external" href="install.html#prod-installation-platform">Prod Installation
+(platform)</a></li>
+<li><a class="reference external" href="install.html#use-this-kind-of-this-stuff-to-do-cool-stuff">Use this kind of this stuff to do cool
+stuff.</a></li>
+<li><a class="reference external" href="install.html#testing">Testing</a></li>
+<li><a class="reference external" href="install.html#api-documentation">API documentation</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="tutorial.html">Tutorial</a><ul>
+<li><a class="reference external" href="tutorial.html#the-pyinterpret-workflow">The PyInterpret
+workflow</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="api.html">API Reference</a><ul>
+<li><a class="reference external" href="api.html#interpretation-object">Interpretation Object</a></li>
+</ul>
+</li>
+</ul>
+</div><p>** <a class="reference external" href="index.html">pyinterpret</a></p>
+<div class="wy-nav-content"><div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation"><ul class="simple">
+<li><a class="reference external" href="index.html">Docs</a> »</li>
+<li>pyinterpret.core.global_interpretation package</li>
+<li><a class="reference external" href="_sources/pyinterpret.core.global_interpretation.txt">View page
+source</a></li>
+</ul>
+<hr class="docutils" />
+</div><div class="document" role="main"><div id="pyinterpret-core-global-interpretation-package"
+class="section"><div class="section" id="pyinterpret-core-global-interpretation-package">
+<h1>pyinterpret.core.global_interpretation package<a class="reference external" href="#pyinterpret-core-global-interpretation-package">¶</a><a class="headerlink" href="#pyinterpret-core-global-interpretation-package" title="Permalink to this headline">¶</a></h1>
+<div id="submodules" class="section"><div class="section" id="submodules">
+<h2>Submodules<a class="reference external" href="#submodules">¶</a><a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div><div id="module-pyinterpret.core.global_interpretation.base"
+class="section"></div>
+<div class="section" id="pyinterpret-core-global-interpretation-base-module">
+<h2>pyinterpret.core.global_interpretation.base module<a class="reference external" href="#module-pyinterpret.core.global_interpretation.base">¶</a><a class="headerlink" href="#pyinterpret-core-global-interpretation-base-module" title="Permalink to this headline">¶</a></h2>
+<p>Base method for all global interpretations. Is a subclass of base
+ModelInterpreter</p>
+<blockquote>
+<div><em>class</em></div></blockquote>
+<dl class="docutils">
+<dt><code class="docutils literal"><span class="pre">pyinterpret.core.global_interpretation.base.</span></code><code class="docutils literal"><span class="pre">BaseGlobalInterpretation</span></code>(<em>interpreter</em>)<a class="reference external" href="_modules/pyinterpret/core/global_interpretation/base.html#BaseGlobalInterpretation">[source]</a><a class="reference external" href="#pyinterpret.core.global_interpretation.base.BaseGlobalInterpretation">¶</a></dt>
+<dd><p class="first">Bases:
+<code class="docutils literal"><span class="pre">`pyinterpret.core.model_interpreter.ModelInterpreter</span></code> &lt;pyinterpret.core.html#pyinterpret.core.model_interpreter.ModelInterpreter&gt;`__</p>
+<p class="last">Base class for global model interpretations</p>
+</dd>
+</dl>
+</div><div
+id="pyinterpret-core-global-interpretation-partial-dependence-module"
+class="section"></div>
+<div class="section" id="pyinterpret-core-global-interpretation-partial-dependence-module">
+<h2>pyinterpret.core.global_interpretation.partial_dependence module<a class="reference external" href="#pyinterpret-core-global-interpretation-partial-dependence-module">¶</a><a class="headerlink" href="#pyinterpret-core-global-interpretation-partial-dependence-module" title="Permalink to this headline">¶</a></h2>
+</div><div id="module-pyinterpret.core.global_interpretation"
+class="section"></div>
+<div class="section" id="module-contents">
+<h2>Module contents<a class="reference external" href="#module-pyinterpret.core.global_interpretation">¶</a><a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<p>Submodule for all interpretations that cover <em>regions</em> of the domain,
+rather than individual points.</p>
+</div></div></div><hr class="docutils" />
+<div role="contentinfo"><p>© Copyright 2017, Author.</p>
+</div><p>Built with <a class="reference external" href="http://sphinx-doc.org/">Sphinx</a> using a
+<a class="reference external" href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a class="reference external" href="https://readthedocs.org">Read
+the Docs</a>.</p>
+</div></div></div></div>
+</div>
+
+
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Author.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -89,9 +89,11 @@
               
             
             
-              <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../pyinterpret.html">pyinterpret package</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
 </ul>
 
             
@@ -158,41 +160,76 @@
   <h1>Source code for pyinterpret.model.local</h1><div class="highlight"><pre>
 <span class="sd">&quot;&quot;&quot;Model subclass for in memory predict functions&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">.model</span> <span class="k">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">.model</span> <span class="k">import</span> <span class="n">ModelType</span>
 <span class="kn">from</span> <span class="nn">..util</span> <span class="k">import</span> <span class="n">exceptions</span>
 
 
-<div class="viewcode-block" id="InMemoryModel"><a class="viewcode-back" href="../../../pyinterpret.model.html#pyinterpret.model.local.InMemoryModel">[docs]</a><span class="k">class</span> <span class="nc">InMemoryModel</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">InMemoryModel</span><span class="p">(</span><span class="n">ModelType</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This model can be called directly from memory</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction_fn</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">examples</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+<div class="viewcode-block" id="InMemoryModel.__init__"><a class="viewcode-back" href="../../../reference/model.html#pyinterpret.model.InMemoryModel.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction_fn</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">class_names</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">examples</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;This model can be called directly from memory</span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        prediction_fn(callable)</span>
+<span class="sd">        prediction_fn: callable</span>
 <span class="sd">            function that returns predictions</span>
 
-<span class="sd">        examples(numpy.array or pandas.dataframe):</span>
+<span class="sd">        log_level: int</span>
+<span class="sd">            config setting to see model logs. 10 is a good value for seeing debug messages.</span>
+<span class="sd">            30 is warnings only.</span>
+
+<span class="sd">        class_names: array type</span>
+<span class="sd">            optional names of classes that describe model outputs.</span>
+
+<span class="sd">        examples: numpy.array or pandas.dataframe</span>
 <span class="sd">            examples to use to make inferences about the function.</span>
 <span class="sd">            prediction_fn must be able to take examples as an</span>
 <span class="sd">            argument.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">InMemoryModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">prediction_fn</span> <span class="o">=</span> <span class="n">prediction_fn</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">prediction_fn</span><span class="p">,</span> <span class="s">&quot;__call__&quot;</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">ModelError</span><span class="p">(</span><span class="s">&quot;Predict function must be callable&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_examples</span><span class="p">(</span><span class="n">examples</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">examples</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">check_output_signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examples</span><span class="p">)</span>
+            <span class="k">raise</span><span class="p">(</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ModelError</span><span class="p">(</span><span class="s">&quot;Predict function must be callable&quot;</span><span class="p">))</span>
 
-<div class="viewcode-block" id="InMemoryModel.predict"><a class="viewcode-back" href="../../../pyinterpret.model.html#pyinterpret.model.local.InMemoryModel.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prediction_fn</span> <span class="o">=</span> <span class="n">prediction_fn</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">InMemoryModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span>
+                                            <span class="n">class_names</span><span class="o">=</span><span class="n">class_names</span><span class="p">,</span>
+                                            <span class="n">examples</span><span class="o">=</span><span class="n">examples</span><span class="p">)</span></div>
+
+
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Just use the function itself for predictions</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prediction_fn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prediction_fn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_predict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">predict_fn</span><span class="p">,</span> <span class="n">formatter</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Static prediction function for multiprocessing usecases</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data: arraytype</span>
+
+<span class="sd">        formatter: callable</span>
+<span class="sd">            function responsible for formatting model outputs as necessary. For instance,</span>
+<span class="sd">            one hot encoding multiclass outputs.</span>
+
+<span class="sd">        predict_fn: callable</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -----------</span>
+<span class="sd">        predictions: arraytype</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">predict_fn</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">formatter</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">formatter</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">results</span>
 </pre></div>
 
            </div>

@@ -1,0 +1,38 @@
+pyinterpret.model package
+=========================
+
+Submodules
+----------
+
+pyinterpret.model.local module
+------------------------------
+
+.. automodule:: pyinterpret.model.local
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyinterpret.model.model module
+------------------------------
+
+.. automodule:: pyinterpret.model.model
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyinterpret.model.remote module
+-------------------------------
+
+.. automodule:: pyinterpret.model.remote
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: pyinterpret.model
+    :members:
+    :undoc-members:
+    :show-inheritance:
