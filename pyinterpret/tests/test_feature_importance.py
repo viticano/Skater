@@ -8,6 +8,7 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn import datasets
 from functools import partial
 
+
 from pyinterpret.core.explanations import Interpretation
 from pyinterpret.util import exceptions
 from pyinterpret.tests.arg_parser import create_parser
@@ -72,8 +73,7 @@ class TestFeatureImportance(unittest.TestCase):
 
     def test_feature_importance(self):
         importances = self.interpreter.feature_importance.feature_importance(self.regressor_predict_fn)
-        self.assertEquals(importances.sum(), 1) # default grid resolution is 100
-
+        self.assertEquals(np.isclose(importances.sum(), 1), True) # default grid resolution is 100
     def test_plot_feature_importance(self):
         self.interpreter.feature_importance.plot_feature_importance(self.regressor_predict_fn)
 
