@@ -134,5 +134,5 @@ class FeatureImportance(BaseGlobalInterpretation):
             f = ax.figure
 
         colors = cycle(COLORS)
-        color = colors.next()
+        color = next(colors)
         importances.sort_values().plot(kind='barh',ax=ax, color=color)
