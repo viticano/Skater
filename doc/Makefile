@@ -8,6 +8,7 @@ PAPER         =
 BUILDDIR      = ../../model-interpretation-docs
 PDFBUILDDIR   = /tmp
 PDF           = ../manual.pdf
+REFERENCEDIR  = reference
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_elements.papersize=a4
@@ -51,6 +52,14 @@ help:
 .PHONY: clean
 clean:
 	rm -rf $(BUILDDIR)/*
+
+.PHONY: buildrefs
+buildrefs:
+	@if [ -d $(REFERENCEDIR)]; then sudo rm -r $(REFERENCEDIR); fi
+	@mkdir $(REFERENCEDIR)
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(REFERENCEDIR)
+
+
 
 .PHONY: html
 html:

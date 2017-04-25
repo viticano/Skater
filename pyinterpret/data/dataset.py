@@ -6,6 +6,7 @@ from sklearn.metrics.pairwise import cosine_distances
 
 from ..util.logger import build_logger
 from ..util import exceptions
+from ..util.data import add_column_numpy_array
 
 __all__ = ['DataManager']
 
@@ -20,9 +21,12 @@ class DataManager(object):
 
         Parameters
         ----------
-            data: 1D or 2D numpy array.
+            data: 1D/2D numpy array, or pandas DataFrame
+                raw data
             feature_names: iterable of feature names
+                Optional keyword containing names of features.
             index: iterable of row names
+                Optional keyword containing names of indexes (rows).
 
         """
 
@@ -46,18 +50,22 @@ class DataManager(object):
                       "Data.shape: {}".format(ndim)
             raise(exceptions.DataSetError(err_msg))
 
-        self.n_rows, self.dim = data.shape
-        self.logger.debug("after transform data.shape: {}".format(data.shape))
+        self.data = data
+        self.data_type = type(data)
+        self.metastore = None
+        self._get_metadata()
 
-        if isinstance(data, pd.DataFrame):
+        self.logger.debug("after transform data.shape: {}".format(self.data.shape))
+
+        if isinstance(self.data, pd.DataFrame):
             if feature_names is None:
-                feature_names = list(data.columns.values)
+                feature_names = list(self.data.columns.values)
             if not index:
-                index = list(data.index.values)
+                index = list(self.data.index.values)
             self.feature_ids = feature_names
             self.index = index
 
-        elif isinstance(data, np.ndarray):
+        elif isinstance(self.data, np.ndarray):
             if feature_names is None:
                 feature_names = range(self.dim)
             if not index:
@@ -69,11 +77,6 @@ class DataManager(object):
             raise(ValueError("Invalid: currently we only support pandas dataframes and numpy arrays"
                              "If you would like support for additional data structures let us "
                              "know!"))
-
-        #self.data = pd.DataFrame(data, columns=self.feature_ids, index=self.index)
-        self.data = data
-        self.data_type = type(data)
-        self.metastore = None
 
 
     def generate_grid(self, feature_ids, grid_resolution=100, grid_range=(.05, .95)):
@@ -133,9 +136,18 @@ class DataManager(object):
         self.logger.info('Generated grid of shape {}'.format(grid_shape))
         return grid
 
+    def _get_metadata(self):
+        n_rows = self.data.shape[0]
+        dim = self.data.shape[1]
+        self.n_rows = n_rows
+        self.dim = dim
+
+
+
     def _build_metastore(self, bin_count):
 
-        n_rows = self.data.shape[0]
+        self._get_metadata()
+
         medians = np.median(np.array(self.data), axis=0).reshape(1, self.dim)
 
         # how far each data point is from the global median
@@ -169,13 +181,14 @@ class DataManager(object):
         else:
             raise ValueError("Can't get item for data of type {}".format(self.data_type))
 
-    def __setitem__(self, key):
+    def __setitem__(self, key, newval):
         if self.data_type == pd.DataFrame:
-            return self.__setitem_pandas__(key)
+            self.__setcolumn_pandas__(key, newval)
         if self.data_type == np.ndarray:
-            return self.__setitem_ndarray__(key)
+            self.__setcolumn_ndarray__(key, newval)
         else:
             raise ValueError("Can't set item for data of type {}".format(self.data_type))
+        self._get_metadata()
 
     def __getrows__(self, idx):
         if self.data_type == pd.DataFrame:
@@ -195,15 +208,19 @@ class DataManager(object):
         return self.data[:, idx]
 
 
-    def __setitem_pandas__(self, i, newval):
+    def __setcolumn_pandas__(self, i, newval):
         """if you passed in a pandas dataframe, it has columns which are strings."""
         self.data[i] = newval
 
 
-    def __setitem_ndarray__(self, i, newval):
+    def __setcolumn_ndarray__(self, i, newval):
         """if you passed in a pandas dataframe, it has columns which are strings."""
-        idx = self.feature_ids.index(i)
-        self.data[:, idx] = newval
+        if i in self.feature_ids:
+            idx = self.feature_ids.index(i)
+            self.data[:, idx] = newval
+        else:
+            self.data = add_column_numpy_array(self.data, newval)
+            self.feature_ids.append(i)
 
     def __getrows_pandas__(self, idx):
         """if you passed in a pandas dataframe, it has columns which are strings."""
@@ -280,11 +297,31 @@ class DataManager(object):
                 return np.array(samples)
 
     def generate_column_sample(self, feature_id, n_samples=None, method='random-choice'):
+        """Sample a single feature from the data set.
+
+        Parameters
+        ----------
+
+        feature_id: hashable
+            name of the feature to sample. If no feature names were passed, then
+            the features are accessible via their column index.
+
+        n_samples: int
+            the number of samples to generate
+
+        method: str
+            the sampling method. Currently only random-choice is implemented.
+
+
+        """
         if method == 'random-choice':
             return self._generate_column_sample_random_choice(feature_id, n_samples=n_samples)
+        else:
+            raise(NotImplementedError("Currenly we only support random-choice for column \
+                                       level sampling "))
 
     def _generate_column_sample_random_choice(self, feature_id, n_samples=None):
-        return np.random.choice(self[feature_id].values, size=n_samples)
+        return np.random.choice(self.__getitem__(feature_id), size=n_samples)
 
     def _generate_column_sample_stratified(self, feature_id, n_samples=None):
         """

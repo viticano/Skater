@@ -11,6 +11,7 @@ class InMemoryModel(ModelType):
 
     def __init__(self, prediction_fn, log_level=30, class_names=None, examples=None):
         """This model can be called directly from memory
+
         Parameters
         ----------
         prediction_fn: callable
@@ -23,7 +24,7 @@ class InMemoryModel(ModelType):
         class_names: array type
             optional names of classes that describe model outputs.
 
-        examples(numpy.array or pandas.dataframe):
+        examples: numpy.array or pandas.dataframe
             examples to use to make inferences about the function.
             prediction_fn must be able to take examples as an
             argument.
