@@ -5,10 +5,10 @@ Overview
 '''''''''''''''''''''''''''''
 
 
-PyInterpret
+lynxes
 ~~~~~~~~~~~~~~~~
 
-PyInterpret is a python package for model agnostic interpretation of predictive models. With lynxes, you can unpack the internal
+lynxes is a python package for model agnostic interpretation of predictive models. With lynxes, you can unpack the internal
 mechanics of arbitrary models; as long as you can obtain inputs, and use a function to obtain outputs, you can use lynxes to learn
 about the models internal decision criteria.
 
@@ -18,9 +18,10 @@ corresponding outputs.
 
 Interpretation algorithms for all but the most trivial models must make some simplifications
 when representing a model's decision criteria. These simplifications can be with respect to:
-* feature scope: the number of features for which we explain model behavior at a time.
-* domain: the region of the input space for which explain model behavior
-* detail/fidelity: the level of aggregation performed (across features or the domain)
+
+1. `feature scope`: the number of features for which we explain model behavior at a time.
+2. `domain`: the region of the input space for which explain model behavior
+3. `detail/fidelity`: the level of aggregation performed (across features or the domain)
 
 Partial dependence, marginal plots, and similar explanations generally simplify on feature scope;
 they provide faithful approximations on small feature subsets.
