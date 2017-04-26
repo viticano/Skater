@@ -49,12 +49,22 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data):
     feature_columns = pd_metadata['feature_columns']
     feature_ids= pd_metadata['feature_ids']
     class_columns = pd_metadata['class_columns']
-    data_columns = pd_metadata['data_feature_ids']
-    data_sample = pd.DataFrame(input_data, columns=data_columns)
+    data_columns = list(pd_metadata['data_feature_ids'])
+    #data_sample = pd.DataFrame(input_data, columns=data_columns)
+    data_sample = input_data.copy()
     new_row = grid_expanded[index]
 
-    for feature_idx, feature_id in enumerate(feature_ids):
-        data_sample[feature_id] = new_row[feature_idx]
+    if isinstance(data_sample, np.ndarray):
+        for feature_idx, feature_id in enumerate(feature_ids):
+            column_idx = data_columns.index(feature_id)
+            data_sample[:, column_idx] = new_row[feature_idx]
+
+    elif isinstance(data_sample, pd.DataFrame):
+        for feature_idx, feature_id in enumerate(feature_ids):
+            data_sample[feature_id] = new_row[feature_idx]
+
+    else:
+        raise ValueError("Data Sample must be pandas dataframe or numpy array")
 
     predictions = estimator_fn(data_sample)
     mean_prediction = np.mean(predictions, axis=0)
@@ -707,7 +717,7 @@ class PartialDependence(BaseGlobalInterpretation):
         binary_vals = np.unique(pdp[binary_feature])
         for class_column in class_columns:
             colors = cycle(COLORS)
-            f = plt.figure()
+            f = pyplot.figure()
             ax = f.add_subplot(111)
             figure_list.append(f)
             axis_list.append(ax)
@@ -800,7 +810,7 @@ class PartialDependence(BaseGlobalInterpretation):
             diffs = np.concatenate((np.array([diffs[0]]), conv_diffs, np.array([diffs[-1]])))
             return diffs
 
-        df = pdp.sort(columns=[feature_1, feature_2])
+        df = pdp.sort_values([feature_1, feature_2])
 
         feature_1_diffs = feature_vals_to_grad_deltas(df[feature_1].values)
         feature_2_diffs = feature_vals_to_grad_deltas(df[feature_2].values)

@@ -70,7 +70,7 @@ class DataManager(object):
                 feature_names = range(self.dim)
             if not index:
                 index = range(self.n_rows)
-            self.feature_ids = feature_names
+            self.feature_ids = list(feature_names)
             self.index = index
 
         else:
