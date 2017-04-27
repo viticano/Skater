@@ -17,11 +17,13 @@ install:
 - pip install numpy
 - pip install scipy
 - pip install matplotlib
+- pip install flake8
 - python setup.py install
 - python -c "import scipy"
 - python -c "import numpy"
 - python -c "import lime"
 script:
+- "flake8 lynxes"
 - ". run_test.sh"
 branches:
   only:
