@@ -1,4 +1,4 @@
-"Specialized Exceptions for pyinterpret"
+"Specialized Exceptions for lynxes"
 
 def exception_factory(exception_name, base_exception = Exception, attributes = None):
     attribute_dict = {

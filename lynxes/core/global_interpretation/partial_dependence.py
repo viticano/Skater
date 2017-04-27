@@ -137,13 +137,13 @@ class PartialDependence(BaseGlobalInterpretation):
             features, so generally one should only look at one or two features at a
             time. These feature ids must be available in the class's associated DataSet.
             As of now, we only support looking at 1 or 2 features at a time.
-        modelinstance: pyinterpret.model.model.Model subtype
+        modelinstance: lynxes.model.model.Model subtype
             an estimator function of a fitted model used to derive prediction. Supports
             classification and regression. Supports classification(binary, multi-class) and regression.
             predictions = predict_fn(data)
 
-            Can either by a pyinterpret.model.remote.DeployedModel or a
-            pyinterpret.model.local.InMemoryModel
+            Can either by a lynxes.model.remote.DeployedModel or a
+            lynxes.model.local.InMemoryModel
         grid: numpy.ndarray
             2 dimensional array on which we fix values of features. Note this is
             determined automatically if not given based on the percentiles of the
@@ -181,8 +181,8 @@ class PartialDependence(BaseGlobalInterpretation):
         return_metadata: boolean
 
         :Example:
-        >>> from pyinterpret.model import InMemoryModel
-        >>> from pyinterpret.core.explanations import Interpretation
+        >>> from lynxes.model import InMemoryModel
+        >>> from lynxes.core.explanations import Interpretation
         >>> from sklearn.ensemble import RandomForestClassier
         >>> from sklearn.datasets import load_boston
         >>> boston = load_boston()
@@ -210,8 +210,8 @@ class PartialDependence(BaseGlobalInterpretation):
         # TODO: There might be a better place to do this check
         if not isinstance(modelinstance, ModelType):
             raise(exceptions.ModelError("Incorrect estimator function used for computing partial dependence, try one "
-                                        "creating one with pyinterpret.model.local.InMemoryModel or"
-                                        "pyinterpret.model.remote.DeployedModel"))
+                                        "creating one with lynxes.model.local.InMemoryModel or"
+                                        "lynxes.model.remote.DeployedModel"))
 
         if modelinstance.model_type == 'classifier' and modelinstance.probability == False:
             raise(exceptions.ModelError("Incorrect estimator function used for computing partial dependence, try one "
@@ -352,13 +352,13 @@ class PartialDependence(BaseGlobalInterpretation):
             features, so generally one should only look at one or two features at a
             time. These feature ids must be available in the class's associated DataSet.
             As of now, we only support looking at 1 or 2 features at a time.
-        modelinstance: pyinterpret.model.model.Model subtype
+        modelinstance: lynxes.model.model.Model subtype
             an estimator function of a fitted model used to derive prediction. Supports
             classification and regression. Supports classification(binary, multi-class) and regression.
             predictions = predict_fn(data)
 
-            Can either by a pyinterpret.model.remote.DeployedModel or a
-            pyinterpret.model.local.InMemoryModel
+            Can either by a lynxes.model.remote.DeployedModel or a
+            lynxes.model.local.InMemoryModel
         grid: numpy.ndarray
             2 dimensional array on which we fix values of features. Note this is
             determined automatically if not given based on the percentiles of the
@@ -415,12 +415,12 @@ class PartialDependence(BaseGlobalInterpretation):
         >>> estimator = GradientBoostingRegressor(n_estimators=10, max_depth=4,
         >>>                             learning_rate=0.1, loss='huber', random_state=1)
         >>> estimator.fit(x_train, y_train)
-        >>> from pyinterpret.core.explanations import Interpretation
+        >>> from lynxes.core.explanations import Interpretation
         >>> interpreter = Interpretation()
         >>> print("Feature name: {}".format(names))
         >>> interpreter.load_data(X_train, feature_names=names)
         >>> print("Input feature name: {}".format[names[1], names[5]])
-        >>> from pyinterpret.model import InMemoryModel
+        >>> from lynxes.model import InMemoryModel
         >>> model = InMemoryModel(clf.predict, examples = X_train)
         >>> interpreter.partial_dependence.plot_partial_dependence([names[1], names[5]], model,
         >>>                                                         n_samples=100, n_jobs=1)

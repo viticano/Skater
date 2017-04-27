@@ -1,3 +1,3 @@
 #!/bin/sh
-python pyinterpret/tests/all_tests.py
+python lynxes/tests/all_tests.py
 echo $?

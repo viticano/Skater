@@ -27,13 +27,13 @@ class DeployedModel(ModelType):
             request objects and convert them to array types.
 
         log_level: int
-            see pyinterpret.model.Model for details
+            see lynxes.model.Model for details
 
         class_names: array type
-            see pyinterpret.model.Model for details
+            see lynxes.model.Model for details
 
         examples:
-            see pyinterpret.model.Model for details
+            see lynxes.model.Model for details
         """
         self.uri = uri
         self.input_formatter = input_formatter

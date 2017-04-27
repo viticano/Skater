@@ -3,8 +3,8 @@ Model Objects
 
 Overview
 ---------------------------------------
-Pyinterpret contains an abstraction for predictive models. Models apis vary by implementation.
-The pyinterpret Model object manages variations in how models are called, the inputs they expect,
+lynxes contains an abstraction for predictive models. Models apis vary by implementation.
+The lynxes Model object manages variations in how models are called, the inputs they expect,
 and the outputs they generate, so that inputs, outputs, and calls are standardized to both the
 user and to the rest of the code base. Currently the Model object acts as the base class for the
 InMemoryModel and DeployedModel class, though this API may change in later versions.
@@ -22,7 +22,7 @@ InMemoryModel and DeployedModel class, though this API may change in later versi
    gb = GradientBoostedClassifier()
    gb.fit(X,y)
 
-   from pyinterpret.model import InMemoryModel
+   from lynxes.model import InMemoryModel
    model = InMemoryModel(gb.predict_proba, examples = X)
 
 
@@ -30,7 +30,7 @@ InMemoryModel
 ---------------------------------------
 Models that are callable function are exposed via the InMemoryModel object.
 
-.. automethod:: pyinterpret.model.InMemoryModel.__init__
+.. automethod:: lynxes.model.InMemoryModel.__init__
 
 
 
@@ -39,4 +39,4 @@ DeployedModel
 Models that are deployed, and therefore callable via http posts are exposed via the
 DeployedModel object.
 
-.. automethod:: pyinterpret.model.DeployedModel.__init__
+.. automethod:: lynxes.model.DeployedModel.__init__

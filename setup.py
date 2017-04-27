@@ -1,12 +1,12 @@
 # Reference: http://python-packaging.readthedocs.io/en/latest/dependencies.html
 from setuptools import setup, find_packages
 
-setup(name='pyinterpret',
+setup(name='lynxes',
       version='0.0.1',
       description='Model Agnostic Interpretation Library',
       author='Aaron Kramer',
       author_email='aaron@datascience.com',
-      url='https://github.com/datascienceinc/PyInterpret/tree/master',
+      url='https://github.com/datascienceinc/lynxes/tree/master',
       packages=find_packages(),
       install_requires=['scikit-learn>=0.18', 'pandas>=0.19', 'lime>=0.1.1.20', 'requests',
                         'pathos==0.2.0', 'dill>=0.2.6'],

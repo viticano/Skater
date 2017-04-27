@@ -104,9 +104,9 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/pyinterpret.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/lynxes.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/pyinterpret.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/lynxes.qhc"
 
 .PHONY: applehelp
 applehelp:
@@ -123,8 +123,8 @@ devhelp:
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/pyinterpret"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/pyinterpret"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/lynxes"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/lynxes"
 	@echo "# devhelp"
 
 .PHONY: epub
