@@ -32,13 +32,13 @@ class FeatureImportance(BaseGlobalInterpretation):
         Parameters:
         -----------
 
-        modelinstance: pyinterpret.model.model.Model subtype
+        modelinstance: lynxes.model.model.Model subtype
             the machine learning model "prediction" function to explain, such that
             predictions = predict_fn(data).
 
             :Example:
-            >>> from pyinterpret.model import InMemoryModel
-            >>> from pyinterpret.core.explanations import Interpretation
+            >>> from lynxes.model import InMemoryModel
+            >>> from lynxes.core.explanations import Interpretation
             >>> from sklearn.ensemble import RandomForestClassier
             >>> rf = RandomForestClassier()
             >>> rf.fit(X,y)
@@ -95,13 +95,13 @@ class FeatureImportance(BaseGlobalInterpretation):
         Parameters:
         -----------
 
-        modelinstance: pyinterpret.model.model.Model subtype
+        modelinstance: lynxes.model.model.Model subtype
             the machine learning model "prediction" function to explain, such that
             predictions = predict_fn(data).
 
             For instance:
-            >>> from pyinterpret.model import InMemoryModel
-            >>> from pyinterpret.core.explanations import Interpretation
+            >>> from lynxes.model import InMemoryModel
+            >>> from lynxes.core.explanations import Interpretation
             >>> from sklearn.ensemble import RandomForestClassier
             >>> rf = RandomForestClassier()
             >>> rf.fit(X,y)

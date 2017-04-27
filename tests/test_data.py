@@ -4,12 +4,12 @@ import numpy as np
 import pandas as pd
 from numpy.testing import assert_array_equal
 
-from pyinterpret.data import DataManager
-from pyinterpret.tests.arg_parser import arg_parse, create_parser
+from lynxes.data import DataManager
+from arg_parser import arg_parse, create_parser
 
 class TestData(unittest.TestCase):
     """
-    Tests the pyinterpret.data.DataManager object
+    Tests the lynxes.data.DataManager object
     """
 
     def setUp(self):

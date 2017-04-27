@@ -1,3 +1,3 @@
 #!/bin/sh
-python pyinterpret/tests/all_tests.py
-echo $?
+python tests/all_tests.py
+exit $?

@@ -1,14 +1,14 @@
-# pyInterpret
+# lynxes
 ##### Master: ![Build Status-master](https://api.travis-ci.com/repositories/datascienceinc/model-interpretation.svg?token=okdWYn5kDgeoCPJZGPEz&branch=master)
 
-<!--![layout](../master/PyInterpret.png?raw=true)
+<!--![layout](../master/lynxes.png?raw=true)
 =======
 -->
 
 ### Dev Installation
 ```
-git clone git@github.com:datascienceinc/PyInterpret.git
-cd PyInterpret
+git clone git@github.com:datascienceinc/lynxes.git
+cd lynxes
 sudo python setup.py install
 ```
 
@@ -16,7 +16,7 @@ sudo python setup.py install
 Requires that pip.conf is configured with pypi.datascience.com credentials.
 
 ```
-pip install pyinterpret
+pip install lynxes
 ```
 
 
@@ -41,8 +41,8 @@ regressor.fit(X, y)
 
 
 #partial dependence
-from pyinterpret.core.explanations import Interpretation
-from pyinterpret.model import InMemoryModel
+from lynxes.core.explanations import Interpretation
+from lynxes.model import InMemoryModel
 i = Interpretation()
 i.load_data(X, feature_names = feature_names)
 model = InMemoryModel(regressor.predict, examples = X)
@@ -50,7 +50,7 @@ i.partial_dependence.plot_partial_dependence([feature_names[0], feature_names[1]
                                             model)
 
 #local interpretation
-from pyinterpret.core.local_interpretation.lime.lime_tabular import LimeTabularExplainer
+from lynxes.core.local_interpretation.lime.lime_tabular import LimeTabularExplainer
 explainer = LimeTabularExplainer(X, feature_names = feature_names)
 explainer.explain_instance(example,  regressor.predict).show_in_notebook()
 
@@ -58,7 +58,7 @@ explainer.explain_instance(example,  regressor.predict).show_in_notebook()
 
 ### Testing
 ```
-python pyinterpret/tests/all_tests.py --debug --n=1000 --dim=3 --seed=1
+python lynxes/tests/all_tests.py --debug --n=1000 --dim=3 --seed=1
 ```
 
 ### API documentation

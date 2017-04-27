@@ -10,9 +10,9 @@ def get_predictor(model):
 
     Parameters
     ----------
-    model: subtype of pyinterpret.model.model.Model
-        Either pyinterpret.model.remote.DeployedModel
-        or pyinterpret.model.local.InMemoryModel
+    model: subtype of lynxes.model.model.Model
+        Either lynxes.model.remote.DeployedModel
+        or lynxes.model.local.InMemoryModel
 
     Returns:
     ----------

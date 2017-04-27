@@ -9,10 +9,10 @@ from sklearn import datasets
 from functools import partial
 
 
-from pyinterpret.core.explanations import Interpretation
-from pyinterpret.util import exceptions
-from pyinterpret.tests.arg_parser import create_parser
-from pyinterpret.model import InMemoryModel, DeployedModel
+from lynxes.core.explanations import Interpretation
+from lynxes.util import exceptions
+from arg_parser import create_parser
+from lynxes.model import InMemoryModel, DeployedModel
 
 class TestFeatureImportance(unittest.TestCase):
 
@@ -76,8 +76,6 @@ class TestFeatureImportance(unittest.TestCase):
         self.assertEquals(np.isclose(importances.sum(), 1), True) # default grid resolution is 100
     def test_plot_feature_importance(self):
         self.interpreter.feature_importance.plot_feature_importance(self.regressor_predict_fn)
-
-
 
 
 if __name__ == '__main__':

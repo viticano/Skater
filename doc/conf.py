@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# pyinterpret documentation build configuration file, created by
+# lynxes documentation build configuration file, created by
 # sphinx-quickstart on Wed Mar 29 17:31:14 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -18,7 +18,7 @@
 #
 # import os
 # import sys
-# sys.path.insert(0, u'/cust/model-interpretation/pyinterpret')
+# sys.path.insert(0, u'/cust/model-interpretation/lynxes')
 
 
 # -- General configuration ------------------------------------------------
@@ -48,7 +48,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'pyinterpret'
+project = u'lynxes'
 copyright = u'2017, Author'
 author = u'Author'
 
@@ -103,7 +103,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'pyinterpretdoc'
+htmlhelp_basename = 'lynxesdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -130,7 +130,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'pyinterpret.tex', u'pyinterpret Documentation',
+    (master_doc, 'lynxes.tex', u'lynxes Documentation',
      u'Author', 'manual'),
 ]
 
@@ -141,7 +141,7 @@ html_sidebars = { '**': ['globaltoc.html', 'relations.html', 'sourcelink.html', 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'pyinterpret', u'pyinterpret Documentation',
+    (master_doc, 'lynxes', u'lynxes Documentation',
      [author], 1)
 ]
 
@@ -152,8 +152,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'pyinterpret', u'pyinterpret Documentation',
-     author, 'pyinterpret', 'One line description of project.',
+    (master_doc, 'lynxes', u'lynxes Documentation',
+     author, 'lynxes', 'One line description of project.',
      'Miscellaneous'),
 ]
 

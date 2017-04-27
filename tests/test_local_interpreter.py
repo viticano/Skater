@@ -8,9 +8,8 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.datasets import load_breast_cancer
 from sklearn.ensemble import RandomForestClassifier
 
-
-from pyinterpret.core.explanations import Interpretation
-from pyinterpret.tests.arg_parser import arg_parse, create_parser
+from lynxes.core.explanations import Interpretation
+from arg_parser import arg_parse, create_parser
 
 class TestLocalInterpreter(unittest.TestCase):
 

@@ -15,15 +15,15 @@ class Interpretation(object):
 
     Attributes:
     ----------
-    data_set: pyinterpret.data.DataSet
-        Pyinterpret's data abstraction layer. All interactions with data goes through
+    data_set: lynxes.data.DataSet
+        lynxes's data abstraction layer. All interactions with data goes through
          this object.
 
-    local_interpreter: pyinterpret.core.local_interpreter.LocalInterpreter
+    local_interpreter: lynxes.core.local_interpreter.LocalInterpreter
         Contains methods for interpreting single prediction. Currently exposes the lime
         library.
 
-    global_interpreter: pyinterpret.core.global_interpreter.GlobalInterpreter
+    global_interpreter: lynxes.core.global_interpreter.GlobalInterpreter
         Contains methods for evaluating a model over entire regions of the domain. Currently
         exposes partial dependency
 
@@ -31,7 +31,7 @@ class Interpretation(object):
     Examples:
     ----------
 
-    from pyinterpret.core.explanations import Interpretation
+    from lynxes.core.explanations import Interpretation
     interpreter = Interpretation()
     interpreter.load_data(X, feature_ids = ['a','b'])
     interpreter.partial_dependence([feature_id1, feature_id2], regressor.predict)
@@ -104,7 +104,7 @@ class Interpretation(object):
 
         Returns
         ----------
-        annotated_model: pyinterpret.model.InMemoryModel
+        annotated_model: lynxes.model.InMemoryModel
         """
 
         if examples is None:

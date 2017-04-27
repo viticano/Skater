@@ -7,7 +7,7 @@ from scipy.special import expit
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from functools import partial
 
-from pyinterpret.core.local_interpretation.lime.lime_tabular import LimeTabularExplainer
+from lynxes.core.local_interpretation.lime.lime_tabular import LimeTabularExplainer
 
 
 class TestLime(unittest.TestCase):
