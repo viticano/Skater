@@ -78,8 +78,6 @@ class TestFeatureImportance(unittest.TestCase):
         self.interpreter.feature_importance.plot_feature_importance(self.regressor_predict_fn)
 
 
-
-
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestFeatureImportance)
     unittest.TextTestRunner(verbosity=2).run(suite)
