@@ -1,13 +1,10 @@
 """Partial Dependence class"""
-from itertools import product, cycle
+from itertools import cycle
 import numpy as np
 import pandas as pd
 
 from ...data import DataManager
 from .base import BaseGlobalInterpretation
-from ...util.static_types import StaticTypes
-from ...util import exceptions
-from ...util.kernels import flatten
 from ...util.plotting import COLORS
 from ...util.exceptions import *
 
