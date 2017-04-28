@@ -14,5 +14,4 @@ __all__ = [
     'OutputTypes',
     'ControlledDict',
     'pickle_method',
-    'unpickle_method'
-           ]
+    'unpickle_method']

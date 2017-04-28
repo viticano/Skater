@@ -8,6 +8,7 @@ from .base import BaseGlobalInterpretation
 from ...util.plotting import COLORS
 from ...util.exceptions import *
 
+
 class FeatureImportance(BaseGlobalInterpretation):
     """Contains methods for feature importance. Subclass of BaseGlobalInterpretation"""
 
@@ -15,8 +16,8 @@ class FeatureImportance(BaseGlobalInterpretation):
     def _build_fresh_metadata_dict():
         return {
             'pdp_cols': {},
-            'sd_col':'',
-            'val_cols':[]
+            'sd_col': '',
+            'val_cols': []
         }
 
 
@@ -57,29 +58,30 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         # instead of copying the whole dataset, should we copy a column, change column values,
         # revert column back to copy?
-        copy_of_data_set = DataManager(self.data_set.data, feature_names = self.data_set.feature_ids, index = self.data_set.index)
+        copy_of_data_set = DataManager(self.data_set.data,
+                                       feature_names=self.data_set.feature_ids,
+                                       index=self.data_set.index)
 
         for feature_id in self.data_set.feature_ids:
-            #collect perturbations
+            # collect perturbations
             samples = self.data_set.generate_column_sample(feature_id, n_samples=n, method='random-choice')
             copy_of_data_set[feature_id] = samples
 
-            #get size of perturbations
-            feature_perturbations = self.data_set[feature_id] - copy_of_data_set[feature_id]
+            # get size of perturbations
+            # feature_perturbations = self.data_set[feature_id] - copy_of_data_set[feature_id]
 
-            #predict based on perturbed values
+            # predict based on perturbed values
             new_predictions = modelinstance.predict(copy_of_data_set.data)
 
-            #evaluated entropy of scaled changes.
+            # evaluated entropy of scaled changes.
             changes_in_predictions = new_predictions - original_predictions
             importance = np.mean(np.std(changes_in_predictions, axis=0))
             importances[feature_id] = importance
 
-            #reset copy
+            # reset copy
             copy_of_data_set[feature_id] = self.data_set[feature_id]
 
-
-        importances =  pd.Series(importances).sort_values()
+        importances = pd.Series(importances).sort_values()
         importances = importances / importances.sum()
         return importances
 
@@ -132,4 +134,5 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         colors = cycle(COLORS)
         color = next(colors)
-        importances.sort_values().plot(kind='barh',ax=ax, color=color)
+        importances.sort_values().plot(kind='barh', ax=ax, color=color)
+        return f, ax

@@ -81,9 +81,9 @@ class Interpretation(object):
 
         self.logger.info("Loading Data")
         self.data_set = DataManager(training_data,
-                                feature_names=feature_names,
-                                index=index,
-                                log_level=self._log_level)
+                                    feature_names=feature_names,
+                                    index=index,
+                                    log_level=self._log_level)
         self.logger.info("Data loaded")
         self.logger.debug("Data shape: {}".format(self.data_set.data.shape))
         self.logger.debug("Dataset Feature_ids: {}".format(self.data_set.feature_ids))

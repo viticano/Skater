@@ -10,6 +10,7 @@ from ..util.data import add_column_numpy_array
 
 __all__ = ['DataManager']
 
+
 class DataManager(object):
     """Module for passing around data to interpretation objects"""
 
@@ -105,7 +106,7 @@ class DataManager(object):
 
         if not all(i >= 0 and i <= 1 for i in grid_range):
             err_msg = "Grid range values must be between 0 and 1 but got:" \
-                                 "{}".format(grid_range)
+                      "{}".format(grid_range)
             raise(exceptions.MalformedGridRangeError(err_msg))
 
         if not isinstance(grid_resolution, int) and grid_resolution > 0:
@@ -126,7 +127,7 @@ class DataManager(object):
         for feature_id in feature_ids:
             data = self[feature_id]
             uniques = np.unique(data)
-            if len(uniques) ==2:
+            if len(uniques) == 2:
                 vals = uniques.copy()
             else:
                 vals = np.unique(np.percentile(self[feature_id], bins))
@@ -257,12 +258,12 @@ class DataManager(object):
         """
 
         arg_dict = {
-            'sample':sample,
-            'strategy':strategy,
-            'n_samples_from_dataset':n_samples_from_dataset,
-            'replace':replace,
-            'samples_per_bin':samples_per_bin,
-            'bin_count':bin_count
+            'sample': sample,
+            'strategy': strategy,
+            'n_samples_from_dataset': n_samples_from_dataset,
+            'replace': replace,
+            'samples_per_bin': samples_per_bin,
+            'bin_count': bin_count
         }
         self.logger.debug("Generating sample with args:\n {}".format(arg_dict))
 
@@ -280,7 +281,6 @@ class DataManager(object):
         elif strategy == 'uniform-over-similarity-ranks':
             metastore = self._build_metastore(bin_count)
             data_distance_ranks = metastore['ranks_rounded']
-            n_rows = metastore['n_rows']
             unique_ranks = metastore['unique_ranks']
 
             samples = []

@@ -1,7 +1,4 @@
 import numpy as np
-import math
-from functools import wraps
-import importlib
 
 from .exceptions import MatplotlibDisplayError, MatplotlibUnavailableError
 
@@ -28,11 +25,11 @@ class LinearSegments(object):
 
     red_to_green_dict = {
         'red': ((0.0, 1.0, 1.0),
-                 (1.0, 0.0, 0.0)),
+                (1.0, 0.0, 0.0)),
         'blue': ((0.0, 0.0, 0.0),
-                  (1.0, 0.0, 0.0)),
+                 (1.0, 0.0, 0.0)),
         'green': ((0.0, 0.0, 0.0),
-                   (1.0, 1.0, 0.0))}
+                  (1.0, 1.0, 0.0))}
 
 
 class ColorMap(object):
@@ -111,7 +108,12 @@ def coordinate_gradients_to_1d_colorscale(dx, dy,
 
     color = np.array(colorx) + np.array(colory)
     color[:, :, 3] = 1.
-    return color, xmin+xbuffer, xmax-xbuffer, ymin+ybuffer, ymax-ybuffer
+    return color, \
+           xmin + xbuffer, \
+           xmax - xbuffer, \
+           ymin + ybuffer, \
+           ymax - ybuffer
+
 
 def plot_2d_color_scale(x1_min, x1_max, x2_min, x2_max, plot_point=None,
                         resolution=10, ax=None, x_buffer_prop=.1, y_buffer_prop=.1):
@@ -146,49 +148,43 @@ def plot_2d_color_scale(x1_min, x1_max, x2_min, x2_max, plot_point=None,
         raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on your system."))
     except RuntimeError:
         raise (MatplotlibDisplayError("Matplotlib unable to open display"))
-    x1_min, x1_max, x1_buffer = build_buffer2(x1_min, x1_max)
-    x2_min, x2_max, x2_buffer = build_buffer2(x2_min, x2_max)
+
+    # xmin, xmax = min(0, np.percentile(x, 3)), max(np.percentile(x, 97), 0)
+    x1_min, x1_max, x1_buffer = build_buffer(x1_min, x1_max, buffer_prop=x_buffer_prop)
+    x2_min, x2_max, x2_buffer = build_buffer(x2_min, x2_max, buffer_prop=y_buffer_prop)
     ax.set_xlim(x1_min, x1_max)
     ax.set_ylim(x2_min, x2_max)
-    x1 = np.linspace(x1_min, x1_max, resolution+1)
-    x2 = np.linspace(x2_min, x2_max, resolution+1)
+    x1 = np.linspace(x1_min, x1_max, resolution + 1)
+    x2 = np.linspace(x2_min, x2_max, resolution + 1)
     x1_diff = x1[1] - x1[0]
     x2_diff = x2[1] - x2[0]
     x1, x2 = np.meshgrid(x1, x2)
-    colors_for_scale, a, b, c, d = coordinate_gradients_to_1d_colorscale(x1, x2, x_buffer_prop=0, y_buffer_prop=0)
+    colors_for_scale, a, b, c, d = coordinate_gradients_to_1d_colorscale(x1,
+                                                                         x2,
+                                                                         x_buffer_prop=0,
+                                                                         y_buffer_prop=0)
 
     if ax is None:
         f, ax = pyplot.subplots(1)
     for i in range(resolution):
         for j in range(resolution):
-            xy = (x1[i,j], x2[i,j])
+            xy = (x1[i, j], x2[i, j])
             color = colors_for_scale[i, j]
             rect = patches.Rectangle(
                 xy, x1_diff, x2_diff,
-                alpha=.8, facecolor=color,zorder=1
+                alpha=.8, facecolor=color, zorder=1
             )
             ax.add_patch(rect)
     if plot_point:
-        ax.scatter([plot_point[0]], [plot_point[1]], s=75.
-                   , color='yellow', alpha=1, zorder=2)
+        ax.scatter([plot_point[0]], [plot_point[1]], s=75.,
+                   color='yellow', alpha=1, zorder=2)
     return ax
 
 
-def build_buffer(x, buffer_prop=.1):
-    xmin, xmax = min(0, np.percentile(x, 3)), max(np.percentile(x, 97), 0)
+def build_buffer(xmin, xmax, buffer_prop=.1):
     if xmin != xmax:
         buffer = (xmax - xmin) * buffer_prop / 2.
-    #all values are the same
-    else:
-        buffer = 0.01
-    xmin, xmax = xmin - buffer, xmax + buffer
-    return xmin, xmax, buffer
-
-
-def build_buffer2(xmin, xmax, buffer_prop=.1):
-    if xmin != xmax:
-        buffer = (xmax - xmin) * buffer_prop / 2.
-    #all values are the same
+    # all values are the same
     else:
         buffer = 0.01
     xmin, xmax = xmin - buffer, xmax + buffer
@@ -207,4 +203,3 @@ def tick_formatter(powerlimits=None):
     formatter = ScalarFormatter()
     formatter.set_powerlimits(powerlimits)
     return formatter
-

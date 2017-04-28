@@ -8,4 +8,4 @@ to define how to type inference.
 from .local import InMemoryModel
 from .deploy import DeployedModel
 
-__all__ = ['InMemoryModel','DeployedModel']
+__all__ = ['InMemoryModel', 'DeployedModel']

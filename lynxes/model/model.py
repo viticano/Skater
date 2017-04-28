@@ -4,10 +4,9 @@ import abc
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.utils.multiclass import type_of_target
-from functools import partial
 import pandas as pd
 
-from ..util.static_types import StaticTypes, return_data_type
+from ..util.static_types import StaticTypes
 from ..util.logger import build_logger
 from ..util import exceptions
 from ..data import DataManager
@@ -24,8 +23,8 @@ class ModelType(object):
         We want to infer whether the model is real valued, or classification (n classes?)
     """
     __metaclass__ = abc.ABCMeta
-    
-    
+
+
     def __init__(self, log_level=30, class_names=None, examples=None, feature_names=None):
         """
         Base model class for wrapping prediction functions. Common methods
@@ -55,7 +54,7 @@ class ModelType(object):
         self.label_encoder = LabelEncoder()
         self.one_hot_encoder = OneHotEncoder()
         self.class_names = class_names
-        self.feature_names=feature_names
+        self.feature_names = feature_names
 
 
         if examples is not None:
@@ -93,7 +92,7 @@ class ModelType(object):
         else:
             return np.array(examples)
 
-      
+
     def _check_output_signature(self, dataset):
         """
         Determines the model_type, output_type. Side effects
@@ -124,7 +123,7 @@ class ModelType(object):
             raise(ValueError("Unsupported model type, output dim = {}".format(ndim)))
 
         try:
-            #continuous, binary, continuous multioutput, multiclass, multilabel-indicator
+            # continuous, binary, continuous multioutput, multiclass, multilabel-indicator
             self.output_type = type_of_target(outputs)
         except:
             self.output_type = False
@@ -225,7 +224,7 @@ class ModelType(object):
         # Note this expression below assumptions (not probability) evaluates to false if
         # and only if the model does not return probabilities. If unknown, should be true
         if self.model_type == StaticTypes.model_types.classifier and not self.probability:
-            #fit label encoder
+            # fit label encoder
             self.logger.debug("Label encoder fit on examples of shape: {}".format(outputs.shape))
             labels = self.label_encoder.fit_transform(outputs)[:, np.newaxis]
             self.logger.debug("Onehot encoder fit on examples of shape: {}".format(labels.shape))
@@ -267,6 +266,3 @@ class ModelType(object):
 
 # todo: add subclasses for classifier and regression, with class names given
 # on init for classifier
-
-
-

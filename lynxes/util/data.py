@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def add_column_numpy_array(array, new_col):
     placeholder = np.ones(array.shape[0])[:, np.newaxis]
     result = np.hstack((array, placeholder))
@@ -9,7 +10,7 @@ def add_column_numpy_array(array, new_col):
                                                     must be the same. \
                                                     Expected: {0}\
                                                     Actual: {1}".format(array.shape[0],
-                                                                       new_col.shape[0])
+                                                                        new_col.shape[0])
         assert len(new_col.shape) <= 2, "new column must be 1D or 2D"
 
         if len(new_col.shape) == 1:
@@ -20,7 +21,7 @@ def add_column_numpy_array(array, new_col):
                                                     must be the same. \
                                                     Expected: {0}\
                                                     Actual: {1}".format(len(array),
-                                                                       new_col.shape[0])
+                                                                        len(new_col))
         new_col = np.array(new_col)
         assert len(new_col.shape) == 1, "list elements cannot be iterable"
         new_col = new_col[:, np.newaxis]

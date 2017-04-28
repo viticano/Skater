@@ -1,6 +1,7 @@
 """Funcs for logging"""
 import logging
 
+
 def build_logger(log_level, logger_name):
     logger = logging.Logger(logger_name)
     logger.setLevel(log_level)

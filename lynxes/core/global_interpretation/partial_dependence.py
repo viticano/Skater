@@ -3,11 +3,9 @@
 from itertools import product, cycle
 import numpy as np
 import pandas as pd
-import re
 from pathos.multiprocessing import Pool
 import functools
 from six.moves import copyreg as copy_reg
-import types
 
 from .base import BaseGlobalInterpretation
 from ...model.model import ModelType
@@ -15,13 +13,14 @@ from ...util import exceptions
 from ...util.data_structures import ControlledDict
 from ...util.model import get_predictor
 from ...util.kernels import flatten
-from ...util.plotting import COLORS, ColorMap, \
+from ...util.plotting import COLORS, \
     coordinate_gradients_to_1d_colorscale, plot_2d_color_scale
 from ...util.exceptions import *
 
-#if we want to employ instance methods in multiprocessing, enable this code:
-#copy_reg.pickle(types.MethodType, pickle_method, unpickle_method)
-#methods stored in util.serialization
+# if we want to employ instance methods in multiprocessing, enable this code:
+# copy_reg.pickle(types.MethodType, pickle_method, unpickle_method)
+# methods stored in util.serialization
+
 
 def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data):
     """ Helper function to compute partial dependence for each grid value
@@ -45,12 +44,13 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data):
     -------
     pd_dict(dict, shape={'sd': <>, 'val_1': <>, 'mean'} : containing estimated value on sample dataset
     """
-    #print "process id: {} parent process id {} \n".format(*[os.getpid(), os.getppid()])
+
+    # print "process id: {} parent process id {} \n".format(*[os.getpid(), os.getppid()])
     feature_columns = pd_metadata['feature_columns']
-    feature_ids= pd_metadata['feature_ids']
+    feature_ids = pd_metadata['feature_ids']
     class_columns = pd_metadata['class_columns']
     data_columns = list(pd_metadata['data_feature_ids'])
-    #data_sample = pd.DataFrame(input_data, columns=data_columns)
+    # data_sample = pd.DataFrame(input_data, columns=data_columns)
     data_sample = input_data.copy()
     new_row = grid_expanded[index]
 
@@ -70,7 +70,7 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data):
     mean_prediction = np.mean(predictions, axis=0)
     std_prediction = np.std(predictions, axis=0)
 
-    if len(predictions.shape)==1:
+    if len(predictions.shape) == 1:
         mean_prediction = np.array([mean_prediction])
         std_prediction = np.array([std_prediction])
 
@@ -112,7 +112,7 @@ class PartialDependence(BaseGlobalInterpretation):
             'sd_column': sd_col,
             'class_columns': class_names,
             'feature_columns': feature_columns,
-            'feature_ids':pd_feature_ids,
+            'feature_ids': pd_feature_ids,
             'data_feature_ids': data_feature_ids,
         })
         metadata.block_setitem()
@@ -213,7 +213,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                         "creating one with lynxes.model.local.InMemoryModel or"
                                         "lynxes.model.remote.DeployedModel"))
 
-        if modelinstance.model_type == 'classifier' and modelinstance.probability == False:
+        if modelinstance.model_type == 'classifier' and modelinstance.probability is False:
             raise(exceptions.ModelError("Incorrect estimator function used for computing partial dependence, try one "
                                         "with which give probability estimates"))
 
@@ -289,7 +289,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                                     bin_count=bin_count)
 
         self.interpreter.logger.debug("Shape of sampled data: {}".format(data_sample.shape))
-        #TODO: Add check for non-empty data
+        # TODO: Add check for non-empty data
 
         # make sure data_set module is giving us correct data structure
         self._check_dataset_type(data_sample)
@@ -305,9 +305,6 @@ class PartialDependence(BaseGlobalInterpretation):
             empty_grid_expanded_err_msg = "Must have at least 1 pdp value" \
                                           "grid shape: {}".format(grid_expanded.shape)
             raise(exceptions.MalformedGridError(empty_grid_expanded_err_msg))
-
-        n_classes = modelinstance.n_classes
-        pd_list = []
 
         predict_fn = get_predictor(modelinstance)
 
@@ -338,7 +335,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                 grid_resolution=None, grid_range=None, n_jobs=-1,
                                 sample=True, sampling_strategy='random-choice',
                                 n_samples=10000, bin_count=50, samples_per_bin=10,
-                                with_variance=False, figsize=(16,10)):
+                                with_variance=False, figsize=(16, 10)):
         """
         Computes partial_dependence of a set of variables. Essentially approximates
         the partial partial_dependence of the predict_fn with respect to the variables
@@ -479,7 +476,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
     def _plot_pdp_from_df(self, pdp, pd_metadata,
                           with_variance=False, plot_title=None,
-                          disable_offset=True, figsize=(16,10)):
+                          disable_offset=True, figsize=(16, 10)):
 
         feature_columns = pd_metadata['feature_columns']
         class_columns = pd_metadata['class_columns']
@@ -514,7 +511,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
     def _2d_pdp_plot(self, pdp, feature_name, sd_col, class_columns,
                      with_variance=False, plot_title=None,
-                     disable_offset=True, figsize=(16,10)):
+                     disable_offset=True, figsize=(16, 10)):
         colors = cycle(COLORS)
         figure_list, axis_list = [], []
 
@@ -614,10 +611,11 @@ class PartialDependence(BaseGlobalInterpretation):
             self.interpreter.logger.debug("Non Binary Feature: {}".format(non_binary_feature))
 
             plot_objects = self._plot_2d_1_binary_feature_and_1_continuous(pdp,
-                                                   binary_feature,
-                                                   non_binary_feature,
-                                                   sd_column, class_columns,
-                                                   with_variance=with_variance)
+                                                                           binary_feature,
+                                                                           non_binary_feature,
+                                                                           sd_column,
+                                                                           class_columns,
+                                                                           with_variance=with_variance)
         for obj in plot_objects:
             if isinstance(obj, mpl_axes):
                 if disable_offset:
@@ -632,7 +630,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
     def _plot_3d_full_mesh(self, pdp, feature1, feature2,
                            sd_column, class_columns,
-                           with_variance=False, alpha=.7, figsize=(16,10)):
+                           with_variance=False, alpha=.7, figsize=(16, 10)):
         colors = cycle(COLORS)
 
         figure_list, axis_list = [], []
@@ -640,19 +638,19 @@ class PartialDependence(BaseGlobalInterpretation):
         for class_column in class_columns:
             gradient_x, gradient_y, X, Y, Z = self.compute_3d_gradients(pdp, class_column, feature1, feature2)
             color_gradient, xmin, xmax, ymin, ymax = coordinate_gradients_to_1d_colorscale(gradient_x, gradient_y)
-            figure=pyplot.figure(figsize=figsize)
+            figure = pyplot.figure(figsize=figsize)
             ax = pyplot.subplot2grid((3, 3), (0, 0), colspan=2, rowspan=3, projection='3d')
             figure_list.append(figure)
             axis_list.append(ax)
 
-            surface = ax.plot_surface(X, Y, Z, alpha=alpha, facecolors=color_gradient, linewidth=0., rstride=1, cstride=1)
+            ax.plot_surface(X, Y, Z, alpha=alpha, facecolors=color_gradient, linewidth=0., rstride=1, cstride=1)
             dx_mean = np.mean(gradient_x)
             dy_mean = np.mean(gradient_y)
             mean_point = (dx_mean, dy_mean)
 
-            #add 2D color scale
+            # add 2D color scale
             ax_colors = pyplot.subplot2grid((3, 3), (1, 2), colspan=1, rowspan=1)
-            ax_colors = plot_2d_color_scale(xmin, xmax, ymin, ymax, plot_point=mean_point,ax=ax_colors)
+            ax_colors = plot_2d_color_scale(xmin, xmax, ymin, ymax, plot_point=mean_point, ax=ax_colors)
             ax_colors.set_xlabel("Local Impact {}".format(feature1))
             ax_colors.set_ylabel("Local Impact {}".format(feature2), rotation=270, labelpad=10)
             ax_colors.yaxis.tick_right()
@@ -672,10 +670,8 @@ class PartialDependence(BaseGlobalInterpretation):
                                 color=var_color)
             ax.set_xlabel(feature1)
             ax.set_ylabel(feature2)
+            # adding a blank line and spacing for formatting
             ax.set_zlabel("\n{}".format(class_column), linespacing=3.0)
-            #ax.xaxis._axinfo['label']['space_factor'] = 2.0
-            #ax.yaxis._axinfo['label']['space_factor'] = 2.0
-            #ax.zaxis._axinfo['label']['space_factor'] = 20.0
             ax.invert_xaxis()
 
             handles, labels = ax.get_legend_handles_labels()
@@ -686,7 +682,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
     def _plot_3d_2_binary_feature(self, pdp, feature1, feature2, sd_column,
                                   class_columns, with_variance=False, figsize=(16, 10)):
-        colors = cycle(COLORS)
+        # colors = cycle(COLORS)
         figure_list, axis_list = [], []
         for class_column in class_columns:
             fig = pyplot.figure(figsize=figsize)
@@ -701,7 +697,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
             figure_list.append(fig)
             axis_list.append(ax)
-            color = next(colors)
+            # color = next(colors)
             ax.set_xlabel(feature1)
             ax.set_ylabel(feature2)
             ax.set_zlabel(class_column)
@@ -711,15 +707,15 @@ class PartialDependence(BaseGlobalInterpretation):
 
     def _plot_2d_2_binary_feature(self, pdp, feature1, feature2, sd_col,
                                   class_columns, with_variance=False,
-                                  figsize=(16,10)):
+                                  figsize=(16, 10)):
         figure_list, axis_list = [], []
 
         std_error = pdp.set_index([feature1, feature2])[sd_col].unstack()
         for class_column in class_columns:
             f = pyplot.figure(figsize=figsize)
             ax = f.add_subplot(111)
-            #feature2 is columns
-            #feature1 is index
+            # feature2 is columns
+            # feature1 is index
             plot_data = pdp.set_index([feature1, feature2])[class_column].unstack()
             plot_data.plot(ax=ax, color=COLORS)
 
@@ -733,7 +729,7 @@ class PartialDependence(BaseGlobalInterpretation):
                     upper_plane = yerr + plot_data[binary2_value].values
                     lower_plane = plot_data[binary2_value].values - yerr
                     ax.fill_between(binary1_values, lower_plane, upper_plane,
-                                    color=color,alpha=.2)
+                                    color=color, alpha=.2)
             figure_list.append(f)
             axis_list.append(ax)
             ax.set_xlabel(feature1)
@@ -744,11 +740,10 @@ class PartialDependence(BaseGlobalInterpretation):
     def _plot_2d_1_binary_feature_and_1_continuous(self, pdp, binary_feature,
                                                    non_binary_feature, sd_column,
                                                    class_columns, with_variance=False,
-                                                   figsize=(16,10)):
+                                                   figsize=(16, 10)):
 
         figure_list, axis_list = [], []
 
-        binary_vals = np.unique(pdp[binary_feature])
         for class_column in class_columns:
             colors = cycle(COLORS)
             f = pyplot.figure(figsize=figsize)
@@ -760,7 +755,7 @@ class PartialDependence(BaseGlobalInterpretation):
             sd = pdp.set_index([non_binary_feature, binary_feature])[sd_column]\
                 .unstack()
 
-            plot_data.plot(ax=ax,color=COLORS)
+            plot_data.plot(ax=ax, color=COLORS)
             if with_variance:
                 non_binary_values = plot_data.index.values
                 binary_values = plot_data.columns.values
