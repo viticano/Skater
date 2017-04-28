@@ -433,10 +433,12 @@ class PartialDependence(BaseGlobalInterpretation):
             global Axes3D
             global mpl_axes
             global cm
+            global tick_formatter
             from matplotlib.axes._subplots import Axes as mpl_axes
-            from matplotlib.ticker import ScalarFormatter
+            # from matplotlib.ticker import ScalarFormatter
             from mpl_toolkits.mplot3d import Axes3D
             from matplotlib import pyplot, cm
+            from ...util.plotting import tick_formatter
         except ImportError:
             raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on your system."))
         except RuntimeError:
@@ -556,7 +558,7 @@ class PartialDependence(BaseGlobalInterpretation):
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(handles, labels)
             if disable_offset:
-                ax.yaxis.set_major_formatter(ScalarFormatter())
+                ax.yaxis.set_major_formatter(tick_formatter())
         return flatten([figure_list, axis_list])
 
 
@@ -619,8 +621,8 @@ class PartialDependence(BaseGlobalInterpretation):
         for obj in plot_objects:
             if isinstance(obj, mpl_axes):
                 if disable_offset:
-                    obj.xaxis.set_major_formatter(ScalarFormatter())
-                    obj.yaxis.set_major_formatter(ScalarFormatter())
+                    obj.xaxis.set_major_formatter(tick_formatter())
+                    obj.yaxis.set_major_formatter(tick_formatter())
                 if plot_title:
                     obj.set_title("Partial Dependence")
                 # matplotlib increases x from left to right, flipping that
@@ -652,9 +654,12 @@ class PartialDependence(BaseGlobalInterpretation):
             ax_colors = pyplot.subplot2grid((3, 3), (1, 2), colspan=1, rowspan=1)
             ax_colors = plot_2d_color_scale(xmin, xmax, ymin, ymax, plot_point=mean_point,ax=ax_colors)
             ax_colors.set_xlabel("Local Impact {}".format(feature1))
-            ax_colors.set_ylabel("Local Impact {}".format(feature2))
+            ax_colors.set_ylabel("Local Impact {}".format(feature2), rotation=270, labelpad=10)
             ax_colors.yaxis.tick_right()
             ax_colors.yaxis.set_label_position("right")
+            ax_colors.xaxis.set_major_formatter(tick_formatter())
+            ax_colors.yaxis.set_major_formatter(tick_formatter())
+
 
 
             if with_variance:
@@ -667,10 +672,10 @@ class PartialDependence(BaseGlobalInterpretation):
                                 color=var_color)
             ax.set_xlabel(feature1)
             ax.set_ylabel(feature2)
-            ax.set_zlabel(class_column)
+            ax.set_zlabel("\n{}".format(class_column), linespacing=3.0)
             #ax.xaxis._axinfo['label']['space_factor'] = 2.0
             #ax.yaxis._axinfo['label']['space_factor'] = 2.0
-            #ax.zaxis._axinfo['label']['space_factor'] = 2.0
+            #ax.zaxis._axinfo['label']['space_factor'] = 20.0
             ax.invert_xaxis()
 
             handles, labels = ax.get_legend_handles_labels()

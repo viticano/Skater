@@ -195,3 +195,16 @@ def build_buffer2(xmin, xmax, buffer_prop=.1):
     return xmin, xmax, buffer
 
 
+def tick_formatter(powerlimits=None):
+    try:
+        from matplotlib.ticker import ScalarFormatter
+    except ImportError:
+        raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on your system."))
+    except RuntimeError:
+        raise (MatplotlibDisplayError("Matplotlib unable to open display"))
+    if powerlimits is None:
+        powerlimits = (3, 3)
+    formatter = ScalarFormatter()
+    formatter.set_powerlimits(powerlimits)
+    return formatter
+
