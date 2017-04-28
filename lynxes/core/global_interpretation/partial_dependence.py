@@ -583,6 +583,7 @@ class PartialDependence(BaseGlobalInterpretation):
         feature_2_is_binary = len(np.unique(feature_2_data)) == 2
 
         if not feature_1_is_binary and not feature_2_is_binary:
+            self.interpreter.logger.debug("Neither feature is binary, so plotting 3D mesh")
             plot_objects = self._plot_3d_full_mesh(pdp,
                                                    feature1,
                                                    feature2,
@@ -592,6 +593,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                                    figsize=figsize)
 
         elif feature_1_is_binary and feature_2_is_binary:
+            self.interpreter.logger.debug("Both features are binary, so plotting groups")
             plot_objects = self._plot_2d_2_binary_feature(pdp,
                                                           feature1,
                                                           feature2,
@@ -602,9 +604,12 @@ class PartialDependence(BaseGlobalInterpretation):
         else:
             # one feature is binary and one isnt.
             binary_feature, non_binary_feature = {
-                feature_1_is_binary: [feature1, feature2],
-                (not feature_1_is_binary): [feature2, feature1]
+                True: [feature1, feature2],
+                False: [feature2, feature1]
             }[feature_1_is_binary]
+            self.interpreter.logger.debug("One feature is binary, and one isnt")
+            self.interpreter.logger.debug("Binary Feature: {}".format(binary_feature))
+            self.interpreter.logger.debug("Non Binary Feature: {}".format(non_binary_feature))
 
             plot_objects = self._plot_2d_1_binary_feature_and_1_continuous(pdp,
                                                    binary_feature,
