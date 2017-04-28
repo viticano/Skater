@@ -163,12 +163,12 @@ class DataManager(object):
             ranks_rounded = pd.qcut(dists, bins / 100, labels=False)
             unique_ranks = np.unique(ranks_rounded)
         else:
-            ranks_rounded = np.ones(n_rows)
+            ranks_rounded = np.ones(self.n_rows)
             unique_ranks = np.ones(1)
         return {
             'median': medians,
             'dists': dists,
-            'n_rows': n_rows,
+            'n_rows': self.n_rows,
             'unique_ranks': unique_ranks,
             'ranks_rounded': ranks_rounded
         }
