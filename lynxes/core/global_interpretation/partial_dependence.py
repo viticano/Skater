@@ -653,6 +653,8 @@ class PartialDependence(BaseGlobalInterpretation):
             ax_colors = plot_2d_color_scale(xmin, xmax, ymin, ymax, plot_point=mean_point,ax=ax_colors)
             ax_colors.set_xlabel("Local Impact {}".format(feature1))
             ax_colors.set_ylabel("Local Impact {}".format(feature2))
+            ax_colors.yaxis.tick_right()
+            ax_colors.yaxis.set_label_position("right")
 
 
             if with_variance:
@@ -666,6 +668,9 @@ class PartialDependence(BaseGlobalInterpretation):
             ax.set_xlabel(feature1)
             ax.set_ylabel(feature2)
             ax.set_zlabel(class_column)
+            #ax.xaxis._axinfo['label']['space_factor'] = 2.0
+            #ax.yaxis._axinfo['label']['space_factor'] = 2.0
+            #ax.zaxis._axinfo['label']['space_factor'] = 2.0
             ax.invert_xaxis()
 
             handles, labels = ax.get_legend_handles_labels()

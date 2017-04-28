@@ -154,8 +154,6 @@ def plot_2d_color_scale(x1_min, x1_max, x2_min, x2_max, plot_point=None,
     x2 = np.linspace(x2_min, x2_max, resolution+1)
     x1_diff = x1[1] - x1[0]
     x2_diff = x2[1] - x2[0]
-    print("x1 diff: {}".format(x1_diff))
-    print("x2 diff: {}".format(x2_diff))
     x1, x2 = np.meshgrid(x1, x2)
     colors_for_scale, a, b, c, d = coordinate_gradients_to_1d_colorscale(x1, x2, x_buffer_prop=0, y_buffer_prop=0)
 
