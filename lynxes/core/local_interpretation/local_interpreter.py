@@ -6,11 +6,9 @@ from sklearn import metrics
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import NearestNeighbors
-from functools import partial
 
 from ...util.kernels import rbf_kernel
 from .base import BaseLocalInterpretation
-from ..model_interpreter import ModelInterpreter
 
 
 class LocalInterpreter(BaseLocalInterpretation):
@@ -81,7 +79,7 @@ class LocalInterpreter(BaseLocalInterpretation):
 
         if similarity_method == 'cosine-similarity':
             weights = self._get_weights_from_cosine_similarity(neighborhood,
-                                                              data_row)
+                                                               data_row)
         elif similarity_method == 'unscaled-kernel-substitution':
             weights = self._get_weights_via_kernel_subtitution(neighborhood,
                                                                data_row,
@@ -103,7 +101,7 @@ class LocalInterpreter(BaseLocalInterpretation):
         explainer_model.fit(neighborhood, predictions, sample_weight=weights)
         self._check_explainer_model_post_train(explainer_model)
 
-        #results = pd.DataFrame(explainer_model.coef_, self.data_set.feature_ids, index = 'coef')
+        # results = pd.DataFrame(explainer_model.coef_, self.data_set.feature_ids, index = 'coef')
         return explainer_model.coef_
 
 
@@ -135,10 +133,14 @@ class LocalInterpreter(BaseLocalInterpretation):
         return abs(similarities)
 
     @staticmethod
-    def _get_weights_via_kernel_subtitution(neighborhood, point, kernel_width,
-                                           distance_metric):
+    def _get_weights_via_kernel_subtitution(neighborhood,
+                                            point,
+                                            kernel_width,
+                                            distance_metric):
         """Computes distances, passes through gaussian kernel"""
-        kernel_fn = lambda d: np.sqrt(np.exp(-(d ** 2) / kernel_width ** 2))
+        def kernel_fn(d):
+            return np.sqrt(np.exp(-(d ** 2) / kernel_width ** 2))
+
         distances = metrics.pairwise_distances(
             neighborhood,
             point.reshape(1, -1),

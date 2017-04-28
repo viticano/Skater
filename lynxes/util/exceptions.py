@@ -1,8 +1,9 @@
 "Specialized Exceptions for lynxes"
 
-def exception_factory(exception_name, base_exception = Exception, attributes = None):
+
+def exception_factory(exception_name, base_exception=Exception, attributes=None):
     attribute_dict = {
-        "__init__":base_exception.__init__
+        "__init__": base_exception.__init__
     }
     if isinstance(attributes, dict):
         attributes.update(attributes)
@@ -11,6 +12,7 @@ def exception_factory(exception_name, base_exception = Exception, attributes = N
         (base_exception, ),
         attribute_dict
     )
+
 
 DataSetNotLoadedError = exception_factory('DataSetNotLoadedError')
 

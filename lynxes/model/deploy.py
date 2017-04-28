@@ -8,7 +8,7 @@ class DeployedModel(ModelType):
     """Model that gets predictions from a deployed model"""
     def __init__(self, uri, input_formatter, output_formatter,
                  log_level=30, class_names=None, examples=None, feature_names=None,
-                 request_kwargs = {}):
+                 request_kwargs={}):
         """This model can be called by making http requests
         to the passed in uri.
 

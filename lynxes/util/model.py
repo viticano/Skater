@@ -25,7 +25,7 @@ def get_predictor(model):
         uri = model.uri
         input_formatter = model.input_formatter
         output_formatter = model.output_formatter
-        formatter=model.formatter
+        formatter = model.formatter
         predict_fn = partial(DeployedModel._predict,
                              uri=uri,
                              input_formatter=input_formatter,
