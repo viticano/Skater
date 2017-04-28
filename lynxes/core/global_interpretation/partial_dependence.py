@@ -338,7 +338,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                 grid_resolution=None, grid_range=None, n_jobs=-1,
                                 sample=True, sampling_strategy='random-choice',
                                 n_samples=10000, bin_count=50, samples_per_bin=10,
-                                with_variance=False):
+                                with_variance=False, figsize=(16,10)):
         """
         Computes partial_dependence of a set of variables. Essentially approximates
         the partial partial_dependence of the predict_fn with respect to the variables
@@ -433,10 +433,12 @@ class PartialDependence(BaseGlobalInterpretation):
             global Axes3D
             global mpl_axes
             global cm
+            global tick_formatter
             from matplotlib.axes._subplots import Axes as mpl_axes
-            from matplotlib.ticker import ScalarFormatter
+            # from matplotlib.ticker import ScalarFormatter
             from mpl_toolkits.mplot3d import Axes3D
             from matplotlib import pyplot, cm
+            from ...util.plotting import tick_formatter
         except ImportError:
             raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on your system."))
         except RuntimeError:
@@ -455,7 +457,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                                       n_jobs=n_jobs, return_metadata=True)
 
             self.interpreter.logger.info("done computing pd, now plotting ...")
-            ax = self._plot_pdp_from_df(pd_df, metadata, with_variance=with_variance)
+            ax = self._plot_pdp_from_df(pd_df, metadata, with_variance=with_variance, figsize=figsize)
             return ax
         else:
             ax_list = []
@@ -470,14 +472,14 @@ class PartialDependence(BaseGlobalInterpretation):
                                                           n_jobs=n_jobs, return_metadata=True)
 
                 self.interpreter.logger.info("done computing pd, now plotting ...")
-                ax = self._plot_pdp_from_df(pd_df, metadata, with_variance=with_variance)
+                ax = self._plot_pdp_from_df(pd_df, metadata, with_variance=with_variance, figsize=figsize)
                 ax_list.append(ax)
             return ax_list
 
 
     def _plot_pdp_from_df(self, pdp, pd_metadata,
                           with_variance=False, plot_title=None,
-                          disable_offset=True):
+                          disable_offset=True, figsize=(16,10)):
 
         feature_columns = pd_metadata['feature_columns']
         class_columns = pd_metadata['class_columns']
@@ -485,14 +487,24 @@ class PartialDependence(BaseGlobalInterpretation):
         n_features = len(feature_columns)
         if n_features == 1 or not hasattr(feature_columns, "__iter__"):
             feature_column = feature_columns[0]
-            return self._2d_pdp_plot(pdp, feature_column, sd_col, class_columns,
+            return self._2d_pdp_plot(pdp,
+                                     feature_column,
+                                     sd_col,
+                                     class_columns,
                                      with_variance=with_variance,
-                                     plot_title=plot_title, disable_offset=disable_offset)
+                                     plot_title=plot_title,
+                                     disable_offset=disable_offset,
+                                     figsize=figsize)
         elif n_features == 2:
             feature1_column, feature2_column = feature_columns
-            return self._3d_pdp_plot(pdp, feature1_column, feature2_column,
-                                     sd_col, class_columns, with_variance=with_variance,
-                                     plot_title=plot_title)
+            return self._3d_pdp_plot(pdp,
+                                     feature1_column,
+                                     feature2_column,
+                                     sd_col,
+                                     class_columns,
+                                     with_variance=with_variance,
+                                     plot_title=plot_title,
+                                     figsize=figsize)
         else:
             msg = "Something went wrong. Expected either a single feature, " \
                   "or a 1-2 element array of features, got array of size:" \
@@ -501,7 +513,8 @@ class PartialDependence(BaseGlobalInterpretation):
 
 
     def _2d_pdp_plot(self, pdp, feature_name, sd_col, class_columns,
-                     with_variance=False, plot_title=None, disable_offset=True):
+                     with_variance=False, plot_title=None,
+                     disable_offset=True, figsize=(16,10)):
         colors = cycle(COLORS)
         figure_list, axis_list = [], []
 
@@ -512,7 +525,7 @@ class PartialDependence(BaseGlobalInterpretation):
         for class_column in class_columns:
             # if class_name is None:
             #     raise ValueError("Could not parse class name from {}".format(mean_col))
-            f, ax = pyplot.subplots(1)
+            f, ax = pyplot.subplots(1, figsize=figsize)
             figure_list.append(f)
             axis_list.append(ax)
             color = next(colors)
@@ -545,7 +558,7 @@ class PartialDependence(BaseGlobalInterpretation):
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(handles, labels)
             if disable_offset:
-                ax.yaxis.set_major_formatter(ScalarFormatter())
+                ax.yaxis.set_major_formatter(tick_formatter())
         return flatten([figure_list, axis_list])
 
 
@@ -558,8 +571,8 @@ class PartialDependence(BaseGlobalInterpretation):
 
 
     def _3d_pdp_plot(self, pdp, feature1, feature2, sd_column, class_columns,
-
-                     with_variance=False, plot_title=None, disable_offset=True):
+                     with_variance=False, plot_title=None, disable_offset=True,
+                     figsize=(16, 10)):
 
         # if there are just 2 classes, pick the last one.
         if len(class_columns) == 2:
@@ -572,22 +585,33 @@ class PartialDependence(BaseGlobalInterpretation):
         feature_2_is_binary = len(np.unique(feature_2_data)) == 2
 
         if not feature_1_is_binary and not feature_2_is_binary:
-            plot_objects = self._plot_3d_full_mesh(pdp, feature1, feature2,
-                                                   sd_column, class_columns,
-                                                   with_variance=with_variance)
-
-        elif feature_1_is_binary and feature_2_is_binary:
-            plot_objects = self._plot_2d_2_binary_feature(pdp,
+            self.interpreter.logger.debug("Neither feature is binary, so plotting 3D mesh")
+            plot_objects = self._plot_3d_full_mesh(pdp,
                                                    feature1,
                                                    feature2,
-                                                   sd_column, class_columns,
-                                                   with_variance=with_variance)
+                                                   sd_column,
+                                                   class_columns,
+                                                   with_variance=with_variance,
+                                                   figsize=figsize)
+
+        elif feature_1_is_binary and feature_2_is_binary:
+            self.interpreter.logger.debug("Both features are binary, so plotting groups")
+            plot_objects = self._plot_2d_2_binary_feature(pdp,
+                                                          feature1,
+                                                          feature2,
+                                                          sd_column,
+                                                          class_columns,
+                                                          with_variance=with_variance,
+                                                          figsize=figsize)
         else:
             # one feature is binary and one isnt.
             binary_feature, non_binary_feature = {
-                feature_1_is_binary: [feature1, feature2],
-                (not feature_1_is_binary): [feature2, feature1]
+                True: [feature1, feature2],
+                False: [feature2, feature1]
             }[feature_1_is_binary]
+            self.interpreter.logger.debug("One feature is binary, and one isnt")
+            self.interpreter.logger.debug("Binary Feature: {}".format(binary_feature))
+            self.interpreter.logger.debug("Non Binary Feature: {}".format(non_binary_feature))
 
             plot_objects = self._plot_2d_1_binary_feature_and_1_continuous(pdp,
                                                    binary_feature,
@@ -597,8 +621,8 @@ class PartialDependence(BaseGlobalInterpretation):
         for obj in plot_objects:
             if isinstance(obj, mpl_axes):
                 if disable_offset:
-                    obj.xaxis.set_major_formatter(ScalarFormatter())
-                    obj.yaxis.set_major_formatter(ScalarFormatter())
+                    obj.xaxis.set_major_formatter(tick_formatter())
+                    obj.yaxis.set_major_formatter(tick_formatter())
                 if plot_title:
                     obj.set_title("Partial Dependence")
                 # matplotlib increases x from left to right, flipping that
@@ -608,7 +632,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
     def _plot_3d_full_mesh(self, pdp, feature1, feature2,
                            sd_column, class_columns,
-                           with_variance=False, alpha=.7):
+                           with_variance=False, alpha=.7, figsize=(16,10)):
         colors = cycle(COLORS)
 
         figure_list, axis_list = [], []
@@ -616,9 +640,9 @@ class PartialDependence(BaseGlobalInterpretation):
         for class_column in class_columns:
             gradient_x, gradient_y, X, Y, Z = self.compute_3d_gradients(pdp, class_column, feature1, feature2)
             color_gradient, xmin, xmax, ymin, ymax = coordinate_gradients_to_1d_colorscale(gradient_x, gradient_y)
-            pyplot.figure()
+            figure=pyplot.figure(figsize=figsize)
             ax = pyplot.subplot2grid((3, 3), (0, 0), colspan=2, rowspan=3, projection='3d')
-            figure_list.append(ax.figure)
+            figure_list.append(figure)
             axis_list.append(ax)
 
             surface = ax.plot_surface(X, Y, Z, alpha=alpha, facecolors=color_gradient, linewidth=0., rstride=1, cstride=1)
@@ -630,7 +654,12 @@ class PartialDependence(BaseGlobalInterpretation):
             ax_colors = pyplot.subplot2grid((3, 3), (1, 2), colspan=1, rowspan=1)
             ax_colors = plot_2d_color_scale(xmin, xmax, ymin, ymax, plot_point=mean_point,ax=ax_colors)
             ax_colors.set_xlabel("Local Impact {}".format(feature1))
-            ax_colors.set_ylabel("Local Impact {}".format(feature2))
+            ax_colors.set_ylabel("Local Impact {}".format(feature2), rotation=270, labelpad=10)
+            ax_colors.yaxis.tick_right()
+            ax_colors.yaxis.set_label_position("right")
+            ax_colors.xaxis.set_major_formatter(tick_formatter())
+            ax_colors.yaxis.set_major_formatter(tick_formatter())
+
 
 
             if with_variance:
@@ -643,7 +672,10 @@ class PartialDependence(BaseGlobalInterpretation):
                                 color=var_color)
             ax.set_xlabel(feature1)
             ax.set_ylabel(feature2)
-            ax.set_zlabel(class_column)
+            ax.set_zlabel("\n{}".format(class_column), linespacing=3.0)
+            #ax.xaxis._axinfo['label']['space_factor'] = 2.0
+            #ax.yaxis._axinfo['label']['space_factor'] = 2.0
+            #ax.zaxis._axinfo['label']['space_factor'] = 20.0
             ax.invert_xaxis()
 
             handles, labels = ax.get_legend_handles_labels()
@@ -653,11 +685,11 @@ class PartialDependence(BaseGlobalInterpretation):
 
 
     def _plot_3d_2_binary_feature(self, pdp, feature1, feature2, sd_column,
-                                  class_columns, with_variance=False):
+                                  class_columns, with_variance=False, figsize=(16, 10)):
         colors = cycle(COLORS)
         figure_list, axis_list = [], []
         for class_column in class_columns:
-            fig = pyplot.figure()
+            fig = pyplot.figure(figsize=figsize)
             ax = fig.add_subplot(111, projection='3d')
 
             for val in np.unique(pdp[feature2]):
@@ -678,12 +710,13 @@ class PartialDependence(BaseGlobalInterpretation):
         return flatten([figure_list, axis_list])
 
     def _plot_2d_2_binary_feature(self, pdp, feature1, feature2, sd_col,
-                                  class_columns, with_variance=False):
+                                  class_columns, with_variance=False,
+                                  figsize=(16,10)):
         figure_list, axis_list = [], []
 
         std_error = pdp.set_index([feature1, feature2])[sd_col].unstack()
         for class_column in class_columns:
-            f = pyplot.figure()
+            f = pyplot.figure(figsize=figsize)
             ax = f.add_subplot(111)
             #feature2 is columns
             #feature1 is index
@@ -710,14 +743,15 @@ class PartialDependence(BaseGlobalInterpretation):
 
     def _plot_2d_1_binary_feature_and_1_continuous(self, pdp, binary_feature,
                                                    non_binary_feature, sd_column,
-                                                   class_columns, with_variance=False):
+                                                   class_columns, with_variance=False,
+                                                   figsize=(16,10)):
 
         figure_list, axis_list = [], []
 
         binary_vals = np.unique(pdp[binary_feature])
         for class_column in class_columns:
             colors = cycle(COLORS)
-            f = pyplot.figure()
+            f = pyplot.figure(figsize=figsize)
             ax = f.add_subplot(111)
             figure_list.append(f)
             axis_list.append(ax)
