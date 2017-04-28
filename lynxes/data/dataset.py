@@ -62,7 +62,7 @@ class DataManager(object):
                 feature_names = list(self.data.columns.values)
             if not index:
                 index = list(self.data.index.values)
-            self.feature_ids = feature_names
+            self.feature_ids = list(feature_names)
             self.index = index
 
         elif isinstance(self.data, np.ndarray):
