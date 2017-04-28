@@ -114,7 +114,7 @@ def coordinate_gradients_to_1d_colorscale(dx, dy,
     return color, xmin+xbuffer, xmax-xbuffer, ymin+ybuffer, ymax-ybuffer
 
 def plot_2d_color_scale(x1_min, x1_max, x2_min, x2_max, plot_point=None,
-                        resolution=10, ax=None):
+                        resolution=10, ax=None, x_buffer_prop=.1, y_buffer_prop=.1):
     """
     Return a generic plot of a 2D color scale
 
@@ -146,15 +146,18 @@ def plot_2d_color_scale(x1_min, x1_max, x2_min, x2_max, plot_point=None,
         raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on your system."))
     except RuntimeError:
         raise (MatplotlibDisplayError("Matplotlib unable to open display"))
-
+    x1_min, x1_max, x1_buffer = build_buffer2(x1_min, x1_max)
+    x2_min, x2_max, x2_buffer = build_buffer2(x2_min, x2_max)
     ax.set_xlim(x1_min, x1_max)
     ax.set_ylim(x2_min, x2_max)
     x1 = np.linspace(x1_min, x1_max, resolution+1)
     x2 = np.linspace(x2_min, x2_max, resolution+1)
     x1_diff = x1[1] - x1[0]
     x2_diff = x2[1] - x2[0]
+    print("x1 diff: {}".format(x1_diff))
+    print("x2 diff: {}".format(x2_diff))
     x1, x2 = np.meshgrid(x1, x2)
-    colors_for_scale, a, b, c, d = coordinate_gradients_to_1d_colorscale(x1, x2)
+    colors_for_scale, a, b, c, d = coordinate_gradients_to_1d_colorscale(x1, x2, x_buffer_prop=0, y_buffer_prop=0)
 
     if ax is None:
         f, ax = pyplot.subplots(1)
@@ -175,7 +178,21 @@ def plot_2d_color_scale(x1_min, x1_max, x2_min, x2_max, plot_point=None,
 
 def build_buffer(x, buffer_prop=.1):
     xmin, xmax = min(0, np.percentile(x, 3)), max(np.percentile(x, 97), 0)
-    buffer = (xmax - xmin) * buffer_prop / 2.
+    if xmin != xmax:
+        buffer = (xmax - xmin) * buffer_prop / 2.
+    #all values are the same
+    else:
+        buffer = 0.01
+    xmin, xmax = xmin - buffer, xmax + buffer
+    return xmin, xmax, buffer
+
+
+def build_buffer2(xmin, xmax, buffer_prop=.1):
+    if xmin != xmax:
+        buffer = (xmax - xmin) * buffer_prop / 2.
+    #all values are the same
+    else:
+        buffer = 0.01
     xmin, xmax = xmin - buffer, xmax + buffer
     return xmin, xmax, buffer
 
