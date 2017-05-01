@@ -1,6 +1,8 @@
 Interpretation Objects
 ======================
 
+.. _interpretation-overview:
+
 Overview
 --------
 Interpretation are initialized with a DataManager object, and expose interpretation algorithms as methods. For instance:
@@ -42,6 +44,9 @@ or subset the feature space.
 Currently, model agnostic global interpretation algorithms supported by lynxes include
 partial dependence and feature importance.
 
+
+.. _interpretation-feature-importance:
+
 Feature Importance
 ~~~~~~~~~~~~~~~~~~
 Feature importance is generic term for the degree to which a predictive model relies on a particular
@@ -54,6 +59,8 @@ more we'll see predictions change as a function of perturbing a feature.
    :members:
 
 
+.. _interpretation-partial-dependence:
+
 Partial Dependence
 ~~~~~~~~~~~~~~~~~~
 Partial Dependence describes the marginal impact of a feature on model prediction, holding
@@ -62,6 +69,8 @@ in a regression model).
 
 .. autoclass:: lynxes.core.global_interpretation.partial_dependence.PartialDependence
    :members:
+
+.. _interpretation-overview-local:
 
 Local Interpretations
 ----------------------
