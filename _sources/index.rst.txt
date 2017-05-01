@@ -19,12 +19,6 @@ lynxes documentation!
    api
 
 
-
-.. only:: html
-
-   - `Gallery <gallery.html>`_
-
-
 Indices and tables
 ==================
 
