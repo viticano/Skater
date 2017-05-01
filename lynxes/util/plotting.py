@@ -84,8 +84,8 @@ def coordinate_gradients_to_1d_colorscale(dx, dy,
     color_array, xmin, xmax, ymin, ymax
     """
     colormap = ColorMap()
-    xmin, xmax, xbuffer = build_buffer(dx)
-    ymin, ymax, ybuffer = build_buffer(dy)
+    xmin, xmax, xbuffer = build_buffer(dx.min(), dx.max())
+    ymin, ymax, ybuffer = build_buffer(dy.min(), dy.max())
     global_min = min(xmin, ymin)
     global_max = max(xmax, ymax)
     if norm == 'separate':
