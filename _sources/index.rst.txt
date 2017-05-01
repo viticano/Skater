@@ -1,6 +1,6 @@
 .. _contents:
 
-PyInterpret documentation!
+lynxes documentation!
 =======================================
 
 .. only:: html

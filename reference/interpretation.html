@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Interpretation Objects &mdash; pyinterpret 0 documentation</title>
+  <title>Interpretation Objects &mdash; lynxes 0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="pyinterpret 0 documentation" href="../index.html"/>
+    <link rel="top" title="lynxes 0 documentation" href="../index.html"/>
         <link rel="up" title="API Reference" href="../api.html"/>
         <link rel="next" title="Model Objects" href="model.html"/>
         <link rel="prev" title="API Reference" href="../api.html"/> 
@@ -57,7 +57,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> pyinterpret
+            <a href="../index.html" class="icon icon-home"> lynxes
           
 
           
@@ -128,7 +128,7 @@
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">pyinterpret</a>
+          <a href="../index.html">lynxes</a>
         
       </nav>
 
@@ -182,12 +182,12 @@
   <div class="section" id="interpretation-objects">
 <h1>Interpretation Objects<a class="headerlink" href="#interpretation-objects" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="overview">
-<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<span id="interpretation-overview"></span><h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 <p>Interpretation are initialized with a DataManager object, and expose interpretation algorithms as methods. For instance:</p>
 <div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
 3
-4</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">pyinterpret</span> <span class="kn">import</span> <span class="n">Interpretation</span><span class="p">()</span>
+4</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">lynxes</span> <span class="kn">import</span> <span class="n">Interpretation</span><span class="p">()</span>
 <span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span>
 <span class="n">interpreter</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 <span class="n">interpreter</span><span class="o">.</span><span class="n">feature_importance</span><span class="o">.</span><span class="n">feature_importance</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
@@ -203,8 +203,8 @@ and observation names, as well as providing various sampling algorithms.</p>
 <p>Currently load_data requires a numpy ndarray or pandas DataFrame, though we may add support for additional data structures in the future.
 For more details on what the DataManager does, please see the relevant documentation [PROVIDE LINK].</p>
 <dl class="method">
-<dt id="pyinterpret.core.explanations.Interpretation.load_data">
-<code class="descclassname">Interpretation.</code><code class="descname">load_data</code><span class="sig-paren">(</span><em>training_data</em>, <em>feature_names=None</em>, <em>index=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyinterpret/core/explanations.html#Interpretation.load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.core.explanations.Interpretation.load_data" title="Permalink to this definition">¶</a></dt>
+<dt id="lynxes.core.explanations.Interpretation.load_data">
+<code class="descclassname">Interpretation.</code><code class="descname">load_data</code><span class="sig-paren">(</span><em>training_data</em>, <em>feature_names=None</em>, <em>index=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lynxes/core/explanations.html#Interpretation.load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lynxes.core.explanations.Interpretation.load_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a DataSet object from inputs, ties to interpretation object.
 This will be exposed to all submodules.</p>
 <dl class="docutils">
@@ -232,22 +232,22 @@ or subset the feature space.</p>
 <p>Currently, model agnostic global interpretation algorithms supported by lynxes include
 partial dependence and feature importance.</p>
 <div class="section" id="feature-importance">
-<h3>Feature Importance<a class="headerlink" href="#feature-importance" title="Permalink to this headline">¶</a></h3>
+<span id="interpretation-feature-importance"></span><h3>Feature Importance<a class="headerlink" href="#feature-importance" title="Permalink to this headline">¶</a></h3>
 <p>Feature importance is generic term for the degree to which a predictive model relies on a particular
 feature. Lynxes feature importance implementation is based on an information theoretic criteria,
 measuring the entropy in the change of predictions, given a perturbation of a given feature.
 The intuition is that the more a model&#8217;s decision criteria depend on a feature, the
 more we&#8217;ll see predictions change as a function of perturbing a feature.</p>
 <dl class="class">
-<dt id="pyinterpret.core.global_interpretation.feature_importance.FeatureImportance">
-<em class="property">class </em><code class="descclassname">pyinterpret.core.global_interpretation.feature_importance.</code><code class="descname">FeatureImportance</code><span class="sig-paren">(</span><em>interpreter</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyinterpret/core/global_interpretation/feature_importance.html#FeatureImportance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.core.global_interpretation.feature_importance.FeatureImportance" title="Permalink to this definition">¶</a></dt>
+<dt id="lynxes.core.global_interpretation.feature_importance.FeatureImportance">
+<em class="property">class </em><code class="descclassname">lynxes.core.global_interpretation.feature_importance.</code><code class="descname">FeatureImportance</code><span class="sig-paren">(</span><em>interpreter</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lynxes/core/global_interpretation/feature_importance.html#FeatureImportance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lynxes.core.global_interpretation.feature_importance.FeatureImportance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Contains methods for feature importance. Subclass of BaseGlobalInterpretation</p>
 <dl class="method">
-<dt id="pyinterpret.core.global_interpretation.feature_importance.FeatureImportance.feature_importance">
-<code class="descname">feature_importance</code><span class="sig-paren">(</span><em>modelinstance</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyinterpret/core/global_interpretation/feature_importance.html#FeatureImportance.feature_importance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.core.global_interpretation.feature_importance.FeatureImportance.feature_importance" title="Permalink to this definition">¶</a></dt>
+<dt id="lynxes.core.global_interpretation.feature_importance.FeatureImportance.feature_importance">
+<code class="descname">feature_importance</code><span class="sig-paren">(</span><em>modelinstance</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lynxes/core/global_interpretation/feature_importance.html#FeatureImportance.feature_importance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lynxes.core.global_interpretation.feature_importance.FeatureImportance.feature_importance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes feature importance of all features related to a model instance.</p>
 <dl class="docutils">
-<dt>modelinstance: pyinterpret.model.model.Model subtype</dt>
+<dt>modelinstance: lynxes.model.model.Model subtype</dt>
 <dd><p class="first">the machine learning model &#8220;prediction&#8221; function to explain, such that
 predictions = predict_fn(data).</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -258,8 +258,8 @@ predictions = predict_fn(data).</p>
 </tr>
 </tbody>
 </table>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyinterpret.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyinterpret.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">lynxes.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">lynxes.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="k">import</span> <span class="n">RandomForestClassier</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span> <span class="o">=</span> <span class="n">RandomForestClassier</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
@@ -277,17 +277,17 @@ predictions = predict_fn(data).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyinterpret.core.global_interpretation.feature_importance.FeatureImportance.plot_feature_importance">
-<code class="descname">plot_feature_importance</code><span class="sig-paren">(</span><em>predict_fn</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyinterpret/core/global_interpretation/feature_importance.html#FeatureImportance.plot_feature_importance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.core.global_interpretation.feature_importance.FeatureImportance.plot_feature_importance" title="Permalink to this definition">¶</a></dt>
+<dt id="lynxes.core.global_interpretation.feature_importance.FeatureImportance.plot_feature_importance">
+<code class="descname">plot_feature_importance</code><span class="sig-paren">(</span><em>predict_fn</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lynxes/core/global_interpretation/feature_importance.html#FeatureImportance.plot_feature_importance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lynxes.core.global_interpretation.feature_importance.FeatureImportance.plot_feature_importance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes feature importance of all features related to a model instance,
 then plots the results.</p>
 <dl class="docutils">
-<dt>modelinstance: pyinterpret.model.model.Model subtype</dt>
+<dt>modelinstance: lynxes.model.model.Model subtype</dt>
 <dd><p class="first">the machine learning model &#8220;prediction&#8221; function to explain, such that
 predictions = predict_fn(data).</p>
 <p>For instance:
-&gt;&gt;&gt; from pyinterpret.model import InMemoryModel
-&gt;&gt;&gt; from pyinterpret.core.explanations import Interpretation
+&gt;&gt;&gt; from lynxes.model import InMemoryModel
+&gt;&gt;&gt; from lynxes.core.explanations import Interpretation
 &gt;&gt;&gt; from sklearn.ensemble import RandomForestClassier
 &gt;&gt;&gt; rf = RandomForestClassier()
 &gt;&gt;&gt; rf.fit(X,y)</p>
@@ -309,17 +309,17 @@ one will be created.</dd>
 
 </div>
 <div class="section" id="partial-dependence">
-<h3>Partial Dependence<a class="headerlink" href="#partial-dependence" title="Permalink to this headline">¶</a></h3>
+<span id="interpretation-partial-dependence"></span><h3>Partial Dependence<a class="headerlink" href="#partial-dependence" title="Permalink to this headline">¶</a></h3>
 <p>Partial Dependence describes the marginal impact of a feature on model prediction, holding
 other features in the model constant. The derivative of partial dependence describes the impact of a feature (analogous to a feature coefficient
 in a regression model).</p>
 <dl class="class">
-<dt id="pyinterpret.core.global_interpretation.partial_dependence.PartialDependence">
-<em class="property">class </em><code class="descclassname">pyinterpret.core.global_interpretation.partial_dependence.</code><code class="descname">PartialDependence</code><span class="sig-paren">(</span><em>interpreter</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyinterpret/core/global_interpretation/partial_dependence.html#PartialDependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence" title="Permalink to this definition">¶</a></dt>
+<dt id="lynxes.core.global_interpretation.partial_dependence.PartialDependence">
+<em class="property">class </em><code class="descclassname">lynxes.core.global_interpretation.partial_dependence.</code><code class="descname">PartialDependence</code><span class="sig-paren">(</span><em>interpreter</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lynxes/core/global_interpretation/partial_dependence.html#PartialDependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lynxes.core.global_interpretation.partial_dependence.PartialDependence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Contains methods for partial dependence. Subclass of BaseGlobalInterpretation</p>
 <dl class="staticmethod">
-<dt id="pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.compute_3d_gradients">
-<em class="property">static </em><code class="descname">compute_3d_gradients</code><span class="sig-paren">(</span><em>pdp</em>, <em>mean_col</em>, <em>feature_1</em>, <em>feature_2</em>, <em>scaled=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyinterpret/core/global_interpretation/partial_dependence.html#PartialDependence.compute_3d_gradients"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.compute_3d_gradients" title="Permalink to this definition">¶</a></dt>
+<dt id="lynxes.core.global_interpretation.partial_dependence.PartialDependence.compute_3d_gradients">
+<em class="property">static </em><code class="descname">compute_3d_gradients</code><span class="sig-paren">(</span><em>pdp</em>, <em>mean_col</em>, <em>feature_1</em>, <em>feature_2</em>, <em>scaled=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lynxes/core/global_interpretation/partial_dependence.html#PartialDependence.compute_3d_gradients"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lynxes.core.global_interpretation.partial_dependence.PartialDependence.compute_3d_gradients" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes component-wise gradients of pdp dataframe.</p>
 <dl class="docutils">
 <dt>pdp: pandas.DataFrame</dt>
@@ -337,8 +337,8 @@ in a regression model).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence">
-<code class="descname">partial_dependence</code><span class="sig-paren">(</span><em>feature_ids</em>, <em>modelinstance</em>, <em>grid=None</em>, <em>grid_resolution=None</em>, <em>n_jobs=-1</em>, <em>grid_range=None</em>, <em>sample=True</em>, <em>sampling_strategy='random-choice'</em>, <em>n_samples=10000</em>, <em>bin_count=50</em>, <em>samples_per_bin=10</em>, <em>return_metadata=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyinterpret/core/global_interpretation/partial_dependence.html#PartialDependence.partial_dependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence" title="Permalink to this definition">¶</a></dt>
+<dt id="lynxes.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence">
+<code class="descname">partial_dependence</code><span class="sig-paren">(</span><em>feature_ids</em>, <em>modelinstance</em>, <em>grid=None</em>, <em>grid_resolution=None</em>, <em>n_jobs=-1</em>, <em>grid_range=None</em>, <em>sample=True</em>, <em>sampling_strategy='random-choice'</em>, <em>n_samples=10000</em>, <em>bin_count=50</em>, <em>samples_per_bin=10</em>, <em>return_metadata=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lynxes/core/global_interpretation/partial_dependence.html#PartialDependence.partial_dependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lynxes.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes partial_dependence of a set of variables. Essentially approximates
 the partial partial_dependence of the predict_fn with respect to the variables
 passed.</p>
@@ -349,12 +349,12 @@ Note that the algorithm&#8217;s complexity scales exponentially with additional
 features, so generally one should only look at one or two features at a
 time. These feature ids must be available in the class&#8217;s associated DataSet.
 As of now, we only support looking at 1 or 2 features at a time.</dd>
-<dt>modelinstance: pyinterpret.model.model.Model subtype</dt>
+<dt>modelinstance: lynxes.model.model.Model subtype</dt>
 <dd><p class="first">an estimator function of a fitted model used to derive prediction. Supports
 classification and regression. Supports classification(binary, multi-class) and regression.
 predictions = predict_fn(data)</p>
-<p class="last">Can either by a pyinterpret.model.remote.DeployedModel or a
-pyinterpret.model.local.InMemoryModel</p>
+<p class="last">Can either by a lynxes.model.remote.DeployedModel or a
+lynxes.model.local.InMemoryModel</p>
 </dd>
 <dt>grid: numpy.ndarray</dt>
 <dd>2 dimensional array on which we fix values of features. Note this is
@@ -400,15 +400,17 @@ total samples = bin_count * samples per bin.</dd>
 </tr>
 </tbody>
 </table>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyinterpret.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyinterpret.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">lynxes.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">lynxes.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="k">import</span> <span class="n">RandomForestClassier</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="k">import</span> <span class="n">load_boston</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">boston</span> <span class="o">=</span> <span class="n">load_boston</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">boston</span><span class="o">.</span><span class="n">data</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">boston</span><span class="o">.</span><span class="n">target</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">features</span> <span class="o">=</span> <span class="n">boston</span><span class="o">.</span><span class="n">feature_names</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span> <span class="o">=</span> <span class="n">RandomForestClassier</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span> <span class="o">=</span> <span class="n">RandomForestClassier</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -422,8 +424,8 @@ total samples = bin_count * samples per bin.</dd>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence">
-<code class="descname">plot_partial_dependence</code><span class="sig-paren">(</span><em>feature_ids</em>, <em>modelinstance</em>, <em>grid=None</em>, <em>grid_resolution=None</em>, <em>grid_range=None</em>, <em>n_jobs=-1</em>, <em>sample=True</em>, <em>sampling_strategy='random-choice'</em>, <em>n_samples=10000</em>, <em>bin_count=50</em>, <em>samples_per_bin=10</em>, <em>with_variance=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyinterpret/core/global_interpretation/partial_dependence.html#PartialDependence.plot_partial_dependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence" title="Permalink to this definition">¶</a></dt>
+<dt id="lynxes.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence">
+<code class="descname">plot_partial_dependence</code><span class="sig-paren">(</span><em>feature_ids</em>, <em>modelinstance</em>, <em>grid=None</em>, <em>grid_resolution=None</em>, <em>grid_range=None</em>, <em>n_jobs=-1</em>, <em>sample=True</em>, <em>sampling_strategy='random-choice'</em>, <em>n_samples=10000</em>, <em>bin_count=50</em>, <em>samples_per_bin=10</em>, <em>with_variance=False</em>, <em>figsize=(16</em>, <em>10)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lynxes/core/global_interpretation/partial_dependence.html#PartialDependence.plot_partial_dependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lynxes.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes partial_dependence of a set of variables. Essentially approximates
 the partial partial_dependence of the predict_fn with respect to the variables
 passed.</p>
@@ -434,12 +436,12 @@ Note that the algorithm&#8217;s complexity scales exponentially with additional
 features, so generally one should only look at one or two features at a
 time. These feature ids must be available in the class&#8217;s associated DataSet.
 As of now, we only support looking at 1 or 2 features at a time.</dd>
-<dt>modelinstance: pyinterpret.model.model.Model subtype</dt>
+<dt>modelinstance: lynxes.model.model.Model subtype</dt>
 <dd><p class="first">an estimator function of a fitted model used to derive prediction. Supports
 classification and regression. Supports classification(binary, multi-class) and regression.
 predictions = predict_fn(data)</p>
-<p class="last">Can either by a pyinterpret.model.remote.DeployedModel or a
-pyinterpret.model.local.InMemoryModel</p>
+<p class="last">Can either by a lynxes.model.remote.DeployedModel or a
+lynxes.model.local.InMemoryModel</p>
 </dd>
 <dt>grid: numpy.ndarray</dt>
 <dd>2 dimensional array on which we fix values of features. Note this is
@@ -493,12 +495,12 @@ plots for visibility. If you have a use case where you&#8217;d like error bars f
 <span class="gp">&gt;&gt;&gt; </span><span class="n">estimator</span> <span class="o">=</span> <span class="n">GradientBoostingRegressor</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
 <span class="gp">&gt;&gt;&gt; </span>                            <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s">&#39;huber&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyinterpret.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">lynxes.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s">&quot;Feature name: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">names</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="n">names</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s">&quot;Input feature name: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">names</span><span class="p">[</span><span class="mi">5</span><span class="p">]])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyinterpret.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">lynxes.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">plot_partial_dependence</span><span class="p">([</span><span class="n">names</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">names</span><span class="p">[</span><span class="mi">5</span><span class="p">]],</span> <span class="n">model</span><span class="p">,</span>
 <span class="gp">&gt;&gt;&gt; </span>                                                        <span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -511,7 +513,7 @@ plots for visibility. If you have a use case where you&#8217;d like error bars f
 </div>
 </div>
 <div class="section" id="local-interpretations">
-<h2>Local Interpretations<a class="headerlink" href="#local-interpretations" title="Permalink to this headline">¶</a></h2>
+<span id="interpretation-overview-local"></span><h2>Local Interpretations<a class="headerlink" href="#local-interpretations" title="Permalink to this headline">¶</a></h2>
 <p>Local interpretations are based on using interpretable surrogate models to illustrate
 how features impact predictions constrained to a particular point or small region in
 the input space. Linear surrogates around a point correspond the LIME algorithm; tree like
@@ -519,8 +521,8 @@ surrogates around a point correspond to anchorLIME.</p>
 <div class="section" id="lime">
 <h3>LIME<a class="headerlink" href="#lime" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
-<dt id="pyinterpret.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer">
-<em class="property">class </em><code class="descclassname">pyinterpret.core.local_interpretation.lime.lime_tabular.</code><code class="descname">LimeTabularExplainer</code><span class="sig-paren">(</span><em>training_data</em>, <em>training_labels=None</em>, <em>feature_names=None</em>, <em>categorical_features=None</em>, <em>categorical_names=None</em>, <em>kernel_width=None</em>, <em>verbose=False</em>, <em>class_names=None</em>, <em>feature_selection='auto'</em>, <em>discretize_continuous=True</em>, <em>discretizer='quartile'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer" title="Permalink to this definition">¶</a></dt>
+<dt id="lynxes.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer">
+<em class="property">class </em><code class="descclassname">lynxes.core.local_interpretation.lime.lime_tabular.</code><code class="descname">LimeTabularExplainer</code><span class="sig-paren">(</span><em>training_data</em>, <em>training_labels=None</em>, <em>feature_names=None</em>, <em>categorical_features=None</em>, <em>categorical_names=None</em>, <em>kernel_width=None</em>, <em>verbose=False</em>, <em>class_names=None</em>, <em>feature_selection='auto'</em>, <em>discretize_continuous=True</em>, <em>discretizer='quartile'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lynxes.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Explains predictions on tabular (i.e. matrix) data.
 For numerical features, perturb them by sampling from a Normal(0,1) and
 doing the inverse operation of mean-centering and scaling, according to the
@@ -529,8 +531,8 @@ sampling according to the training distribution, and making a binary
 feature that is 1 when the value is the same as the instance being
 explained.</p>
 <dl class="method">
-<dt id="pyinterpret.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_instance">
-<code class="descname">explain_instance</code><span class="sig-paren">(</span><em>data_row</em>, <em>classifier_fn</em>, <em>labels=(1</em>, <em>)</em>, <em>top_labels=None</em>, <em>num_features=10</em>, <em>num_samples=5000</em>, <em>distance_metric='euclidean'</em>, <em>model_regressor=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer.explain_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_instance" title="Permalink to this definition">¶</a></dt>
+<dt id="lynxes.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_instance">
+<code class="descname">explain_instance</code><span class="sig-paren">(</span><em>data_row</em>, <em>classifier_fn</em>, <em>labels=(1</em>, <em>)</em>, <em>top_labels=None</em>, <em>num_features=10</em>, <em>num_samples=5000</em>, <em>distance_metric='euclidean'</em>, <em>model_regressor=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer.explain_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lynxes.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_instance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates explanations for a prediction.</p>
 <p>First, we generate neighborhood data by randomly perturbing features
 from the instance (see __data_inverse). We then learn locally weighted
@@ -562,8 +564,8 @@ explanations.</dd>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyinterpret.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_regressor_instance">
-<code class="descname">explain_regressor_instance</code><span class="sig-paren">(</span><em>data_row</em>, <em>predict_fn</em>, <em>num_features=10</em>, <em>num_samples=5000</em>, <em>distance_metric='euclidean'</em>, <em>model_regressor=None</em>, <em>testing=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer.explain_regressor_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyinterpret.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_regressor_instance" title="Permalink to this definition">¶</a></dt>
+<dt id="lynxes.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_regressor_instance">
+<code class="descname">explain_regressor_instance</code><span class="sig-paren">(</span><em>data_row</em>, <em>predict_fn</em>, <em>num_features=10</em>, <em>num_samples=5000</em>, <em>distance_metric='euclidean'</em>, <em>model_regressor=None</em>, <em>testing=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer.explain_regressor_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lynxes.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_regressor_instance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates explanations for a prediction.
 First, we generate neighborhood data by randomly perturbing features
 from the instance (see __data_inverse). We then learn locally weighted

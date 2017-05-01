@@ -3,7 +3,7 @@
 API Reference
 ===========
 
-.. automodule:: pyinterpret
+.. automodule:: lynxes
    :members:
 
 

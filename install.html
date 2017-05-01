@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; pyinterpret 0 documentation</title>
+  <title>Installation &mdash; lynxes 0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="pyinterpret 0 documentation" href="index.html"/>
+    <link rel="top" title="lynxes 0 documentation" href="index.html"/>
         <link rel="next" title="Tutorial" href="tutorial.html"/>
         <link rel="prev" title="Overview" href="overview.html"/> 
 
@@ -56,7 +56,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> pyinterpret
+            <a href="index.html" class="icon icon-home"> lynxes
           
 
           
@@ -116,7 +116,7 @@
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">pyinterpret</a>
+          <a href="index.html">lynxes</a>
         
       </nav>
 
@@ -169,8 +169,8 @@
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="dev-installation">
 <h2>Dev Installation<a class="headerlink" href="#dev-installation" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">datascienceinc</span><span class="o">/</span><span class="n">PyInterpret</span><span class="o">.</span><span class="n">git</span>
-<span class="n">cd</span> <span class="n">PyInterpret</span>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">datascienceinc</span><span class="o">/</span><span class="n">lynxes</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">lynxes</span>
 <span class="n">sudo</span> <span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
 </pre></div>
 </div>
@@ -179,7 +179,7 @@
 <h2>Prod Installation (platform)<a class="headerlink" href="#prod-installation-platform" title="Permalink to this headline">¶</a></h2>
 <p>Requires that pip.conf is configured with pypi.datascience.com
 credentials.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">pip</span> <span class="n">install</span> <span class="n">pyinterpret</span>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">pip</span> <span class="n">install</span> <span class="n">lynxes</span>
 </pre></div>
 </div>
 </div>
@@ -203,8 +203,8 @@ credentials.</p>
 
 
 <span class="c">#partial dependence</span>
-<span class="kn">from</span> <span class="nn">pyinterpret.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
-<span class="kn">from</span> <span class="nn">pyinterpret.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
+<span class="kn">from</span> <span class="nn">lynxes.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
+<span class="kn">from</span> <span class="nn">lynxes.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
 <span class="n">i</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span>
 <span class="n">i</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">feature_names</span> <span class="o">=</span> <span class="n">feature_names</span><span class="p">)</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">)</span>
@@ -212,7 +212,7 @@ credentials.</p>
                                             <span class="n">model</span><span class="p">)</span>
 
 <span class="c">#local interpretation</span>
-<span class="kn">from</span> <span class="nn">pyinterpret.core.local_interpretation.lime.lime_tabular</span> <span class="k">import</span> <span class="n">LimeTabularExplainer</span>
+<span class="kn">from</span> <span class="nn">lynxes.core.local_interpretation.lime.lime_tabular</span> <span class="k">import</span> <span class="n">LimeTabularExplainer</span>
 <span class="n">explainer</span> <span class="o">=</span> <span class="n">LimeTabularExplainer</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">feature_names</span> <span class="o">=</span> <span class="n">feature_names</span><span class="p">)</span>
 <span class="n">explainer</span><span class="o">.</span><span class="n">explain_instance</span><span class="p">(</span><span class="n">example</span><span class="p">,</span>  <span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">)</span><span class="o">.</span><span class="n">show_in_notebook</span><span class="p">()</span>
 </pre></div>
@@ -220,7 +220,7 @@ credentials.</p>
 </div>
 <div class="section" id="testing">
 <h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">python</span> <span class="n">pyinterpret</span><span class="o">/</span><span class="n">tests</span><span class="o">/</span><span class="n">all_tests</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">debug</span> <span class="o">--</span><span class="n">n</span><span class="o">=</span><span class="mi">1000</span> <span class="o">--</span><span class="n">dim</span><span class="o">=</span><span class="mi">3</span> <span class="o">--</span><span class="n">seed</span><span class="o">=</span><span class="mi">1</span>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">python</span> <span class="n">lynxes</span><span class="o">/</span><span class="n">tests</span><span class="o">/</span><span class="n">all_tests</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">debug</span> <span class="o">--</span><span class="n">n</span><span class="o">=</span><span class="mi">1000</span> <span class="o">--</span><span class="n">dim</span><span class="o">=</span><span class="mi">3</span> <span class="o">--</span><span class="n">seed</span><span class="o">=</span><span class="mi">1</span>
 </pre></div>
 </div>
 </div>

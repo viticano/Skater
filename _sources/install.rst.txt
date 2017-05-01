@@ -7,8 +7,8 @@ Dev Installation
 
 ::
 
-    git clone git@github.com:datascienceinc/PyInterpret.git
-    cd PyInterpret
+    git clone git@github.com:datascienceinc/lynxes.git
+    cd lynxes
     sudo python setup.py install
 
 Prod Installation (platform)
@@ -19,7 +19,7 @@ credentials.
 
 ::
 
-    pip install pyinterpret
+    pip install lynxes
 
 Use this kind of this stuff to do cool stuff.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,8 +44,8 @@ Use this kind of this stuff to do cool stuff.
 
 
     #partial dependence
-    from pyinterpret.core.explanations import Interpretation
-    from pyinterpret.model import InMemoryModel
+    from lynxes.core.explanations import Interpretation
+    from lynxes.model import InMemoryModel
     i = Interpretation()
     i.load_data(X, feature_names = feature_names)
     model = InMemoryModel(regressor.predict, examples = X)
@@ -53,7 +53,7 @@ Use this kind of this stuff to do cool stuff.
                                                 model)
 
     #local interpretation
-    from pyinterpret.core.local_interpretation.lime.lime_tabular import LimeTabularExplainer
+    from lynxes.core.local_interpretation.lime.lime_tabular import LimeTabularExplainer
     explainer = LimeTabularExplainer(X, feature_names = feature_names)
     explainer.explain_instance(example,  regressor.predict).show_in_notebook()
 
@@ -62,7 +62,7 @@ Testing
 
 ::
 
-    python pyinterpret/tests/all_tests.py --debug --n=1000 --dim=3 --seed=1
+    python lynxes/tests/all_tests.py --debug --n=1000 --dim=3 --seed=1
 
 API documentation
 ~~~~~~~~~~~~~~~~~

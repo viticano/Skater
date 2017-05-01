@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyinterpret.core.global_interpretation.feature_importance &mdash; pyinterpret 0 documentation</title>
+  <title>pyinterpret.core.global_interpretation.feature_importance &mdash; lynxes 0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../../search.html"/>
-    <link rel="top" title="pyinterpret 0 documentation" href="../../../../index.html"/>
+    <link rel="top" title="lynxes 0 documentation" href="../../../../index.html"/>
         <link rel="up" title="Module code" href="../../../index.html"/> 
 
   
@@ -55,7 +55,7 @@
           
 
           
-            <a href="../../../../index.html" class="icon icon-home"> pyinterpret
+            <a href="../../../../index.html" class="icon icon-home"> lynxes
           
 
           
@@ -108,7 +108,7 @@
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">pyinterpret</a>
+          <a href="../../../../index.html">lynxes</a>
         
       </nav>
 
@@ -163,6 +163,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
+<span class="kn">from</span> <span class="nn">...data</span> <span class="k">import</span> <span class="n">DataManager</span>
 <span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="n">BaseGlobalInterpretation</span>
 <span class="kn">from</span> <span class="nn">...util.static_types</span> <span class="k">import</span> <span class="n">StaticTypes</span>
 <span class="kn">from</span> <span class="nn">...util</span> <span class="k">import</span> <span class="n">exceptions</span>
@@ -219,12 +220,15 @@
 
         <span class="c"># instead of copying the whole dataset, should we copy a column, change column values,</span>
         <span class="c"># revert column back to copy?</span>
+        <span class="n">copy_of_data_set</span> <span class="o">=</span> <span class="n">DataManager</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_set</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">feature_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_set</span><span class="o">.</span><span class="n">feature_ids</span><span class="p">,</span> <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_set</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
         <span class="k">for</span> <span class="n">feature_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_set</span><span class="o">.</span><span class="n">feature_ids</span><span class="p">:</span>
-            <span class="n">X_mutable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_set</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="c">#X_mutable = self.data_set.data.copy()</span>
             <span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_set</span><span class="o">.</span><span class="n">generate_column_sample</span><span class="p">(</span><span class="n">feature_id</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s">&#39;random-choice&#39;</span><span class="p">)</span>
-            <span class="n">feature_perturbations</span> <span class="o">=</span> <span class="n">X_mutable</span><span class="p">[</span><span class="n">feature_id</span><span class="p">]</span> <span class="o">-</span> <span class="n">samples</span>
-            <span class="n">X_mutable</span><span class="p">[</span><span class="n">feature_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">samples</span>
-            <span class="n">new_predictions</span> <span class="o">=</span> <span class="n">modelinstance</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_mutable</span><span class="p">)</span>
+            <span class="n">copy_of_data_set</span><span class="p">[</span><span class="n">feature_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">samples</span>
+            <span class="n">feature_perturbations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_set</span><span class="p">[</span><span class="n">feature_id</span><span class="p">]</span> <span class="o">-</span> <span class="n">copy_of_data_set</span><span class="p">[</span><span class="n">feature_id</span><span class="p">]</span>
+            <span class="c">#X_mutable[feature_id] = samples</span>
+            <span class="n">new_predictions</span> <span class="o">=</span> <span class="n">modelinstance</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">copy_of_data_set</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
             <span class="n">changes_in_predictions</span> <span class="o">=</span> <span class="n">new_predictions</span> <span class="o">-</span> <span class="n">original_predictions</span>
             <span class="n">importance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">changes_in_predictions</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
             <span class="n">importances</span><span class="p">[</span><span class="n">feature_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">importance</span>
