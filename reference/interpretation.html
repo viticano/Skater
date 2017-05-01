@@ -563,35 +563,6 @@ explanations.</dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="lynxes.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_regressor_instance">
-<code class="descname">explain_regressor_instance</code><span class="sig-paren">(</span><em>data_row</em>, <em>predict_fn</em>, <em>num_features=10</em>, <em>num_samples=5000</em>, <em>distance_metric='euclidean'</em>, <em>model_regressor=None</em>, <em>testing=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer.explain_regressor_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lynxes.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_regressor_instance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates explanations for a prediction.
-First, we generate neighborhood data by randomly perturbing features
-from the instance (see __data_inverse). We then learn locally weighted
-linear models on this neighborhood data to explain changes in the prediction
-in an interpretable way (see lime_base.py).
-Args:</p>
-<blockquote>
-<div><p>data_row: 1d numpy array, corresponding to a row
-predict_fn: prediction function, which</p>
-<blockquote>
-<div>takes a numpy array and expected values.  For
-ScikitRegressors , this is classifier.predict.</div></blockquote>
-<p>num_features: maximum number of features present in explanation
-num_samples: size of the neighborhood to learn the linear model
-distance_metric: the distance metric to use for weights.
-model_regressor: sklearn regressor to use in explanation. Defaults
-to Ridge regression in LimeBase. Must have <a href="#id3"><span class="problematic" id="id4">model_regressor.coef_</span></a>
-and &#8216;sample_weight&#8217; as a parameter to model_regressor.fit()</p>
-</div></blockquote>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>An Explanation object (see explanation.py) with the corresponding
-explanations.</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 </div>
