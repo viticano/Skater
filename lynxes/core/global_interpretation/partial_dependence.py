@@ -16,6 +16,7 @@ from ...util.kernels import flatten
 from ...util.plotting import COLORS, \
     coordinate_gradients_to_1d_colorscale, plot_2d_color_scale
 from ...util.exceptions import *
+from ...util.static_types import StaticTypes
 
 # if we want to employ instance methods in multiprocessing, enable this code:
 # copy_reg.pickle(types.MethodType, pickle_method, unpickle_method)
@@ -105,7 +106,8 @@ class PartialDependence(BaseGlobalInterpretation):
 
     def _build_metadata_dict(self, modelinstance, pd_feature_ids, data_feature_ids):
 
-        feature_columns = ['feature: {}'.format(i) for i in pd_feature_ids]
+        #feature_columns = ['feature: {}'.format(i) for i in pd_feature_ids]
+        feature_columns = ['{}'.format(i) for i in pd_feature_ids]
         sd_col = 'sd'
         class_names = modelinstance.class_names
         metadata = ControlledDict({
@@ -531,7 +533,7 @@ class PartialDependence(BaseGlobalInterpretation):
             plane = data[class_column]
 
             # if binary feature, then len(pdp) == 2 -> barchart
-            if self._is_feature_binary(pdp, feature_name):
+            if self._is_feature_binary(pdp, feature_name) or not self.data_set.feature_info[feature_name]['numeric']:
                 if with_variance:
                     error = data[sd_col]
                 else:
@@ -547,7 +549,6 @@ class PartialDependence(BaseGlobalInterpretation):
                                     upper_plane.values,
                                     alpha=.2,
                                     color=color)
-
             if plot_title:
                 ax.set_title(plot_title)
             ax.set_ylabel(class_column)
@@ -578,10 +579,10 @@ class PartialDependence(BaseGlobalInterpretation):
         feature_1_data = pdp[feature1].values
         feature_2_data = pdp[feature2].values
 
-        feature_1_is_binary = len(np.unique(feature_1_data)) == 2
-        feature_2_is_binary = len(np.unique(feature_2_data)) == 2
+        feature_1_is_categorical = self.data_set.feature_info[feature1]['unique'] == 2 or not self.data_set.feature_info[feature1]['numeric']
+        feature_2_is_categorical = self.data_set.feature_info[feature2]['unique'] == 2 or not self.data_set.feature_info[feature2]['numeric']
 
-        if not feature_1_is_binary and not feature_2_is_binary:
+        if not feature_1_is_categorical and not feature_2_is_categorical:
             self.interpreter.logger.debug("Neither feature is binary, so plotting 3D mesh")
             plot_objects = self._plot_3d_full_mesh(pdp,
                                                    feature1,
@@ -591,31 +592,31 @@ class PartialDependence(BaseGlobalInterpretation):
                                                    with_variance=with_variance,
                                                    figsize=figsize)
 
-        elif feature_1_is_binary and feature_2_is_binary:
+        elif feature_1_is_categorical and feature_2_is_categorical:
             self.interpreter.logger.debug("Both features are binary, so plotting groups")
-            plot_objects = self._plot_2d_2_binary_feature(pdp,
-                                                          feature1,
-                                                          feature2,
-                                                          sd_column,
-                                                          class_columns,
-                                                          with_variance=with_variance,
-                                                          figsize=figsize)
+            plot_objects = self._plot_2d_2_categorical_features(pdp,
+                                                                feature1,
+                                                                feature2,
+                                                                sd_column,
+                                                                class_columns,
+                                                                with_variance=with_variance,
+                                                                figsize=figsize)
         else:
             # one feature is binary and one isnt.
-            binary_feature, non_binary_feature = {
+            categorical_feature, non_categorical_feature = {
                 True: [feature1, feature2],
                 False: [feature2, feature1]
-            }[feature_1_is_binary]
-            self.interpreter.logger.debug("One feature is binary, and one isnt")
-            self.interpreter.logger.debug("Binary Feature: {}".format(binary_feature))
-            self.interpreter.logger.debug("Non Binary Feature: {}".format(non_binary_feature))
+            }[feature_1_is_categorical]
+            self.interpreter.logger.debug("One feature is categorical, and one isnt")
+            self.interpreter.logger.debug("Categorical Feature: {}".format(categorical_feature))
+            self.interpreter.logger.debug("Non Categorical Feature: {}".format(non_categorical_feature))
 
-            plot_objects = self._plot_2d_1_binary_feature_and_1_continuous(pdp,
-                                                                           binary_feature,
-                                                                           non_binary_feature,
-                                                                           sd_column,
-                                                                           class_columns,
-                                                                           with_variance=with_variance)
+            plot_objects = self._plot_2d_1_categorical_feature_and_1_continuous(pdp,
+                                                                                categorical_feature,
+                                                                                non_categorical_feature,
+                                                                                sd_column,
+                                                                                class_columns,
+                                                                                with_variance=with_variance)
         for obj in plot_objects:
             if isinstance(obj, mpl_axes):
                 if disable_offset:
@@ -680,7 +681,7 @@ class PartialDependence(BaseGlobalInterpretation):
         return flatten([figure_list, axis_list])
 
 
-    def _plot_3d_2_binary_feature(self, pdp, feature1, feature2, sd_column,
+    def _plot_3d_2_categorical_features(self, pdp, feature1, feature2, sd_column,
                                   class_columns, with_variance=False, figsize=(16, 10)):
         # colors = cycle(COLORS)
         figure_list, axis_list = [], []
@@ -705,7 +706,7 @@ class PartialDependence(BaseGlobalInterpretation):
             ax.legend(handles, labels)
         return flatten([figure_list, axis_list])
 
-    def _plot_2d_2_binary_feature(self, pdp, feature1, feature2, sd_col,
+    def _plot_2d_2_categorical_features(self, pdp, feature1, feature2, sd_col,
                                   class_columns, with_variance=False,
                                   figsize=(16, 10)):
         figure_list, axis_list = [], []
@@ -718,6 +719,7 @@ class PartialDependence(BaseGlobalInterpretation):
             # feature1 is index
             plot_data = pdp.set_index([feature1, feature2])[class_column].unstack()
             plot_data.plot(ax=ax, color=COLORS)
+            print(plot_data)
 
             if with_variance:
                 colors = cycle(COLORS)
@@ -737,9 +739,13 @@ class PartialDependence(BaseGlobalInterpretation):
 
         return flatten([figure_list, axis_list])
 
-    def _plot_2d_1_binary_feature_and_1_continuous(self, pdp, binary_feature,
-                                                   non_binary_feature, sd_column,
-                                                   class_columns, with_variance=False,
+    def _plot_2d_1_categorical_feature_and_1_continuous(self,
+                                                   pdp,
+                                                   categorical_feature,
+                                                   non_categorical_feature,
+                                                   sd_column,
+                                                   class_columns,
+                                                   with_variance=False,
                                                    figsize=(16, 10)):
 
         figure_list, axis_list = [], []
@@ -750,20 +756,20 @@ class PartialDependence(BaseGlobalInterpretation):
             ax = f.add_subplot(111)
             figure_list.append(f)
             axis_list.append(ax)
-            plot_data = pdp.set_index([non_binary_feature, binary_feature])[class_column]\
+            plot_data = pdp.set_index([non_categorical_feature, categorical_feature])[class_column]\
                 .unstack()
-            sd = pdp.set_index([non_binary_feature, binary_feature])[sd_column]\
+            sd = pdp.set_index([non_categorical_feature, categorical_feature])[sd_column]\
                 .unstack()
 
             plot_data.plot(ax=ax, color=COLORS)
             if with_variance:
-                non_binary_values = plot_data.index.values
-                binary_values = plot_data.columns.values
+                non_categorical_values = plot_data.index.values
+                categorical_values = plot_data.columns.values
                 upper_plane = plot_data + sd
                 lower_plane = plot_data - sd
-                for binary_value in binary_values:
+                for categorical_value in categorical_values:
                     color = next(colors)
-                    ax.fill_between(non_binary_values, lower_plane[binary_value].values, upper_plane[binary_value].values, alpha=.2,
+                    ax.fill_between(non_categorical_values, lower_plane[categorical_value].values, upper_plane[categorical_value].values, alpha=.2,
                                     color=color)
             ax.set_ylabel(class_column)
         return flatten([figure_list, axis_list])
