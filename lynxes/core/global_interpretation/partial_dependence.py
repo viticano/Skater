@@ -301,7 +301,8 @@ class PartialDependence(BaseGlobalInterpretation):
         self.interpreter.logger.debug("PD metadata: {}".format(_pdp_metadata))
 
         # cartesian product of grid
-        grid_expanded = np.array(list(product(*grid)))
+        # converting to dataframe to get differing dtypes
+        grid_expanded = pd.DataFrame(list(product(*grid))).values
 
         if grid_expanded.shape[0] <= 0:
             empty_grid_expanded_err_msg = "Must have at least 1 pdp value" \
@@ -594,7 +595,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
         elif feature_1_is_categorical and feature_2_is_categorical:
             self.interpreter.logger.debug("Both features are binary, so plotting groups")
-            plot_objects = self._plot_2d_2_categorical_features(pdp,
+            plot_objects = self._plot_2d_2_categorical_features_bar(pdp,
                                                                 feature1,
                                                                 feature2,
                                                                 sd_column,
@@ -620,7 +621,10 @@ class PartialDependence(BaseGlobalInterpretation):
         for obj in plot_objects:
             if isinstance(obj, mpl_axes):
                 if disable_offset:
-                    obj.xaxis.set_major_formatter(tick_formatter())
+
+                    xlabels = [i.get_text() for i in obj.get_xticklabels()]
+                    if all(StaticTypes.data_types.is_numeric(i) for i in xlabels):
+                        obj.xaxis.set_major_formatter(tick_formatter())
                     obj.yaxis.set_major_formatter(tick_formatter())
                 if plot_title:
                     obj.set_title("Partial Dependence")
@@ -706,7 +710,7 @@ class PartialDependence(BaseGlobalInterpretation):
             ax.legend(handles, labels)
         return flatten([figure_list, axis_list])
 
-    def _plot_2d_2_categorical_features(self, pdp, feature1, feature2, sd_col,
+    def _plot_2d_2_categorical_features_lines(self, pdp, feature1, feature2, sd_col,
                                   class_columns, with_variance=False,
                                   figsize=(16, 10)):
         figure_list, axis_list = [], []
@@ -739,6 +743,32 @@ class PartialDependence(BaseGlobalInterpretation):
 
         return flatten([figure_list, axis_list])
 
+    def _plot_2d_2_categorical_features_bar(self, pdp, feature1, feature2, sd_col,
+                                  class_columns, with_variance=False,
+                                  figsize=(16, 10)):
+        figure_list, axis_list = [], []
+
+        std_error = pdp.set_index([feature1, feature2])[sd_col].unstack()
+        for class_column in class_columns:
+            f = pyplot.figure(figsize=figsize)
+            ax = f.add_subplot(111)
+            # feature2 is columns
+            # feature1 is index
+            plot_data = pdp.set_index([feature1, feature2])[class_column].unstack()
+
+            if with_variance:
+                plot_data.plot(kind='bar', ax=ax, color=COLORS, yerr=std_error)
+            else:
+                plot_data.plot(kind='bar', ax=ax, color=COLORS)
+
+            ax.set_xticklabels(plot_data.index.values)
+            figure_list.append(f)
+            axis_list.append(ax)
+            ax.set_xlabel(feature1)
+            ax.set_ylabel(class_column)
+
+        return flatten([figure_list, axis_list])
+
     def _plot_2d_1_categorical_feature_and_1_continuous(self,
                                                    pdp,
                                                    categorical_feature,
@@ -757,16 +787,24 @@ class PartialDependence(BaseGlobalInterpretation):
             figure_list.append(f)
             axis_list.append(ax)
             plot_data = pdp.set_index([non_categorical_feature, categorical_feature])[class_column]\
-                .unstack()
+                .unstack().sort_index()
             sd = pdp.set_index([non_categorical_feature, categorical_feature])[sd_column]\
                 .unstack()
+            print('CURRENT INDEX')
+            print(plot_data.index.values)
 
             plot_data.plot(ax=ax, color=COLORS)
             if with_variance:
-                non_categorical_values = plot_data.index.values
+                non_categorical_values = map(float,plot_data.index.values)
                 categorical_values = plot_data.columns.values
                 upper_plane = plot_data + sd
                 lower_plane = plot_data - sd
+                print('PLOT DATA')
+                print(plot_data)
+                print('UPPER PLANE')
+                print(upper_plane)
+                print('NON CATEGORICAL VALS')
+                print(non_categorical_values)
                 for categorical_value in categorical_values:
                     color = next(colors)
                     ax.fill_between(non_categorical_values, lower_plane[categorical_value].values, upper_plane[categorical_value].values, alpha=.2,
