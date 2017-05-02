@@ -16,7 +16,7 @@ def chdir(new_dir):
 
 def setup_package():
     root = os.path.abspath(os.path.dirname(__file__))
-    
+
     with chdir(root):
         with io.open(os.path.join(root, 'lynxes', 'about.py'), encoding='utf8') as f:
             about = {}
@@ -43,7 +43,8 @@ def setup_package():
             'requests',
             'pathos==0.2.0',
             'dill>=0.2.6'],
-        extras_require ={'all':'matplotlib'}
+        extras_require ={'all':'matplotlib'},
+         dependency_links=['https://github.com/datascienceinc/lime/tarball/v1-release#egg=lime-0.1.1.20'],
         )
 
 if __name__ == '__main__':
