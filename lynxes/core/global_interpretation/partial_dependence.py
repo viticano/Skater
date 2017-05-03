@@ -107,7 +107,7 @@ class PartialDependence(BaseGlobalInterpretation):
     def _build_metadata_dict(self, modelinstance, pd_feature_ids, data_feature_ids):
 
         #feature_columns = ['feature: {}'.format(i) for i in pd_feature_ids]
-        feature_columns = ['{}'.format(i) for i in pd_feature_ids]
+        feature_columns = [self.feature_column_name_formatter(i) for i in pd_feature_ids]
         sd_col = 'sd'
         class_names = modelinstance.class_names
         metadata = ControlledDict({
@@ -119,6 +119,10 @@ class PartialDependence(BaseGlobalInterpretation):
         })
         metadata.block_setitem()
         return metadata
+
+    @staticmethod
+    def feature_column_name_formatter(columnname):
+        return "{}".format(columnname)
 
 
     def partial_dependence(self, feature_ids, modelinstance, grid=None, grid_resolution=None,

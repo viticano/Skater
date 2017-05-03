@@ -12,6 +12,8 @@ from lynxes.core.explanations import Interpretation
 from lynxes.util import exceptions
 from arg_parser import create_parser
 from lynxes.model import InMemoryModel, DeployedModel
+from lynxes.util.data import MultiColumnLabelBinarizer
+from lynxes.core.global_interpretation.partial_dependence import PartialDependence
 
 class TestPartialDependence(unittest.TestCase):
 
@@ -64,10 +66,17 @@ class TestPartialDependence(unittest.TestCase):
         self.string_classifier_predict_fn = InMemoryModel(self.string_classifier.predict_proba, examples=self.X)
 
 
-
-    @staticmethod
-    def feature_column_name_formatter(columnname):
-        return "feature: {}".format(columnname)
+        # Yet another set of input!!
+        self.sample_x_categorical = np.array([['B', -1], ['A', -1], ['A', -2], ['C', 1], ['C', 2], ['A', 1]])
+        self.sample_y_categorical = np.array(['A','A','A','B','B','B'])
+        self.categorical_feature_names = ['Letters','Numbers']
+        self.categorical_transformer = MultiColumnLabelBinarizer()
+        self.categorical_transformer.fit(self.sample_x_categorical)
+        self.sample_x_categorical_transormed = self.categorical_transformer.transform(self.sample_x_categorical)
+        self.categorical_classifier = LogisticRegression()
+        self.categorical_classifier.fit(self.sample_x_categorical_transormed, self.sample_y_categorical)
+        self.categorical_predict_fn = lambda x: self.categorical_classifier.predict_proba(self.categorical_transformer.transform(x))
+        self.categorical_model = InMemoryModel(self.categorical_predict_fn, examples=self.sample_x_categorical)
 
 
     def test_pdp_with_default_sampling(self):
@@ -75,6 +84,18 @@ class TestPartialDependence(unittest.TestCase):
                                                                        self.regressor_predict_fn,
                                                                        sample=True)
         self.assertEquals(pdp_df.shape, (100, 3)) # default grid resolution is 100
+
+    def test_pd_with_categorical_features(self):
+        interpreter = Interpretation(self.sample_x_categorical, feature_names=self.categorical_feature_names)
+        interpreter.partial_dependence.partial_dependence([self.categorical_feature_names[0]], self.categorical_model)
+        try:
+            interpreter.partial_dependence.partial_dependence([self.categorical_feature_names[0]], self.categorical_model)
+        except:
+            self.fail("PD computation function failed with categorical features")
+        try:
+            interpreter.partial_dependence.plot_partial_dependence([self.categorical_feature_names], self.categorical_model)
+        except:
+            self.fail("PDP plotting function failed with categorical features")
 
 
     def test_partial_dependence_binary_classification(self):
@@ -92,7 +113,8 @@ class TestPartialDependence(unittest.TestCase):
         interpreter.load_data(np.array(self.sample_x), self.sample_feature_name)
         pdp_df = interpreter.partial_dependence.partial_dependence(['0'], classifier_predict_fn,
                                                                   grid_resolution=5, sample=True)
-        self.assertEquals(pdp_df.shape[0], 5)
+
+        self.assertEquals(pdp_df.shape[0], len(np.unique(interpreter.data_set['0'])))
 
         # now with our own grid
         ud_grid = np.unique(self.sample_x[:, 0])
@@ -115,7 +137,7 @@ class TestPartialDependence(unittest.TestCase):
         pdp_df = interpreter.partial_dependence.partial_dependence([iris.feature_names[0]], classifier_predict_fn,
                                                                    grid_resolution=25, sample=True)
 
-        expected_feature_name = self.feature_column_name_formatter('sepal length (cm)')
+        expected_feature_name = PartialDependence.feature_column_name_formatter('sepal length (cm)')
 
         self.assertIn(expected_feature_name,
                       pdp_df.columns.values,
@@ -142,7 +164,7 @@ class TestPartialDependence(unittest.TestCase):
     def test_pdp_regression_coefs_closeness(self, epsilon=1):
         pdp_df = self.interpreter.partial_dependence.partial_dependence([self.features[0]],
                                                                        self.regressor_predict_fn)
-        val_col = self.feature_column_name_formatter(self.features[0])
+        val_col = PartialDependence.feature_column_name_formatter(self.features[0])
 
         y = np.array(pdp_df['Predicted Value'])
         x = np.array(pdp_df[val_col])[:, np.newaxis]

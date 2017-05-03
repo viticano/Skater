@@ -68,9 +68,9 @@ class DataManager(object):
 
         elif isinstance(self.data, np.ndarray):
             if feature_names is None:
-                feature_names = range(self.dim)
+                feature_names = range(self.data.shape[1])
             if not index:
-                index = range(self.n_rows)
+                index = range(self.data.shape[0])
             self.feature_ids = list(feature_names)
             self.index = index
 
