@@ -3,6 +3,7 @@
 from .global_interpretation.partial_dependence import PartialDependence
 from .local_interpretation.local_interpreter import LocalInterpreter
 from .global_interpretation.feature_importance import FeatureImportance
+from .global_interpretation.ice import IndividualConditionalExpection
 from ..data.dataset import DataManager
 from ..model.local import InMemoryModel
 from ..util.logger import build_logger
@@ -55,6 +56,7 @@ class Interpretation(object):
         self.local_interpreter = LocalInterpreter(self)
         self.partial_dependence = PartialDependence(self)
         self.feature_importance = FeatureImportance(self)
+        self.ice = IndividualConditionalExpection(self)
         self.data_set = None
 
         if training_data is not None:
