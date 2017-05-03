@@ -333,9 +333,9 @@ class PartialDependence(BaseGlobalInterpretation):
             executor_instance.join()
             executor_instance.terminate()
         if return_metadata:
-            return pd.DataFrame(pd_list), _pdp_metadata
+            return pd.DataFrame(list(pd_list)), _pdp_metadata
         else:
-            return pd.DataFrame(pd_list)
+            return pd.DataFrame(list(pd_list))
 
 
     def plot_partial_dependence(self, feature_ids, modelinstance, grid=None,
