@@ -10,7 +10,7 @@ Interpretation are initialized with a DataManager object, and expose interpretat
 .. code-block:: python
    :linenos:
 
-   from lynxes import Interpretation()
+   from skate import Interpretation()
    interpreter = Interpretation()
    interpreter.load_data(data)
    interpreter.feature_importance.feature_importance(model)
@@ -26,10 +26,10 @@ and observation names, as well as providing various sampling algorithms.
 Currently load_data requires a numpy ndarray or pandas DataFrame, though we may add support for additional data structures in the future.
 For more details on what the DataManager does, please see the relevant documentation [PROVIDE LINK].
 
-.. currentmodule:: lynxes
+.. currentmodule:: skate
 
 
-.. automethod:: lynxes.core.explanations.Interpretation.load_data
+.. automethod:: skate.core.explanations.Interpretation.load_data
 
 Global Interpretations
 ----------------------
@@ -41,7 +41,7 @@ to interpret a decision function in any number of dimensions. Given that we gene
 intuit visualizations of a few dimensions at time, global interpretation algorithms either aggregate
 or subset the feature space.
 
-Currently, model agnostic global interpretation algorithms supported by lynxes include
+Currently, model agnostic global interpretation algorithms supported by skate include
 partial dependence and feature importance.
 
 
@@ -50,12 +50,12 @@ partial dependence and feature importance.
 Feature Importance
 ~~~~~~~~~~~~~~~~~~
 Feature importance is generic term for the degree to which a predictive model relies on a particular
-feature. Lynxes feature importance implementation is based on an information theoretic criteria,
+feature. skate feature importance implementation is based on an information theoretic criteria,
 measuring the entropy in the change of predictions, given a perturbation of a given feature.
 The intuition is that the more a model's decision criteria depend on a feature, the
 more we'll see predictions change as a function of perturbing a feature.
 
-.. autoclass:: lynxes.core.global_interpretation.feature_importance.FeatureImportance
+.. autoclass:: skate.core.global_interpretation.feature_importance.FeatureImportance
    :members:
 
 
@@ -67,7 +67,7 @@ Partial Dependence describes the marginal impact of a feature on model predictio
 other features in the model constant. The derivative of partial dependence describes the impact of a feature (analogous to a feature coefficient
 in a regression model).
 
-.. autoclass:: lynxes.core.global_interpretation.partial_dependence.PartialDependence
+.. autoclass:: skate.core.global_interpretation.partial_dependence.PartialDependence
    :members:
 
 .. _interpretation-overview-local:
@@ -82,5 +82,5 @@ surrogates around a point correspond to anchorLIME.
 LIME
 ~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: lynxes.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer
+.. autoclass:: skate.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer
    :members:

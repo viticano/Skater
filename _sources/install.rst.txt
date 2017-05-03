@@ -7,8 +7,8 @@ Dev Installation
 
 ::
 
-    git clone git@github.com:datascienceinc/lynxes.git
-    cd lynxes
+    git clone git@github.com:datascienceinc/skate.git
+    cd skate
     sudo python setup.py install
 
 Prod Installation (platform)
@@ -19,7 +19,7 @@ credentials.
 
 ::
 
-    pip install lynxes
+    pip install skate
 
 Use this kind of this stuff to do cool stuff.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,8 +44,8 @@ Use this kind of this stuff to do cool stuff.
 
 
     #partial dependence
-    from lynxes.core.explanations import Interpretation
-    from lynxes.model import InMemoryModel
+    from skate.core.explanations import Interpretation
+    from skate.model import InMemoryModel
     i = Interpretation()
     i.load_data(X, feature_names = feature_names)
     model = InMemoryModel(regressor.predict, examples = X)
@@ -53,7 +53,7 @@ Use this kind of this stuff to do cool stuff.
                                                 model)
 
     #local interpretation
-    from lynxes.core.local_interpretation.lime.lime_tabular import LimeTabularExplainer
+    from skate.core.local_interpretation.lime.lime_tabular import LimeTabularExplainer
     explainer = LimeTabularExplainer(X, feature_names = feature_names)
     explainer.explain_instance(example,  regressor.predict).show_in_notebook()
 
@@ -62,7 +62,7 @@ Testing
 
 ::
 
-    python lynxes/tests/all_tests.py --debug --n=1000 --dim=3 --seed=1
+    python skate/tests/all_tests.py --debug --n=1000 --dim=3 --seed=1
 
 API documentation
 ~~~~~~~~~~~~~~~~~

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Tutorial &mdash; lynxes 0 documentation</title>
+  <title>Tutorial &mdash; skate 0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="lynxes 0 documentation" href="index.html"/>
+    <link rel="top" title="skate 0 documentation" href="index.html"/>
         <link rel="next" title="API Reference" href="api.html"/>
         <link rel="prev" title="Installation" href="install.html"/> 
 
@@ -56,7 +56,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> lynxes
+            <a href="index.html" class="icon icon-home"> skate
           
 
           
@@ -94,7 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#the-lynxes-workflow">The lynxes workflow</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-skate-workflow">The skate workflow</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#creating-an-interpretation-object">Creating an interpretation object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#creating-a-model">Creating a Model</a></li>
 </ul>
@@ -116,7 +116,7 @@
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">lynxes</a>
+          <a href="index.html">skate</a>
         
       </nav>
 
@@ -167,9 +167,9 @@
             
   <div class="section" id="tutorial">
 <h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="the-lynxes-workflow">
-<h2>The lynxes workflow<a class="headerlink" href="#the-lynxes-workflow" title="Permalink to this headline">¶</a></h2>
-<p>The general workflow within the lynxes package is to create an interpretation, create a model, and run interpretation algorithms.</p>
+<div class="section" id="the-skate-workflow">
+<h2>The skate workflow<a class="headerlink" href="#the-skate-workflow" title="Permalink to this headline">¶</a></h2>
+<p>The general workflow within the skate package is to create an interpretation, create a model, and run interpretation algorithms.</p>
 <div class="section" id="creating-an-interpretation-object">
 <h3>Creating an interpretation object<a class="headerlink" href="#creating-an-interpretation-object" title="Permalink to this headline">¶</a></h3>
 <p>An Interpretation consumes a dataset, and optionally some meta data like feature names and row ids.
@@ -178,26 +178,26 @@ Internally, the Interpretation will generate a DataManager to handle data reques
 <span class="n">boston</span> <span class="o">=</span> <span class="n">load_boston</span><span class="p">()</span>
 <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">features</span> <span class="o">=</span> <span class="n">boston</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">boston</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">boston</span><span class="o">.</span><span class="n">feature_names</span>
 
-<span class="kn">from</span> <span class="nn">lynxes</span> <span class="kn">import</span> <span class="n">Interpretation</span>
+<span class="kn">from</span> <span class="nn">skate</span> <span class="kn">import</span> <span class="n">Interpretation</span>
 <span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="n">features</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>To begin using the Interpretation to explain models, we need to create a lynxes Model.</p>
+<p>To begin using the Interpretation to explain models, we need to create a skate Model.</p>
 </div>
 <div class="section" id="creating-a-model">
 <h3>Creating a Model<a class="headerlink" href="#creating-a-model" title="Permalink to this headline">¶</a></h3>
 <p>To ensure formatting consistency, and common functionality among various model types and interfaces,
-we require that models passed to Interpretations to be wrapped in a lynxes Model object. Currently we support regression type
+we require that models passed to Interpretations to be wrapped in a skate Model object. Currently we support regression type
 models and classifiers that return probability scores. If you have a need for explaining classifiers that dont provide probability scores, please
 let us know: <a class="reference external" href="https://github.com/datascienceinc/model-interpretation/issues/82">https://github.com/datascienceinc/model-interpretation/issues/82</a>.</p>
-<p>To create a lynxes model based on a local function or method, pass in the predict function to an InMemoryModel. A user can optionally pass data samples
-to the examples keyword argument. This is only used to infer output types and formats. Out of the box, lynxes allows models return numpy arrays and
+<p>To create a skate model based on a local function or method, pass in the predict function to an InMemoryModel. A user can optionally pass data samples
+to the examples keyword argument. This is only used to infer output types and formats. Out of the box, skate allows models return numpy arrays and
 pandas dataframes. If youd like support for additional formats, please let us know: <a class="reference external" href="https://github.com/datascienceinc/model-interpretation/issues/117">https://github.com/datascienceinc/model-interpretation/issues/117</a></p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostedRegressor</span>
 <span class="n">gb</span> <span class="o">=</span> <span class="n">GradientBoostedRegressor</span><span class="p">()</span>
 <span class="n">gb</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">lynxes.model</span> <span class="kn">import</span> <span class="n">InMemoryModel</span>
+<span class="kn">from</span> <span class="nn">skate.model</span> <span class="kn">import</span> <span class="n">InMemoryModel</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">gb</span><span class="o">.</span><span class="n">predict</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:</span><span class="mi">10</span><span class="p">])</span>
 </pre></div>
 </div>
@@ -206,7 +206,7 @@ data structure.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">predict_as_dataframe</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">gb</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 
-<span class="kn">from</span> <span class="nn">lynxes.model</span> <span class="kn">import</span> <span class="n">InMemoryModel</span>
+<span class="kn">from</span> <span class="nn">skate.model</span> <span class="kn">import</span> <span class="n">InMemoryModel</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">predict_as_dataframe</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:</span><span class="mi">10</span><span class="p">])</span>
 </pre></div>
 </div>
@@ -214,7 +214,7 @@ data structure.</p>
 an input formatter and an output formatter, which speak to the requests library for posting and parsing.</p>
 <p>The input formatter takes a pandas DataFrame or a numpy ndarray, and returns an object (such as a dict) that can be converted to json
 to be posted. The output formatter takes a requests.response as an input and returns a numpy ndarray or pandas DataFrame:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">lynxes.model</span> <span class="kn">import</span> <span class="n">DeployedModel</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">skate.model</span> <span class="kn">import</span> <span class="n">DeployedModel</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
 <span class="k">def</span> <span class="nf">input_formatter</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="k">return</span> <span class="p">{</span><span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="p">)}</span>
@@ -224,14 +224,14 @@ to be posted. The output formatter takes a requests.response as an input and ret
 </pre></div>
 </div>
 <p>If your api requires additional configuration like cookies, use request_kwargs:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">lynxes.model</span> <span class="kn">import</span> <span class="n">DeployedModel</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">skate.model</span> <span class="kn">import</span> <span class="n">DeployedModel</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
 <span class="n">req_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;cookies&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;cookie-name&#39;</span><span class="p">:</span><span class="s">&#39;cookie&#39;</span><span class="p">}}</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">DeployedModel</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">input_formatter</span><span class="p">,</span> <span class="n">output_formatter</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:</span><span class="mi">10</span><span class="p">],</span> <span class="n">request_kwargs</span><span class="o">=</span><span class="n">req_kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>With an Interpretation and a Model, one can run all lynxes interpretation algorithms.</p>
+<p>With an Interpretation and a Model, one can run all skate interpretation algorithms.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">interpreter</span><span class="o">.</span><span class="n">feature_importance</span><span class="o">.</span><span class="n">feature_importance</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
 <span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">plot_partial_dependence</span><span class="p">([</span><span class="n">features</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">features</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">model</span><span class="p">)</span>

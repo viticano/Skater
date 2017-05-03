@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Model Objects &mdash; lynxes 0 documentation</title>
+  <title>Model Objects &mdash; skate 0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="lynxes 0 documentation" href="../index.html"/>
+    <link rel="top" title="skate 0 documentation" href="../index.html"/>
         <link rel="up" title="API Reference" href="../api.html"/>
         <link rel="next" title="DataManagers" href="data.html"/>
         <link rel="prev" title="Interpretation Objects" href="interpretation.html"/> 
@@ -57,7 +57,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> lynxes
+            <a href="../index.html" class="icon icon-home"> skate
           
 
           
@@ -120,7 +120,7 @@
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">lynxes</a>
+          <a href="../index.html">skate</a>
         
       </nav>
 
@@ -175,8 +175,8 @@
 <h1>Model Objects<a class="headerlink" href="#model-objects" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
-<p>lynxes contains an abstraction for predictive models. Models apis vary by implementation.
-The lynxes Model object manages variations in how models are called, the inputs they expect,
+<p>skate contains an abstraction for predictive models. Models apis vary by implementation.
+The skate Model object manages variations in how models are called, the inputs they expect,
 and the outputs they generate, so that inputs, outputs, and calls are standardized to both the
 user and to the rest of the code base. Currently the Model object acts as the base class for the
 InMemoryModel and DeployedModel class, though this API may change in later versions.</p>
@@ -201,7 +201,7 @@ InMemoryModel and DeployedModel class, though this API may change in later versi
 <span class="n">gb</span> <span class="o">=</span> <span class="n">GradientBoostedClassifier</span><span class="p">()</span>
 <span class="n">gb</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">lynxes.model</span> <span class="kn">import</span> <span class="n">InMemoryModel</span>
+<span class="kn">from</span> <span class="nn">skate.model</span> <span class="kn">import</span> <span class="n">InMemoryModel</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">gb</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">)</span>
 </pre></div>
 </td></tr></table></div>
@@ -210,8 +210,8 @@ InMemoryModel and DeployedModel class, though this API may change in later versi
 <h2>InMemoryModel<a class="headerlink" href="#inmemorymodel" title="Permalink to this headline">¶</a></h2>
 <p>Models that are callable function are exposed via the InMemoryModel object.</p>
 <dl class="method">
-<dt id="lynxes.model.InMemoryModel.__init__">
-<code class="descclassname">InMemoryModel.</code><code class="descname">__init__</code><span class="sig-paren">(</span><em>prediction_fn</em>, <em>log_level=30</em>, <em>class_names=None</em>, <em>examples=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lynxes/model/local.html#InMemoryModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lynxes.model.InMemoryModel.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="skate.model.InMemoryModel.__init__">
+<code class="descclassname">InMemoryModel.</code><code class="descname">__init__</code><span class="sig-paren">(</span><em>prediction_fn</em>, <em>log_level=30</em>, <em>class_names=None</em>, <em>examples=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skate/model/local.html#InMemoryModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skate.model.InMemoryModel.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>This model can be called directly from memory</p>
 <dl class="docutils">
 <dt>prediction_fn: callable</dt>
@@ -234,8 +234,8 @@ argument.</dd>
 <p>Models that are deployed, and therefore callable via http posts are exposed via the
 DeployedModel object.</p>
 <dl class="method">
-<dt id="lynxes.model.DeployedModel.__init__">
-<code class="descclassname">DeployedModel.</code><code class="descname">__init__</code><span class="sig-paren">(</span><em>uri</em>, <em>input_formatter</em>, <em>output_formatter</em>, <em>log_level=30</em>, <em>class_names=None</em>, <em>examples=None</em>, <em>feature_names=None</em>, <em>request_kwargs={}</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lynxes/model/deploy.html#DeployedModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lynxes.model.DeployedModel.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="skate.model.DeployedModel.__init__">
+<code class="descclassname">DeployedModel.</code><code class="descname">__init__</code><span class="sig-paren">(</span><em>uri</em>, <em>input_formatter</em>, <em>output_formatter</em>, <em>log_level=30</em>, <em>class_names=None</em>, <em>examples=None</em>, <em>feature_names=None</em>, <em>request_kwargs={}</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skate/model/deploy.html#DeployedModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skate.model.DeployedModel.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>This model can be called by making http requests
 to the passed in uri.</p>
 <dl class="docutils">
@@ -250,11 +250,11 @@ and convert them to JSON.</dd>
 results to interpretation objects. This usually should take
 request objects and convert them to array types.</dd>
 <dt>log_level: int</dt>
-<dd>see lynxes.model.Model for details</dd>
+<dd>see skate.model.Model for details</dd>
 <dt>class_names: array type</dt>
-<dd>see lynxes.model.Model for details</dd>
+<dd>see skate.model.Model for details</dd>
 <dt>examples:</dt>
-<dd>see lynxes.model.Model for details</dd>
+<dd>see skate.model.Model for details</dd>
 </dl>
 </dd></dl>
 

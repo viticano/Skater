@@ -3,7 +3,7 @@
 API Reference
 ===========
 
-.. automodule:: lynxes
+.. automodule:: skate
    :members:
 
 
