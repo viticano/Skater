@@ -6,6 +6,7 @@ from sklearn.metrics.pairwise import cosine_distances
 
 from ..util.logger import build_logger
 from ..util import exceptions
+from ..util.static_types import StaticTypes
 from ..util.data import add_column_numpy_array
 
 __all__ = ['DataManager']
@@ -54,7 +55,6 @@ class DataManager(object):
         self.data = data
         self.data_type = type(data)
         self.metastore = None
-        self._get_metadata()
 
         self.logger.debug("after transform data.shape: {}".format(self.data.shape))
 
@@ -68,9 +68,9 @@ class DataManager(object):
 
         elif isinstance(self.data, np.ndarray):
             if feature_names is None:
-                feature_names = range(self.dim)
+                feature_names = range(self.data.shape[1])
             if not index:
-                index = range(self.n_rows)
+                index = range(self.data.shape[0])
             self.feature_ids = list(feature_names)
             self.index = index
 
@@ -79,6 +79,7 @@ class DataManager(object):
                              "If you would like support for additional data structures let us "
                              "know!"))
 
+        self._get_metadata()
 
     def generate_grid(self, feature_ids, grid_resolution=100, grid_range=(.05, .95)):
         """
@@ -126,11 +127,14 @@ class DataManager(object):
         grid = []
         for feature_id in feature_ids:
             data = self[feature_id]
-            uniques = np.unique(data)
-            if len(uniques) == 2:
-                vals = uniques.copy()
+            info = self.feature_info[feature_id]
+            # if a feature is categorical (non numeric) or
+            # has a small number of unique values, we'll just
+            # supply unique values for the grid
+            if info['unique'] < grid_resolution or info['numeric'] is False:
+                vals = np.unique(data)
             else:
-                vals = np.unique(np.percentile(self[feature_id], bins))
+                vals = np.unique(np.percentile(data, bins))
             grid.append(vals)
         grid = np.array(grid)
         grid_shape = [(1, i) for i in [row.shape[0] for row in grid]]
@@ -143,7 +147,16 @@ class DataManager(object):
         self.n_rows = n_rows
         self.dim = dim
 
+        dtypes = pd.DataFrame(self.data, columns = self.feature_ids, index = self.index).dtypes
 
+        self.feature_info = {}
+        for feature in self.feature_ids:
+            x = self[feature]
+            self.feature_info[feature] = {
+                'type':dtypes.loc[feature],
+                'unique':len(np.unique(x)),
+                'numeric': StaticTypes.data_types.is_dtype_numeric(x.dtype)
+                }
 
     def _build_metastore(self, bin_count):
 

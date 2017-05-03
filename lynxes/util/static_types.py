@@ -1,5 +1,5 @@
 """Static types class and methods for inferring types."""
-
+import numpy as np
 
 class ModelTypes(object):
     """Stores values for model types and keywords"""
@@ -16,11 +16,26 @@ class OutputTypes(object):
     iterable = 'iterable'
     unknown = 'unknown'
 
+class DataTypes(object):
+    @staticmethod
+    def is_numeric(thing):
+        try:
+            float(thing)
+            return True
+        except ValueError:
+            return False
+    @staticmethod
+    def is_dtype_numeric(dtype):
+        assert isinstance(dtype, np.dtype), "expect numpy.dtype, got {}".format(type(dtype))
+        return np.issubdtype(dtype, np.number)
+    numeric = 'numeric'
+    nonnumeric = 'nonnumeric'
 
 class StaticTypes(object):
     """Stores values for model types, output types, and keywords"""
     model_types = ModelTypes
     output_types = OutputTypes
+    data_types = DataTypes
     unknown = 'unknown'
     not_applicable = 'not applicable'
 
