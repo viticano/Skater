@@ -23,7 +23,7 @@ from ...util.static_types import StaticTypes
 # methods stored in util.serialization
 
 
-def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data):
+def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data, filter_classes=None):
     """ Helper function to compute partial dependence for each grid value
 
     Parameters:
@@ -49,7 +49,7 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data):
     # print "process id: {} parent process id {} \n".format(*[os.getpid(), os.getppid()])
     feature_columns = pd_metadata['feature_columns']
     feature_ids = pd_metadata['feature_ids']
-    class_columns = pd_metadata['class_columns']
+    target_columns = pd_metadata['target_columns']
     data_columns = list(pd_metadata['data_feature_ids'])
     # data_sample = pd.DataFrame(input_data, columns=data_columns)
     data_sample = input_data.copy()
@@ -75,21 +75,29 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data):
         mean_prediction = np.array([mean_prediction])
         std_prediction = np.array([std_prediction])
 
-    number_of_classes = len(class_columns)
+
+    number_of_classes = len(target_columns)
     assert number_of_classes == mean_prediction.shape[0], "Mismatch between prediction dimension" \
                                                           "and number of class names" \
                                                           "Prediction dimension: {} " \
-                                                          "n class_names: {}".format(*[mean_prediction.shape,
+                                                          "n target_names: {}".format(*[mean_prediction.shape,
                                                                                        number_of_classes])
+
+    if filter_classes:
+        class_idx = [target_columns.index(i) for i in filter_classes]
+        mean_prediction = mean_prediction[class_idx]
+        target_columns = [target_columns[i] for i in class_idx]
+        number_of_classes = len(filter_classes)
+
 
     pd_dict = {column: new_row[idx] for idx, column in enumerate(feature_columns)}
     if number_of_classes == 2:
-        class_column = class_columns[1]
-        pd_dict[class_column] = mean_prediction[1]
+        target_column = target_columns[1]
+        pd_dict[target_column] = mean_prediction[1]
         pd_dict['sd'] = std_prediction[0]
     else:
         for class_i in range(number_of_classes):
-            pd_dict[class_columns[class_i]] = mean_prediction[class_i]
+            pd_dict[target_columns[class_i]] = mean_prediction[class_i]
         pd_dict['sd'] = std_prediction[0]
 
     return pd_dict
@@ -104,15 +112,16 @@ class PartialDependence(BaseGlobalInterpretation):
     _predict_fn = None
 
 
-    def _build_metadata_dict(self, modelinstance, pd_feature_ids, data_feature_ids):
+    def _build_metadata_dict(self, modelinstance, pd_feature_ids, data_feature_ids, filter_classes):
 
         #feature_columns = ['feature: {}'.format(i) for i in pd_feature_ids]
         feature_columns = [self.feature_column_name_formatter(i) for i in pd_feature_ids]
         sd_col = 'sd'
-        class_names = modelinstance.class_names
+        filtered_target_names = [i for i in modelinstance.target_names if i in filter_classes]
         metadata = ControlledDict({
             'sd_column': sd_col,
-            'class_columns': class_names,
+            'target_columns': modelinstance.target_names,
+            'filtered_target_columns': filtered_target_names,
             'feature_columns': feature_columns,
             'feature_ids': pd_feature_ids,
             'data_feature_ids': data_feature_ids,
@@ -124,9 +133,8 @@ class PartialDependence(BaseGlobalInterpretation):
     def feature_column_name_formatter(columnname):
         return "{}".format(columnname)
 
-
-    def partial_dependence(self, feature_ids, modelinstance, grid=None, grid_resolution=None,
-                           n_jobs=-1, grid_range=None, sample=True,
+    def partial_dependence(self, feature_ids, modelinstance, filter_classes=None, grid=None,
+                           grid_resolution=None, n_jobs=-1, grid_range=None, sample=True,
                            sampling_strategy='random-choice', n_samples=10000,
                            bin_count=50, samples_per_bin=10, return_metadata=False):
 
@@ -150,6 +158,9 @@ class PartialDependence(BaseGlobalInterpretation):
 
             Can either by a lynxes.model.remote.DeployedModel or a
             lynxes.model.local.InMemoryModel
+        filter_classes: array type
+            The classes to run partial dependence on. Default None invokes all classes.
+            Only used in classification models.
         grid: numpy.ndarray
             2 dimensional array on which we fix values of features. Note this is
             determined automatically if not given based on the percentiles of the
@@ -207,11 +218,24 @@ class PartialDependence(BaseGlobalInterpretation):
         >>> interpreter.partial_dependence.partial_dependence(features,model)
         """
 
+
+
         if not hasattr(feature_ids, "__iter__"):
             feature_ids = [feature_ids]
 
         if grid_resolution is None:
             grid_resolution = 100 if len(feature_ids) == 1 else 30
+
+        if not filter_classes:
+            filter_classes = modelinstance.target_names
+        else:
+            assert all([i in modelinstance.target_names for i in filter_classes]), "members of filter classes must be" \
+                                                                                  "members of modelinstance.classes." \
+                                                                                  "Expected members of: " \
+                                                                                  "{0}\n" \
+                                                                                  "got: " \
+                                                                                  "{1}".format(modelinstance.target_names,
+                                                                                               filter_classes)
 
         # TODO: There might be a better place to do this check
         if not isinstance(modelinstance, ModelType):
@@ -301,11 +325,10 @@ class PartialDependence(BaseGlobalInterpretation):
         self._check_dataset_type(data_sample)
 
         self.interpreter.logger.debug("Feature Ids: {}".format(feature_ids))
-        _pdp_metadata = self._build_metadata_dict(modelinstance, feature_ids, self.data_set.feature_ids)
+        _pdp_metadata = self._build_metadata_dict(modelinstance, feature_ids, self.data_set.feature_ids, filter_classes)
         self.interpreter.logger.debug("PD metadata: {}".format(_pdp_metadata))
 
         # cartesian product of grid
-        # converting to dataframe to get differing dtypes
         grid_expanded = pd.DataFrame(list(product(*grid))).values
 
         if grid_expanded.shape[0] <= 0:
@@ -320,7 +343,8 @@ class PartialDependence(BaseGlobalInterpretation):
                                     estimator_fn=predict_fn,
                                     grid_expanded=grid_expanded,
                                     pd_metadata=_pdp_metadata,
-                                    input_data=data_sample)
+                                    input_data=data_sample,
+                                    filter_classes=filter_classes)
         arg_list = [i for i in range(grid_expanded.shape[0])]
         executor_instance = Pool(n_jobs)
 
@@ -338,9 +362,9 @@ class PartialDependence(BaseGlobalInterpretation):
             return pd.DataFrame(list(pd_list))
 
 
-    def plot_partial_dependence(self, feature_ids, modelinstance, grid=None,
-                                grid_resolution=None, grid_range=None, n_jobs=-1,
-                                sample=True, sampling_strategy='random-choice',
+    def plot_partial_dependence(self, feature_ids, modelinstance, filter_classes=None,
+                                grid=None, grid_resolution=None, grid_range=None,
+                                n_jobs=-1, sample=True, sampling_strategy='random-choice',
                                 n_samples=10000, bin_count=50, samples_per_bin=10,
                                 with_variance=False, figsize=(16, 10)):
         """
@@ -452,7 +476,8 @@ class PartialDependence(BaseGlobalInterpretation):
         # in the event that a user wants a 3D pdp with multiple classes, how should
         # we handle this? currently each class will get its own figure
         if not hasattr(feature_ids, "__iter__"):
-            pd_df, metadata = self.partial_dependence(feature_ids, modelinstance, grid=grid,
+            pd_df, metadata = self.partial_dependence(feature_ids, modelinstance,
+                                                      filter_classes=filter_classes,grid=grid,
                                                       grid_resolution=grid_resolution,
                                                       grid_range=grid_range, sample=sample,
                                                       sampling_strategy=sampling_strategy,
@@ -467,7 +492,7 @@ class PartialDependence(BaseGlobalInterpretation):
             ax_list = []
             for feature_or_feature_pair in feature_ids:
                 pd_df, metadata = self.partial_dependence(feature_or_feature_pair, modelinstance,
-                                                          grid=grid,
+                                                          filter_classes=filter_classes, grid=grid,
                                                           grid_resolution=grid_resolution,
                                                           grid_range=grid_range, sample=sample,
                                                           sampling_strategy=sampling_strategy,
@@ -486,7 +511,7 @@ class PartialDependence(BaseGlobalInterpretation):
                           disable_offset=True, figsize=(16, 10)):
 
         feature_columns = pd_metadata['feature_columns']
-        class_columns = pd_metadata['class_columns']
+        target_columns = pd_metadata['filtered_target_columns']
         sd_col = pd_metadata['sd_column']
         n_features = len(feature_columns)
         if n_features == 1 or not hasattr(feature_columns, "__iter__"):
@@ -494,7 +519,7 @@ class PartialDependence(BaseGlobalInterpretation):
             return self._2d_pdp_plot(pdp,
                                      feature_column,
                                      sd_col,
-                                     class_columns,
+                                     target_columns,
                                      with_variance=with_variance,
                                      plot_title=plot_title,
                                      disable_offset=disable_offset,
@@ -505,7 +530,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                      feature1_column,
                                      feature2_column,
                                      sd_col,
-                                     class_columns,
+                                     target_columns,
                                      with_variance=with_variance,
                                      plot_title=plot_title,
                                      figsize=figsize)
@@ -516,18 +541,18 @@ class PartialDependence(BaseGlobalInterpretation):
             raise(ValueError(msg))
 
 
-    def _2d_pdp_plot(self, pdp, feature_name, sd_col, class_columns,
+    def _2d_pdp_plot(self, pdp, feature_name, sd_col, target_columns,
                      with_variance=False, plot_title=None,
                      disable_offset=True, figsize=(16, 10)):
         colors = cycle(COLORS)
         figure_list, axis_list = [], []
 
         # if there are just 2 classes, pick the last one.
-        if len(class_columns) == 2:
-            class_columns = [class_columns[-1]]
+        if len(target_columns) == 2:
+            target_columns = [target_columns[-1]]
 
-        for class_column in class_columns:
-            # if class_name is None:
+        for target_column in target_columns:
+            # if target_name is None:
             #     raise ValueError("Could not parse class name from {}".format(mean_col))
             f, ax = pyplot.subplots(1, figsize=figsize)
             figure_list.append(f)
@@ -535,7 +560,7 @@ class PartialDependence(BaseGlobalInterpretation):
             color = next(colors)
 
             data = pdp.set_index(feature_name)
-            plane = data[class_column]
+            plane = data[target_column]
 
             # if binary feature, then len(pdp) == 2 -> barchart
             if self._is_feature_binary(pdp, feature_name) or not self.data_set.feature_info[feature_name]['numeric']:
@@ -556,7 +581,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                     color=color)
             if plot_title:
                 ax.set_title(plot_title)
-            ax.set_ylabel(class_column)
+            ax.set_ylabel(target_column)
             ax.set_xlabel(feature_name)
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(handles, labels)
@@ -573,13 +598,13 @@ class PartialDependence(BaseGlobalInterpretation):
             return False
 
 
-    def _3d_pdp_plot(self, pdp, feature1, feature2, sd_column, class_columns,
+    def _3d_pdp_plot(self, pdp, feature1, feature2, sd_column, target_columns,
                      with_variance=False, plot_title=None, disable_offset=True,
                      figsize=(16, 10)):
 
         # if there are just 2 classes, pick the last one.
-        if len(class_columns) == 2:
-            class_columns = [class_columns[-1]]
+        if len(target_columns) == 2:
+            target_columns = [target_columns[-1]]
 
         feature_1_data = pdp[feature1].values
         feature_2_data = pdp[feature2].values
@@ -593,7 +618,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                                    feature1,
                                                    feature2,
                                                    sd_column,
-                                                   class_columns,
+                                                   target_columns,
                                                    with_variance=with_variance,
                                                    figsize=figsize)
 
@@ -603,7 +628,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                                                 feature1,
                                                                 feature2,
                                                                 sd_column,
-                                                                class_columns,
+                                                                target_columns,
                                                                 with_variance=with_variance,
                                                                 figsize=figsize)
         else:
@@ -620,7 +645,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                                                                 categorical_feature,
                                                                                 non_categorical_feature,
                                                                                 sd_column,
-                                                                                class_columns,
+                                                                                target_columns,
                                                                                 with_variance=with_variance)
         for obj in plot_objects:
             if isinstance(obj, mpl_axes):
@@ -638,14 +663,14 @@ class PartialDependence(BaseGlobalInterpretation):
 
 
     def _plot_3d_full_mesh(self, pdp, feature1, feature2,
-                           sd_column, class_columns,
+                           sd_column, target_columns,
                            with_variance=False, alpha=.7, figsize=(16, 10)):
         colors = cycle(COLORS)
 
         figure_list, axis_list = [], []
 
-        for class_column in class_columns:
-            gradient_x, gradient_y, X, Y, Z = self.compute_3d_gradients(pdp, class_column, feature1, feature2)
+        for target_column in target_columns:
+            gradient_x, gradient_y, X, Y, Z = self.compute_3d_gradients(pdp, target_column, feature1, feature2)
             color_gradient, xmin, xmax, ymin, ymax = coordinate_gradients_to_1d_colorscale(gradient_x, gradient_y)
             figure = pyplot.figure(figsize=figsize)
             ax = pyplot.subplot2grid((3, 3), (0, 0), colspan=2, rowspan=3, projection='3d')
@@ -672,15 +697,15 @@ class PartialDependence(BaseGlobalInterpretation):
             if with_variance:
                 var_color = next(colors)
                 ax.plot_trisurf(pdp[feature1].values, pdp[feature2].values,
-                                (pdp[class_column] + pdp[sd_column]).values, alpha=.2,
+                                (pdp[target_column] + pdp[sd_column]).values, alpha=.2,
                                 color=var_color)
                 ax.plot_trisurf(pdp[feature1].values, pdp[feature2].values,
-                                (pdp[class_column] - pdp[sd_column]).values, alpha=.2,
+                                (pdp[target_column] - pdp[sd_column]).values, alpha=.2,
                                 color=var_color)
             ax.set_xlabel(feature1)
             ax.set_ylabel(feature2)
             # adding a blank line and spacing for formatting
-            ax.set_zlabel("\n{}".format(class_column), linespacing=3.0)
+            ax.set_zlabel("\n{}".format(target_column), linespacing=3.0)
             ax.invert_xaxis()
 
             handles, labels = ax.get_legend_handles_labels()
@@ -690,16 +715,16 @@ class PartialDependence(BaseGlobalInterpretation):
 
 
     def _plot_3d_2_categorical_features(self, pdp, feature1, feature2, sd_column,
-                                  class_columns, with_variance=False, figsize=(16, 10)):
+                                  target_columns, with_variance=False, figsize=(16, 10)):
         # colors = cycle(COLORS)
         figure_list, axis_list = [], []
-        for class_column in class_columns:
+        for target_column in target_columns:
             fig = pyplot.figure(figsize=figsize)
             ax = fig.add_subplot(111, projection='3d')
 
             for val in np.unique(pdp[feature2]):
                 filter_idx = pdp[feature2] == val
-                pdp_vals = pdp[filter_idx][class_column].values
+                pdp_vals = pdp[filter_idx][target_column].values
                 x1 = pdp[filter_idx][feature1].values
                 x2 = pdp[filter_idx][feature2].values
                 ax.plot(x1, x2, pdp_vals)
@@ -709,23 +734,23 @@ class PartialDependence(BaseGlobalInterpretation):
             # color = next(colors)
             ax.set_xlabel(feature1)
             ax.set_ylabel(feature2)
-            ax.set_zlabel(class_column)
+            ax.set_zlabel(target_column)
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(handles, labels)
         return flatten([figure_list, axis_list])
 
     def _plot_2d_2_categorical_features_lines(self, pdp, feature1, feature2, sd_col,
-                                  class_columns, with_variance=False,
+                                  target_columns, with_variance=False,
                                   figsize=(16, 10)):
         figure_list, axis_list = [], []
 
         std_error = pdp.set_index([feature1, feature2])[sd_col].unstack()
-        for class_column in class_columns:
+        for target_column in target_columns:
             f = pyplot.figure(figsize=figsize)
             ax = f.add_subplot(111)
             # feature2 is columns
             # feature1 is index
-            plot_data = pdp.set_index([feature1, feature2])[class_column].unstack()
+            plot_data = pdp.set_index([feature1, feature2])[target_column].unstack()
             plot_data.plot(ax=ax, color=COLORS)
             print(plot_data)
 
@@ -743,22 +768,22 @@ class PartialDependence(BaseGlobalInterpretation):
             figure_list.append(f)
             axis_list.append(ax)
             ax.set_xlabel(feature1)
-            ax.set_ylabel(class_column)
+            ax.set_ylabel(target_column)
 
         return flatten([figure_list, axis_list])
 
     def _plot_2d_2_categorical_features_bar(self, pdp, feature1, feature2, sd_col,
-                                  class_columns, with_variance=False,
+                                  target_columns, with_variance=False,
                                   figsize=(16, 10)):
         figure_list, axis_list = [], []
 
         std_error = pdp.set_index([feature1, feature2])[sd_col].unstack()
-        for class_column in class_columns:
+        for target_column in target_columns:
             f = pyplot.figure(figsize=figsize)
             ax = f.add_subplot(111)
             # feature2 is columns
             # feature1 is index
-            plot_data = pdp.set_index([feature1, feature2])[class_column].unstack()
+            plot_data = pdp.set_index([feature1, feature2])[target_column].unstack()
 
             if with_variance:
                 plot_data.plot(kind='bar', ax=ax, color=COLORS, yerr=std_error)
@@ -769,7 +794,7 @@ class PartialDependence(BaseGlobalInterpretation):
             figure_list.append(f)
             axis_list.append(ax)
             ax.set_xlabel(feature1)
-            ax.set_ylabel(class_column)
+            ax.set_ylabel(target_column)
 
         return flatten([figure_list, axis_list])
 
@@ -778,19 +803,19 @@ class PartialDependence(BaseGlobalInterpretation):
                                                    categorical_feature,
                                                    non_categorical_feature,
                                                    sd_column,
-                                                   class_columns,
+                                                   target_columns,
                                                    with_variance=False,
                                                    figsize=(16, 10)):
 
         figure_list, axis_list = [], []
 
-        for class_column in class_columns:
+        for target_column in target_columns:
             colors = cycle(COLORS)
             f = pyplot.figure(figsize=figsize)
             ax = f.add_subplot(111)
             figure_list.append(f)
             axis_list.append(ax)
-            plot_data = pdp.set_index([non_categorical_feature, categorical_feature])[class_column]\
+            plot_data = pdp.set_index([non_categorical_feature, categorical_feature])[target_column]\
                 .unstack().sort_index()
             sd = pdp.set_index([non_categorical_feature, categorical_feature])[sd_column]\
                 .unstack()
@@ -813,7 +838,7 @@ class PartialDependence(BaseGlobalInterpretation):
                     color = next(colors)
                     ax.fill_between(non_categorical_values, lower_plane[categorical_value].values, upper_plane[categorical_value].values, alpha=.2,
                                     color=color)
-            ax.set_ylabel(class_column)
+            ax.set_ylabel(target_column)
         return flatten([figure_list, axis_list])
 
     @staticmethod

@@ -25,7 +25,7 @@ class ModelType(object):
     __metaclass__ = abc.ABCMeta
 
 
-    def __init__(self, log_level=30, class_names=None, examples=None, feature_names=None):
+    def __init__(self, log_level=30, target_names=None, examples=None, feature_names=None, unique_values=None):
         """
         Base model class for wrapping prediction functions. Common methods
         involve output type inference in requiring predict methods
@@ -34,6 +34,12 @@ class ModelType(object):
         ----------
             log_level: int
                 0, 10, 20, 30, 40, or 50 for verbosity of logs.
+            target_names: arraytype
+                The names of the target variable/classes. There should be as many
+                 names as there are outputs per prediction (n=1 for regression,
+                 n=2 for binary classification, etc). Defaults to Predicted Value for
+                 regression and Class 1...n for classification.
+
 
 
         Attributes
@@ -53,14 +59,14 @@ class ModelType(object):
         self.formatter = lambda x: x
         self.label_encoder = LabelEncoder()
         self.one_hot_encoder = OneHotEncoder()
-        self.class_names = class_names
+        self.target_names = target_names
         self.feature_names = feature_names
-
+        self.unique_values = unique_values
 
         if examples is not None:
             self.input_type = type(examples)
             examples = DataManager(examples, feature_names=feature_names)
-            self._check_output_signature(examples)
+            self._build_model_metadata(examples)
         else:
             self.input_type = None
             self.logger.warn("No examples provided, cannot infer model type")
@@ -93,7 +99,7 @@ class ModelType(object):
             return np.array(examples)
 
 
-    def _check_output_signature(self, dataset):
+    def _build_model_metadata(self, dataset):
         """
         Determines the model_type, output_type. Side effects
         of this method are to mutate object's attributes (model_type,
@@ -115,6 +121,7 @@ class ModelType(object):
             outputs = self.predict(dataset.data)
         else:
             raise ValueError("Unrecognized input type: {}".format(self.input_type))
+
         self.input_shape = dataset.data.shape
         self.output_shape = outputs.shape
 
@@ -132,36 +139,26 @@ class ModelType(object):
             self.model_type = StaticTypes.model_types.regressor
             self.n_classes = 1
             self.probability = StaticTypes.not_applicable
-            if self.class_names is None:
-                self.class_names = ['Predicted Value']
 
         elif self.output_type == 'multiclass':
             self.model_type = StaticTypes.model_types.classifier
             self.probability = False
             self.n_classes = len(np.unique(outputs))
-            if self.class_names is None:
-                self.class_names = ['Probability Class {}'.format(i) for i in range(self.n_classes)]
 
         elif self.output_type == 'continuous-multioutput':
             self.model_type = StaticTypes.model_types.classifier
             self.probability = True
             self.n_classes = outputs.shape[1]
-            if self.class_names is None:
-                self.class_names = ['Probability Class {}'.format(i) for i in range(self.n_classes)]
 
         elif self.output_type == 'binary':
             self.model_type = StaticTypes.model_types.classifier
             self.probability = False
             self.n_classes = 2
-            if self.class_names is None:
-                self.class_names = ['Probability Class {}'.format(i) for i in range(self.n_classes)]
 
         elif self.output_type == 'multilabel-indicator':
             self.model_type = StaticTypes.model_types.classifier
             self.probability = False
             self.n_classes = outputs.shape[1]
-            if self.class_names is None:
-                self.class_names = ['Probability Class {}'.format(i) for i in range(self.n_classes)]
 
         else:
             err_msg = "Could not infer model type"
@@ -169,6 +166,9 @@ class ModelType(object):
             self.logger.debug("Outputs: {}".format(outputs))
             self.logger.debug("sklearn response: {}".format(self.output_type))
             exceptions.ModelError(err_msg)
+
+        if self.target_names is None:
+            self.target_names = range(self.n_classes)
 
         self.formatter = self.transformer_func_factory(outputs)
 
@@ -194,13 +194,13 @@ class ModelType(object):
         """
 
         _labels = self.label_encoder.transform(output)[:, np.newaxis]
-        # class_names = label_encoder.classes_.tolist()
+        # target_names = label_encoder.classes_.tolist()
 
         self.logger.debug("Using transforming function. Found {} classes".format(len(self.label_encoder.classes_)))
         self.logger.debug("Label shape: {}".format(len(_labels.shape)))
         output = self.one_hot_encoder.transform(_labels).todense()
         output = np.squeeze(np.asarray(output))
-        return output
+        return DataManager(output, feature_names=self.label_encoder.classes_)[self.unique_values]
 
 
     def transformer_func_factory(self, outputs):
@@ -225,8 +225,10 @@ class ModelType(object):
         # and only if the model does not return probabilities. If unknown, should be true
         if self.model_type == StaticTypes.model_types.classifier and not self.probability:
             # fit label encoder
+            artificial_samples = np.array(self.unique_values)
             self.logger.debug("Label encoder fit on examples of shape: {}".format(outputs.shape))
-            labels = self.label_encoder.fit_transform(outputs)[:, np.newaxis]
+            self.label_encoder.fit(artificial_samples)
+            labels = self.label_encoder.transform(artificial_samples)[:, np.newaxis]
             self.logger.debug("Onehot encoder fit on examples of shape: {}".format(labels.shape))
             self.one_hot_encoder.fit(labels)
             return self.predict_function_transformer
@@ -263,6 +265,11 @@ class ModelType(object):
         reports.append("Input Shape: {} \n".format(self.input_shape))
         reports.append("Probability: {} \n".format(self.probability))
         return reports
+
+    @staticmethod
+    def _filter_outputs(predictions, target_names, filter_classes):
+        """Helpful method when you need to filter predictions to a subset"""
+        return DataManager(predictions, feature_names=target_names)[filter_classes]
 
 # todo: add subclasses for classifier and regression, with class names given
 # on init for classifier

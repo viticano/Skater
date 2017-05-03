@@ -9,7 +9,7 @@ class InMemoryModel(ModelType):
     This model can be called directly from memory
     """
 
-    def __init__(self, prediction_fn, log_level=30, class_names=None, examples=None):
+    def __init__(self, prediction_fn, log_level=30, target_names=None, examples=None, unique_values=None):
         """This model can be called directly from memory
 
         Parameters
@@ -21,7 +21,7 @@ class InMemoryModel(ModelType):
             config setting to see model logs. 10 is a good value for seeing debug messages.
             30 is warnings only.
 
-        class_names: array type
+        target_names: array type
             optional names of classes that describe model outputs.
 
         examples: numpy.array or pandas.dataframe
@@ -35,9 +35,8 @@ class InMemoryModel(ModelType):
 
         self.prediction_fn = prediction_fn
         super(InMemoryModel, self).__init__(log_level=log_level,
-                                            class_names=class_names,
-                                            examples=examples)
-
+                                            target_names=target_names,
+                                            examples=examples, unique_values=unique_values)
 
 
     def predict(self, *args, **kwargs):
@@ -46,6 +45,9 @@ class InMemoryModel(ModelType):
         """
         return self.formatter(self.prediction_fn(*args, **kwargs))
 
+
+    def predict_wrapper(data, modelinstance, filter_classes):
+        return DataManager(modelinstance.predict(data), feature_names=modelinstance.target_names)[filter_classes]
 
     @staticmethod
     def _predict(data, predict_fn, formatter):
