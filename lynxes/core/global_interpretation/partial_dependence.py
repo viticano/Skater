@@ -77,21 +77,19 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data, fil
 
 
     number_of_classes = len(target_columns)
-    assert number_of_classes == mean_prediction.shape[0], "Mismatch between prediction dimension" \
-                                                          "and number of class names" \
-                                                          "Prediction dimension: {} " \
-                                                          "n target_names: {}".format(*[mean_prediction.shape,
-                                                                                       number_of_classes])
+    # assert number_of_classes == mean_prediction.shape[0], "Mismatch between prediction dimension" \
+    #                                                       "and number of class names" \
+    #                                                       "Prediction dimension: {} " \
+    #                                                       "n target_names: {}".format(*[mean_prediction.shape,
+    #                                                                                    number_of_classes])
 
-    if filter_classes:
+    if filter_classes is not None:
         class_idx = [target_columns.index(i) for i in filter_classes]
         mean_prediction = mean_prediction[class_idx]
         target_columns = [target_columns[i] for i in class_idx]
         number_of_classes = len(filter_classes)
-
-
     pd_dict = {column: new_row[idx] for idx, column in enumerate(feature_columns)}
-    if number_of_classes == 2:
+    if number_of_classes == 2 and filter_classes is None:
         target_column = target_columns[1]
         pd_dict[target_column] = mean_prediction[1]
         pd_dict['sd'] = std_prediction[0]
@@ -117,7 +115,10 @@ class PartialDependence(BaseGlobalInterpretation):
         #feature_columns = ['feature: {}'.format(i) for i in pd_feature_ids]
         feature_columns = [self.feature_column_name_formatter(i) for i in pd_feature_ids]
         sd_col = 'sd'
-        filtered_target_names = [i for i in modelinstance.target_names if i in filter_classes]
+        if filter_classes is not None:
+            filtered_target_names = [i for i in modelinstance.target_names if i in filter_classes]
+        else:
+            filtered_target_names = None
         metadata = ControlledDict({
             'sd_column': sd_col,
             'target_columns': modelinstance.target_names,
@@ -135,7 +136,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
     def partial_dependence(self, feature_ids, modelinstance, filter_classes=None, grid=None,
                            grid_resolution=None, n_jobs=-1, grid_range=None, sample=True,
-                           sampling_strategy='random-choice', n_samples=10000,
+                           sampling_strategy='random-choice', n_samples=500,
                            bin_count=50, samples_per_bin=10, return_metadata=False):
 
         """
@@ -226,9 +227,10 @@ class PartialDependence(BaseGlobalInterpretation):
         if grid_resolution is None:
             grid_resolution = 100 if len(feature_ids) == 1 else 30
 
-        if not filter_classes:
-            filter_classes = modelinstance.target_names
-        else:
+        #if not filter_classes:
+            #filter_classes = modelinstance.target_names
+
+        if filter_classes:
             assert all([i in modelinstance.target_names for i in filter_classes]), "members of filter classes must be" \
                                                                                   "members of modelinstance.classes." \
                                                                                   "Expected members of: " \
@@ -244,8 +246,14 @@ class PartialDependence(BaseGlobalInterpretation):
                                         "lynxes.model.remote.DeployedModel"))
 
         if modelinstance.model_type == 'classifier' and modelinstance.probability is False:
-            raise(exceptions.ModelError("Incorrect estimator function used for computing partial dependence, try one "
-                                        "with which give probability estimates"))
+
+            if modelinstance.unique_values is None:
+                raise(exceptions.ModelError('If using classifier without probability scores, unique_values cannot '
+                                            'be None'))
+            self.interpreter.logger.warn("Classifiers with probability scores can be explained more granularly than those"
+                                         "without scores. If a prediction method with scores is available, use that instead.")
+
+
 
         if len(feature_ids) >= 3:
             too_many_features_err_msg = "Pass in at most 2 features for pdp. If you have a " \
@@ -347,10 +355,10 @@ class PartialDependence(BaseGlobalInterpretation):
                                     filter_classes=filter_classes)
         arg_list = [i for i in range(grid_expanded.shape[0])]
         executor_instance = Pool(n_jobs)
-
         try:
-            pd_list = executor_instance.map(pd_func, arg_list)
+           pd_list = executor_instance.map(pd_func, arg_list)
         except:
+            self.interpreter.logger.debug("Multiprocessing failed, going single process")
             pd_list = map(pd_func, arg_list)
         finally:
             executor_instance.close()
@@ -511,7 +519,10 @@ class PartialDependence(BaseGlobalInterpretation):
                           disable_offset=True, figsize=(16, 10)):
 
         feature_columns = pd_metadata['feature_columns']
-        target_columns = pd_metadata['filtered_target_columns']
+        if pd_metadata['filtered_target_columns'] is None:
+            target_columns = pd_metadata['target_columns']
+        else:
+            target_columns = pd_metadata['filtered_target_columns']
         sd_col = pd_metadata['sd_column']
         n_features = len(feature_columns)
         if n_features == 1 or not hasattr(feature_columns, "__iter__"):

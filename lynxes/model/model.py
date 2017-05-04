@@ -170,6 +170,10 @@ class ModelType(object):
         if self.target_names is None:
             self.target_names = range(self.n_classes)
 
+        if self.unique_values is None and self.model_type == 'classifier' and self.probability is False:
+            raise (exceptions.ModelError('If using classifier without probability scores, unique_values cannot '
+                                         'be None'))
+
         self.formatter = self.transformer_func_factory(outputs)
 
         reports = self.model_report(dataset.data)
