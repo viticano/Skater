@@ -233,17 +233,17 @@ class DataManager(object):
         }
 
     def __getitem__(self, key):
-        if self.data_type == pd.DataFrame:
+        if issubclass(self.data_type, pd.DataFrame):
             return self.__getitem_pandas__(key)
-        if self.data_type == np.ndarray:
+        elif issubclass(self.data_type, np.ndarray):
             return self.__getitem_ndarray__(key)
         else:
             raise ValueError("Can't get item for data of type {}".format(self.data_type))
 
     def __setitem__(self, key, newval):
-        if self.data_type == pd.DataFrame:
+        if issubclass(self.data_type, pd.DataFrame):
             self.__setcolumn_pandas__(key, newval)
-        if self.data_type == np.ndarray:
+        elif issubclass(self.data_type, np.ndarray):
             self.__setcolumn_ndarray__(key, newval)
         else:
             raise ValueError("Can't set item for data of type {}".format(self.data_type))
@@ -252,7 +252,7 @@ class DataManager(object):
     def __getrows__(self, idx):
         if self.data_type == pd.DataFrame:
             return self.__getrows_pandas__(idx)
-        if self.data_type == np.ndarray:
+        elif self.data_type == np.ndarray:
             return self.__getrows_ndarray__(idx)
         else:
             raise ValueError("Can't get rows for data of type {}".format(self.data_type))
