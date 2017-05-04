@@ -57,7 +57,7 @@ class TestFeatureImportance(unittest.TestCase):
 
         self.classifier = LogisticRegression()
         self.classifier.fit(self.X, self.y_as_int)
-        self.classifier_predict_fn = InMemoryModel(self.classifier.predict, examples=self.X)
+        self.classifier_predict_fn = InMemoryModel(self.classifier.predict, examples=self.X, unique_values=self.classifier.classes_)
         self.classifier_predict_proba_fn = InMemoryModel(self.classifier.predict_proba, examples=self.X)
 
         self.string_classifier = LogisticRegression()

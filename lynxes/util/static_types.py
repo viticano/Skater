@@ -24,6 +24,9 @@ class DataTypes(object):
             return True
         except ValueError:
             return False
+        except TypeError:
+            return False
+
     @staticmethod
     def is_dtype_numeric(dtype):
         assert isinstance(dtype, np.dtype), "expect numpy.dtype, got {}".format(type(dtype))

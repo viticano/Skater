@@ -58,7 +58,7 @@ class TestPartialDependence(unittest.TestCase):
 
         self.classifier = LogisticRegression()
         self.classifier.fit(self.X, self.y_as_int)
-        self.classifier_predict_fn = InMemoryModel(self.classifier.predict, examples=self.X)
+        self.classifier_predict_fn = InMemoryModel(self.classifier.predict, examples=self.X, unique_values=self.classifier.classes_)
         self.classifier_predict_proba_fn = InMemoryModel(self.classifier.predict_proba, examples=self.X)
 
         self.string_classifier = LogisticRegression()
@@ -87,7 +87,6 @@ class TestPartialDependence(unittest.TestCase):
 
     def test_pd_with_categorical_features(self):
         interpreter = Interpretation(self.sample_x_categorical, feature_names=self.categorical_feature_names)
-        interpreter.partial_dependence.partial_dependence([self.categorical_feature_names[0]], self.categorical_model)
         try:
             interpreter.partial_dependence.partial_dependence([self.categorical_feature_names[0]], self.categorical_model)
         except:
@@ -166,7 +165,7 @@ class TestPartialDependence(unittest.TestCase):
                                                                        self.regressor_predict_fn)
         val_col = PartialDependence.feature_column_name_formatter(self.features[0])
 
-        y = np.array(pdp_df['Predicted Value'])
+        y = np.array(pdp_df[self.regressor_predict_fn.target_names[0]])
         x = np.array(pdp_df[val_col])[:, np.newaxis]
         regressor = LinearRegression()
         regressor.fit(x, y)
@@ -228,15 +227,21 @@ class TestPartialDependence(unittest.TestCase):
 
 
     def test_pdp_1d_classifier_no_proba(self):
-        self.assertRaises(exceptions.ModelError, lambda: self.interpreter.partial_dependence.partial_dependence(self.features[:1],
-                                                                       self.classifier_predict_fn,
-                                                                       grid_resolution=10))
+        try:
+            self.interpreter.partial_dependence.partial_dependence(self.features[:1],
+                                                                   self.classifier_predict_fn,
+                                                                   grid_resolution=10)
+        except:
+            self.fail("1D pdp without proba failed")
 
 
     def test_pdp_2d_classifier_no_proba(self):
-        self.assertRaises(exceptions.ModelError, lambda: self.interpreter.partial_dependence.partial_dependence(self.features[:2],
-                                                                            self.classifier_predict_fn,
-                                                                            grid_resolution=10))
+        try:
+            self.interpreter.partial_dependence.partial_dependence(self.features[:2],
+                                                                   self.classifier_predict_fn,
+                                                                   grid_resolution=10)
+        except:
+            self.fail("2D pdp without proba failed")
 
 
     def test_pdp_1d_classifier_with_proba(self):

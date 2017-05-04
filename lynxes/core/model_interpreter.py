@@ -23,7 +23,7 @@ class ModelInterpreter(object):
         """.consider routes to Interpreter's .consider"""
         self.interpreter.consider(training_data, index=index, feature_names=feature_names)
 
-    def build_annotated_model(self, prediction_function, class_names=None, examples=None):
+    def build_annotated_model(self, prediction_function, target_names=None, examples=None):
         """
         returns lynxes.model.InMemoryModel
         Parameters
@@ -42,5 +42,5 @@ class ModelInterpreter(object):
                 about what it outputs
         """
         return self.interpreter.build_annotated_model(prediction_function,
-                                                      class_names=class_names,
+                                                      target_names=target_names,
                                                       examples=examples)

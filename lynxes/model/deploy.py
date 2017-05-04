@@ -7,7 +7,7 @@ from .model import ModelType
 class DeployedModel(ModelType):
     """Model that gets predictions from a deployed model"""
     def __init__(self, uri, input_formatter, output_formatter,
-                 log_level=30, class_names=None, examples=None, feature_names=None,
+                 log_level=30, target_names=None, examples=None, feature_names=None,
                  request_kwargs={}):
         """This model can be called by making http requests
         to the passed in uri.
@@ -30,7 +30,7 @@ class DeployedModel(ModelType):
         log_level: int
             see lynxes.model.Model for details
 
-        class_names: array type
+        target_names: array type
             see lynxes.model.Model for details
 
         examples:
@@ -41,7 +41,7 @@ class DeployedModel(ModelType):
         self.output_formatter = output_formatter
         self.request_kwargs = request_kwargs
         super(DeployedModel, self).__init__(examples=examples,
-                                            class_names=class_names,
+                                            target_names=target_names,
                                             log_level=log_level,
                                             feature_names=feature_names)
 

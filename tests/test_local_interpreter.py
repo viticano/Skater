@@ -79,8 +79,8 @@ class TestLocalInterpreter(unittest.TestCase):
     #     interpreter = Interpretation()
     #     input_feature_names = ['a', 'b', 'c']
     #     input_df = pd.DataFrame(np.random.randn(5, 4), columns=['a', 'b', 'c', 'd'])
-    #     input_class_names = [0, 1]
-    #     explainer = interpreter.local_interpreter.local_explainer(input_df, class_names=input_class_names,
+    #     input_target_names = [0, 1]
+    #     explainer = interpreter.local_interpreter.local_explainer(input_df, target_names=input_target_names,
     #                                                 feature_names=input_feature_names)
     #     explainer = interpreter.local_interpreter.local_explainer()
     #     import pdb
