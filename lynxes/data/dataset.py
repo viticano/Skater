@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_distances
+import six
 
 from ..util.logger import build_logger
 from ..util import exceptions
@@ -133,7 +134,7 @@ class DataManager(object):
             raise(KeyError(err_msg))
 
         grid_range = [x * 100 for x in grid_range]
-        bins = np.linspace(*grid_range, num=grid_resolution)
+        bins = np.linspace(*grid_range, num=grid_resolution).tolist()
         grid = []
         for feature_id in feature_ids:
             data = self[feature_id]
@@ -262,10 +263,15 @@ class DataManager(object):
 
     def __getitem_ndarray__(self, i):
         """if you passed in a pandas dataframe, it has columns which are strings."""
-        if hasattr(i, '__iter__'):
+        if isinstance(i, (six.text_type, six.binary_type)) or StaticTypes.data_types.is_numeric(i):
+            idx = self.feature_ids.index(i)
+        elif hasattr(i, '__iter__'):
             idx = [self.feature_ids.index(j) for j in i]
         else:
-            idx = self.feature_ids.index(i)
+            raise(ValueError("Unrecongized index type: {}. This should not happen, "
+                             "submit a issue here: "
+                             "https://github.com/datascienceinc/model-interpretation/issues"
+                             .format(type(i))))
         return self.data[:, idx]
 
 
