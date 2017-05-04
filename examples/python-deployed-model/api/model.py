@@ -1,8 +1,10 @@
 from flask import Flask, jsonify, request
 from sklearn.externals import joblib
 import numpy as np
+import os
 
-estimator = joblib.load('../models/model.pkl')
+MODELPATH = '../models/model.pkl'
+TRAINPATH = '../bin/train.py'
 
 def json_to_model_input(request_body):
     json_ = request_body.json
@@ -23,5 +25,22 @@ def predict():
     prediction = estimator.predict(query)
     return jsonify({'predictions': list(prediction)})
 
+def train():
+    from sklearn.datasets import load_boston
+    from sklearn.linear_model import LinearRegression
+    from sklearn.externals import joblib
+
+    boston = load_boston()
+    X = boston.data
+    y = boston.target
+
+    model = LinearRegression()
+    model.fit(X, y)
+
+    joblib.dump(model, MODELPATH)
+
+
 if __name__ == '__main__':
-     app.run("0.0.0.0", debug=True)
+    if not os.path.exists(MODELPATH):
+        train()
+    app.run("0.0.0.0", debug=True)

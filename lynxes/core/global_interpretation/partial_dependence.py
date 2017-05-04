@@ -763,7 +763,6 @@ class PartialDependence(BaseGlobalInterpretation):
             # feature1 is index
             plot_data = pdp.set_index([feature1, feature2])[target_column].unstack()
             plot_data.plot(ax=ax, color=COLORS)
-            print(plot_data)
 
             if with_variance:
                 colors = cycle(COLORS)
@@ -830,8 +829,6 @@ class PartialDependence(BaseGlobalInterpretation):
                 .unstack().sort_index()
             sd = pdp.set_index([non_categorical_feature, categorical_feature])[sd_column]\
                 .unstack()
-            print('CURRENT INDEX')
-            print(plot_data.index.values)
 
             plot_data.plot(ax=ax, color=COLORS)
             if with_variance:
@@ -839,12 +836,6 @@ class PartialDependence(BaseGlobalInterpretation):
                 categorical_values = plot_data.columns.values
                 upper_plane = plot_data + sd
                 lower_plane = plot_data - sd
-                print('PLOT DATA')
-                print(plot_data)
-                print('UPPER PLANE')
-                print(upper_plane)
-                print('NON CATEGORICAL VALS')
-                print(non_categorical_values)
                 for categorical_value in categorical_values:
                     color = next(colors)
                     ax.fill_between(non_categorical_values, lower_plane[categorical_value].values, upper_plane[categorical_value].values, alpha=.2,
