@@ -1,5 +1,5 @@
 """DataSet object"""
-
+from __future__ import division
 import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_distances
@@ -8,7 +8,7 @@ import six
 from ..util.logger import build_logger
 from ..util import exceptions
 from ..util.static_types import StaticTypes
-from ..util.data import add_column_numpy_array
+from ..util.data import add_column_numpy_array, reconcile_bins_to_n_samples, flatten
 
 __all__ = ['DataManager']
 
@@ -383,12 +383,13 @@ class DataManager(object):
         """
         if method == 'random-choice':
             return self._generate_column_sample_random_choice(feature_id, n_samples=n_samples)
-        else:
-            raise(NotImplementedError("Currenly we only support random-choice for column \
-                                       level sampling "))
+        elif method == 'stratified':
+            return self._generate_column_sample_stratified(feature_id, n_samples=n_samples)
+        else: raise(NotImplementedError("Currenly we only support random-choice, stratified for "
+                                        "column level sampling, not {} ".format(method)))
 
     def _generate_column_sample_random_choice(self, feature_id, n_samples=None):
-        return np.random.choice(self.__getitem__(feature_id), size=n_samples)
+        return np.random.choice(self[feature_id], size=n_samples)
 
     def _generate_column_sample_stratified(self, feature_id, n_samples=None):
         """
@@ -397,7 +398,17 @@ class DataManager(object):
         :param n_samples:
         :return:
         """
-        pass
+        bin_count, samples_per_bin = reconcile_bins_to_n_samples(n_samples)
+        percentiles = [100 *(i / bin_count) for i in range(bin_count+1)]
+
+        bins = list(np.percentile(self[feature_id], percentiles))
+        sample_windows = [(bins[i], bins[i + 1]) for i in range(len(bins) - 1)]
+
+        samples = []
+        for window, n in zip(sample_windows, samples_per_bin):
+            samples.append(np.random.uniform(window[0], window[1], size=n).tolist())
+
+        return np.array(flatten(samples))
 
     def _generate_column_sample_modeled(self, feature_id, n_samples=None):
         pass

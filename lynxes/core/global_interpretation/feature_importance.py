@@ -85,7 +85,7 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         for feature_id in self.data_set.feature_ids:
             # collect perturbations
-            samples = self.data_set.generate_column_sample(feature_id, n_samples=n, method='random-choice')
+            samples = self.data_set.generate_column_sample(feature_id, n_samples=n, method='stratified')
             copy_of_data_set[feature_id] = samples
 
             # get size of perturbations
