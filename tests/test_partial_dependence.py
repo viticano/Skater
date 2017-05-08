@@ -83,7 +83,7 @@ class TestPartialDependence(unittest.TestCase):
         pdp_df = self.interpreter.partial_dependence.partial_dependence([self.features[0]],
                                                                        self.regressor_predict_fn,
                                                                        sample=True)
-        self.assertEquals(pdp_df.shape, (100, 3)) # default grid resolution is 100
+        self.assertEquals(pdp_df.shape, (30, 3)) # default grid resolution is 30
 
     def test_pd_with_categorical_features(self):
         interpreter = Interpretation(self.sample_x_categorical, feature_names=self.categorical_feature_names)
@@ -95,6 +95,7 @@ class TestPartialDependence(unittest.TestCase):
             interpreter.partial_dependence.plot_partial_dependence([self.categorical_feature_names], self.categorical_model)
         except:
             self.fail("PDP plotting function failed with categorical features")
+
 
 
     def test_partial_dependence_binary_classification(self):

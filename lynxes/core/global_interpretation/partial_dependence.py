@@ -7,6 +7,7 @@ from pathos.multiprocessing import Pool
 import functools
 from six.moves import copyreg as copy_reg
 
+from ...data import DataManager
 from .base import BaseGlobalInterpretation
 from ...model.model import ModelType
 from ...util import exceptions
@@ -24,7 +25,9 @@ from ...util.static_types import StaticTypes
 
 
 def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data, filter_classes=None):
-    """ Helper function to compute partial dependence for each grid value
+    """ Helper function to compute partial dependence for each grid value. This function is
+    designed to unbound/static to avoid issues when computing partial dendendences in
+    separate processes.
 
     Parameters:
     -----------
@@ -46,28 +49,30 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data, fil
     pd_dict(dict, shape={'sd': <>, 'val_1': <>, 'mean'} : containing estimated value on sample dataset
     """
 
-    # print "process id: {} parent process id {} \n".format(*[os.getpid(), os.getppid()])
-    feature_columns = pd_metadata['feature_columns']
-    feature_ids = pd_metadata['feature_ids']
-    target_columns = pd_metadata['target_columns']
-    data_columns = list(pd_metadata['data_feature_ids'])
-    # data_sample = pd.DataFrame(input_data, columns=data_columns)
-    data_sample = input_data.copy()
+    # column names for the target features in the partial dependence results
+    feature_columns = pd_metadata['feature_columns_for_pd']
+
+    # feature_ids for the target features in the partial dependence results
+    feature_ids = pd_metadata['feature_ids_for_pd']
+
+    # column names of the target classes in the partial dependence results
+    target_columns = pd_metadata['target_names']
+
+    # all of the feature_ids in the data set
+    all_feature_ids = list(pd_metadata['all_feature_ids'])
+
+    # values of the target features to set
     new_row = grid_expanded[index]
+    number_of_classes = len(target_columns)
 
-    if isinstance(data_sample, np.ndarray):
-        for feature_idx, feature_id in enumerate(feature_ids):
-            column_idx = data_columns.index(feature_id)
-            data_sample[:, column_idx] = new_row[feature_idx]
+    # create a copy so mutations dont have side effects, and using a
+    # datamanager for consistent __setitem__ calls.
+    data_set = DataManager(input_data.copy(), feature_names=all_feature_ids)
+    for feature_idx, feature_id in enumerate(feature_ids):
+        data_set[feature_id] = new_row[feature_idx]
 
-    elif isinstance(data_sample, pd.DataFrame):
-        for feature_idx, feature_id in enumerate(feature_ids):
-            data_sample[feature_id] = new_row[feature_idx]
-
-    else:
-        raise ValueError("Data Sample must be pandas dataframe or numpy array")
-
-    predictions = estimator_fn(data_sample)
+    #generate statistics for the new predictions
+    predictions = estimator_fn(data_set.data)
     mean_prediction = np.mean(predictions, axis=0)
     std_prediction = np.std(predictions, axis=0)
 
@@ -75,20 +80,16 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data, fil
         mean_prediction = np.array([mean_prediction])
         std_prediction = np.array([std_prediction])
 
-
-    number_of_classes = len(target_columns)
-    # assert number_of_classes == mean_prediction.shape[0], "Mismatch between prediction dimension" \
-    #                                                       "and number of class names" \
-    #                                                       "Prediction dimension: {} " \
-    #                                                       "n target_names: {}".format(*[mean_prediction.shape,
-    #                                                                                    number_of_classes])
-
     if filter_classes is not None:
         class_idx = [target_columns.index(i) for i in filter_classes]
         mean_prediction = mean_prediction[class_idx]
         target_columns = [target_columns[i] for i in class_idx]
         number_of_classes = len(filter_classes)
+
     pd_dict = {column: new_row[idx] for idx, column in enumerate(feature_columns)}
+
+    # if binary classification and user has not explicitly asked for 2 classes
+    # just return results for one class
     if number_of_classes == 2 and filter_classes is None:
         target_column = target_columns[1]
         pd_dict[target_column] = mean_prediction[1]
@@ -106,13 +107,8 @@ class PartialDependence(BaseGlobalInterpretation):
 
     __all__ = ['partial_dependence', 'plot_partial_dependence']
 
-    _pdp_metadata = {}
-    _predict_fn = None
-
-
     def _build_metadata_dict(self, modelinstance, pd_feature_ids, data_feature_ids, filter_classes):
 
-        #feature_columns = ['feature: {}'.format(i) for i in pd_feature_ids]
         feature_columns = [self.feature_column_name_formatter(i) for i in pd_feature_ids]
         sd_col = 'sd'
         if filter_classes is not None:
@@ -121,11 +117,11 @@ class PartialDependence(BaseGlobalInterpretation):
             filtered_target_names = None
         metadata = ControlledDict({
             'sd_column': sd_col,
-            'target_columns': modelinstance.target_names,
-            'filtered_target_columns': filtered_target_names,
-            'feature_columns': feature_columns,
-            'feature_ids': pd_feature_ids,
-            'data_feature_ids': data_feature_ids,
+            'target_names': modelinstance.target_names,
+            'filtered_target_names': filtered_target_names,
+            'feature_columns_for_pd': feature_columns,
+            'feature_ids_for_pd': pd_feature_ids,
+            'all_feature_ids': data_feature_ids,
         })
         metadata.block_setitem()
         return metadata
@@ -134,15 +130,34 @@ class PartialDependence(BaseGlobalInterpretation):
     def feature_column_name_formatter(columnname):
         return "{}".format(columnname)
 
+    def _check_features(self, feature_ids):
+        if not hasattr(feature_ids, "__iter__"):
+            feature_ids = [feature_ids]
+
+        if len(feature_ids) >= 3:
+            too_many_features_err_msg = "Pass in at most 2 features for pdp. If you have a " \
+                                        "use case where you'd like to look at 3 simultaneously" \
+                                        ", please let us know."
+            raise(exceptions.TooManyFeaturesError(too_many_features_err_msg))
+
+        if len(feature_ids) == 0:
+            empty_features_err_msg = "Feature ids must have non-zero length"
+            raise(exceptions.EmptyFeatureListError(empty_features_err_msg))
+
+        if len(set(feature_ids)) != len(feature_ids):
+            duplicate_features_error_msg = "feature_ids cannot contain duplicate values"
+            raise(exceptions.DuplicateFeaturesError(duplicate_features_error_msg))
+
+        return feature_ids
+
     def partial_dependence(self, feature_ids, modelinstance, filter_classes=None, grid=None,
-                           grid_resolution=None, n_jobs=-1, grid_range=None, sample=True,
+                           grid_resolution=30, n_jobs=-1, grid_range=None, sample=True,
                            sampling_strategy='random-choice', n_samples=500,
                            bin_count=50, samples_per_bin=10, return_metadata=False):
 
         """
-        Computes partial_dependence of a set of variables. Essentially approximates
-        the partial partial_dependence of the predict_fn with respect to the variables
-        passed.
+        Approximates the partial dependence of the predict_fn with respect to the
+        variables passed.
 
         Parameters:
         -----------
@@ -169,7 +184,7 @@ class PartialDependence(BaseGlobalInterpretation):
         grid_resolution: int
             how many unique values to include in the grid. If the percentile range
             is 5% to 95%, then that range will be cut into <grid_resolution>
-            equally size bins. Defaults to 100 for 1D and 30 for 2D.
+            equally size bins. Defaults to 30.
         n_jobs: int
             The number of CPUs to use to compute the PDs. -1 means 'all CPUs'.
             Defaults to using all cores(-1).
@@ -219,16 +234,13 @@ class PartialDependence(BaseGlobalInterpretation):
         >>> interpreter.partial_dependence.partial_dependence(features,model)
         """
 
+        if self.data_set is None:
+            load_data_not_called_err_msg = "self.interpreter.data_set not found. " \
+                                           "Please call Interpretation.load_data " \
+                                           "before running this method."
+            raise(exceptions.DataSetNotLoadedError(load_data_not_called_err_msg))
 
-
-        if not hasattr(feature_ids, "__iter__"):
-            feature_ids = [feature_ids]
-
-        if grid_resolution is None:
-            grid_resolution = 100 if len(feature_ids) == 1 else 30
-
-        #if not filter_classes:
-            #filter_classes = modelinstance.target_names
+        feature_ids = self._check_features(feature_ids)
 
         if filter_classes:
             assert all([i in modelinstance.target_names for i in filter_classes]), "members of filter classes must be" \
@@ -252,28 +264,6 @@ class PartialDependence(BaseGlobalInterpretation):
                                             'be None'))
             self.interpreter.logger.warn("Classifiers with probability scores can be explained more granularly than those"
                                          "without scores. If a prediction method with scores is available, use that instead.")
-
-
-
-        if len(feature_ids) >= 3:
-            too_many_features_err_msg = "Pass in at most 2 features for pdp. If you have a " \
-                                        "use case where you'd like to look at 3 simultaneously" \
-                                        ", please let us know."
-            raise(exceptions.TooManyFeaturesError(too_many_features_err_msg))
-
-        if len(feature_ids) == 0:
-            empty_features_err_msg = "Feature ids must have non-zero length"
-            raise(exceptions.EmptyFeatureListError(empty_features_err_msg))
-
-        if len(set(feature_ids)) != len(feature_ids):
-            duplicate_features_error_msg = "feature_ids cannot contain duplicate values"
-            raise(exceptions.DuplicateFeaturesError(duplicate_features_error_msg))
-
-        if self.data_set is None:
-            load_data_not_called_err_msg = "self.interpreter.data_set not found. " \
-                                           "Please call Interpretation.load_data " \
-                                           "before running this method."
-            raise(exceptions.DataSetNotLoadedError(load_data_not_called_err_msg))
 
         # TODO: This we can change easily to functional style
         missing_feature_ids = []
@@ -299,17 +289,17 @@ class PartialDependence(BaseGlobalInterpretation):
         # if you dont pass a grid, build one.
         grid = np.array(grid)
         if not grid.any():
-            # Currently, if a given feature only has two unique values
-            # then the grid will only include those two. Otherwise itll take the percentile
+            # Currently, if a given feature has fewer unique values than the value
+            # of grid resolution, then the grid will be set to those unique values.
+            # Otherwise it will take the percentile
             # range according with grid_resolution bins.
-            # sklearn however just returns the all unique values if the number of unique
-            # values is less then grid resolution.
-            # TODO: evaluate cases when len(unique(feature))==2
             grid = self.data_set.generate_grid(feature_ids,
                                                grid_resolution=grid_resolution,
                                                grid_range=grid_range)
         else:
-            if len(grid.shape) == 1 and not hasattr(grid[0], "__iter__"):
+            # want to ensure all grids have 2 axes
+            if len(grid.shape) == 1 and \
+                    (StaticTypes.data_types.is_string(grid[0]) or StaticTypes.data_types.is_numeric(grid[0])):
                 grid = grid[:, np.newaxis].T
                 grid_resolution = grid.shape[1]
 
@@ -326,14 +316,10 @@ class PartialDependence(BaseGlobalInterpretation):
                                                     samples_per_bin=samples_per_bin,
                                                     bin_count=bin_count)
 
-        self.interpreter.logger.debug("Shape of sampled data: {}".format(data_sample.shape))
-        # TODO: Add check for non-empty data
-
-        # make sure data_set module is giving us correct data structure
-        self._check_dataset_type(data_sample)
-
-        self.interpreter.logger.debug("Feature Ids: {}".format(feature_ids))
         _pdp_metadata = self._build_metadata_dict(modelinstance, feature_ids, self.data_set.feature_ids, filter_classes)
+
+        self.interpreter.logger.debug("Shape of sampled data: {}".format(data_sample.shape))
+        self.interpreter.logger.debug("Feature Ids: {}".format(feature_ids))
         self.interpreter.logger.debug("PD metadata: {}".format(_pdp_metadata))
 
         # cartesian product of grid
@@ -371,7 +357,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
 
     def plot_partial_dependence(self, feature_ids, modelinstance, filter_classes=None,
-                                grid=None, grid_resolution=None, grid_range=None,
+                                grid=None, grid_resolution=30, grid_range=None,
                                 n_jobs=-1, sample=True, sampling_strategy='random-choice',
                                 n_samples=10000, bin_count=50, samples_per_bin=10,
                                 with_variance=False, figsize=(16, 10)):
@@ -402,7 +388,7 @@ class PartialDependence(BaseGlobalInterpretation):
         grid_resolution: int
             how many unique values to include in the grid. If the percentile range
             is 5% to 95%, then that range will be cut into <grid_resolution>
-            equally size bins. Defaults to 100 for 1D and 30 for 2D.
+            equally size bins. Defaults to 30.
         grid_range: tuple
             the percentile extrama to consider. 2 element tuple, increasing, bounded
             between 0 and 1.
@@ -518,11 +504,11 @@ class PartialDependence(BaseGlobalInterpretation):
                           with_variance=False, plot_title=None,
                           disable_offset=True, figsize=(16, 10)):
 
-        feature_columns = pd_metadata['feature_columns']
-        if pd_metadata['filtered_target_columns'] is None:
-            target_columns = pd_metadata['target_columns']
+        feature_columns = pd_metadata['feature_columns_for_pd']
+        if pd_metadata['filtered_target_names'] is None:
+            target_columns = pd_metadata['target_names']
         else:
-            target_columns = pd_metadata['filtered_target_columns']
+            target_columns = pd_metadata['filtered_target_names']
         sd_col = pd_metadata['sd_column']
         n_features = len(feature_columns)
         if n_features == 1 or not hasattr(feature_columns, "__iter__"):
@@ -858,15 +844,19 @@ class PartialDependence(BaseGlobalInterpretation):
 
 
     @staticmethod
-    def _check_dataset_type(dataset):
+    def _check_dataset(dataset):
         """
-        Ensures that dataset is pandas dataframe
-        :param dataset:
+        Ensures that dataset is pandas dataframe, and dataset is not empty
+        :param dataset: lynxes.__datatypes__
         :return:
         """
         if not isinstance(dataset, (pd.DataFrame, np.ndarray)):
             err_msg = "Dataset.data must be a pandas.DataFrame or numpy.ndarray"
             raise(exceptions.DataSetError(err_msg))
+
+        if len(dataset) == 0:
+            err_msg = "Dataset.data is empty"
+            raise (exceptions.DataSetError(err_msg))
 
 
     @staticmethod

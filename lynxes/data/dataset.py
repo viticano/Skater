@@ -3,7 +3,6 @@ from __future__ import division
 import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_distances
-import six
 
 from ..util.logger import build_logger
 from ..util import exceptions
@@ -19,12 +18,14 @@ class DataManager(object):
     # Todo: we can probably remove some of the keys from data_info, and have properties
     # executed as pure functions for easy to access metadata, such as n_rows, etc
 
-    __n_rows__ = 'n_rows'
-    __dim__ = 'dim'
-    __feature_info__ = 'feature_info'
-    __dtypes__ = 'dtypes'
+    _n_rows = 'n_rows'
+    _dim = 'dim'
+    _feature_info = 'feature_info'
+    _dtypes = 'dtypes'
 
-    __attribute_keys__ = [__n_rows__, __dim__, __feature_info__, __dtypes__]
+    __attribute_keys__ = [_n_rows, _dim, _feature_info, _dtypes]
+    __datatypes__ = (pd.DataFrame, np.ndarray)
+
 
     def __init__(self, data, feature_names=None, index=None, log_level=30):
         """
@@ -47,7 +48,7 @@ class DataManager(object):
         self._log_level = log_level
         self.logger = build_logger(log_level, __name__)
 
-        if not isinstance(data, (np.ndarray, pd.DataFrame)):
+        if not isinstance(data, self.__datatypes__):
             err_msg = 'Invalid Data: expected data to be a numpy array or pandas dataframe but got ' \
                       '{}'.format(type(data))
             raise(exceptions.DataSetError(err_msg))
@@ -91,6 +92,7 @@ class DataManager(object):
                              "know!"))
 
         self.data_info = {attr: None for attr in self.__attribute_keys__}
+
 
     def generate_grid(self, feature_ids, grid_resolution=100, grid_range=(.05, .95)):
         """
@@ -152,20 +154,25 @@ class DataManager(object):
         self.logger.info('Generated grid of shape {}'.format(grid_shape))
         return grid
 
+
     def sync_metadata(self):
-        self.data_info[self.__n_rows__] = self._calculate_n_rows()
-        self.data_info[self.__dim__] = self._calculate_n_rows()
-        self.data_info[self.__dtypes__] = self._calculate_dtypes()
-        self.data_info[self.__feature_info__] = self._calculate_feature_info()
+        self.data_info[self._n_rows] = self._calculate_n_rows()
+        self.data_info[self._dim] = self._calculate_n_rows()
+        self.data_info[self._dtypes] = self._calculate_dtypes()
+        self.data_info[self._feature_info] = self._calculate_feature_info()
+
 
     def _calculate_n_rows(self):
         return self.data.shape[0]
 
+
     def _calculate_dim(self):
         return self.data.shape[1]
 
+
     def _calculate_dtypes(self):
         return pd.DataFrame(self.data, columns=self.feature_ids, index=self.index).dtypes
+
 
     def _calculate_feature_info(self):
         feature_info = {}
@@ -181,31 +188,33 @@ class DataManager(object):
 
     @property
     def n_rows(self):
-        if self.data_info[self.__n_rows__] is None:
-            self.data_info[self.__n_rows__] = self._calculate_n_rows()
-        return self.data_info[self.__n_rows__]
+        if self.data_info[self._n_rows] is None:
+            self.data_info[self._n_rows] = self._calculate_n_rows()
+        return self.data_info[self._n_rows]
+
 
     @property
     def dim(self):
-        if self.data_info[self.__dim__] is None:
-            self.data_info[self.__dim__] = self._calculate_dim()
-        return self.data_info[self.__dim__]
+        if self.data_info[self._dim] is None:
+            self.data_info[self._dim] = self._calculate_dim()
+        return self.data_info[self._dim]
+
 
     @property
     def dtypes(self):
-        if self.data_info[self.__dtypes__] is None:
-            self.data_info[self.__dtypes__] = self._calculate_dtypes()
-        return self.data_info[self.__dtypes__]
+        if self.data_info[self._dtypes] is None:
+            self.data_info[self._dtypes] = self._calculate_dtypes()
+        return self.data_info[self._dtypes]
+
 
     @property
     def feature_info(self):
-        if self.data_info[self.__feature_info__] is None:
-            self.data_info[self.__feature_info__] = self._calculate_feature_info()
-        return self.data_info[self.__feature_info__]
+        if self.data_info[self._feature_info] is None:
+            self.data_info[self._feature_info] = self._calculate_feature_info()
+        return self.data_info[self._feature_info]
 
 
     def _build_metastore(self, bin_count):
-
 
         medians = np.median(np.array(self.data), axis=0).reshape(1, self.dim)
 
@@ -232,6 +241,7 @@ class DataManager(object):
             'ranks_rounded': ranks_rounded
         }
 
+
     def __getitem__(self, key):
         if issubclass(self.data_type, pd.DataFrame):
             return self.__getitem_pandas__(key)
@@ -239,6 +249,7 @@ class DataManager(object):
             return self.__getitem_ndarray__(key)
         else:
             raise ValueError("Can't get item for data of type {}".format(self.data_type))
+
 
     def __setitem__(self, key, newval):
         if issubclass(self.data_type, pd.DataFrame):
@@ -249,6 +260,7 @@ class DataManager(object):
             raise ValueError("Can't set item for data of type {}".format(self.data_type))
         self.sync_metadata()
 
+
     def __getrows__(self, idx):
         if self.data_type == pd.DataFrame:
             return self.__getrows_pandas__(idx)
@@ -257,13 +269,15 @@ class DataManager(object):
         else:
             raise ValueError("Can't get rows for data of type {}".format(self.data_type))
 
+
     def __getitem_pandas__(self, i):
         """if you passed in a pandas dataframe, it has columns which are strings."""
         return self.data[i]
 
+
     def __getitem_ndarray__(self, i):
         """if you passed in a pandas dataframe, it has columns which are strings."""
-        if isinstance(i, (six.text_type, six.binary_type)) or StaticTypes.data_types.is_numeric(i):
+        if StaticTypes.data_types.is_string(i) or StaticTypes.data_types.is_numeric(i):
             idx = self.feature_ids.index(i)
         elif hasattr(i, '__iter__'):
             idx = [self.feature_ids.index(j) for j in i]
@@ -288,6 +302,7 @@ class DataManager(object):
         else:
             self.data = add_column_numpy_array(self.data, newval)
             self.feature_ids.append(i)
+
 
     def __getrows_pandas__(self, idx):
         """if you passed in a pandas dataframe, it has columns which are strings."""
@@ -360,8 +375,11 @@ class DataManager(object):
                     samples.extend(new_samples)
             if self.data_type == pd.DataFrame:
                 return pd.DataFrame(samples, columns=self.feature_ids)
-            else:
+            elif self.data_type == np.ndarray:
                 return np.array(samples)
+            else:
+                self.logger.warn("Type {} not in explictely supported. Returning sample as list")
+                return samples
 
     def generate_column_sample(self, feature_id, n_samples=None, method='random-choice'):
         """Sample a single feature from the data set.
@@ -394,9 +412,14 @@ class DataManager(object):
     def _generate_column_sample_stratified(self, feature_id, n_samples=None):
         """
         Tries to capture all relevant regions of space, relative to how many samples are allowed.
-        :param feature_id:
-        :param n_samples:
-        :return:
+        Parameters:
+        ----------
+        feature_id:
+        n_samples:
+
+        Returns:
+        ---------
+        samples
         """
         bin_count, samples_per_bin = reconcile_bins_to_n_samples(n_samples)
         percentiles = [100 *(i / bin_count) for i in range(bin_count+1)]
@@ -406,7 +429,7 @@ class DataManager(object):
 
         samples = []
         for window, n in zip(sample_windows, samples_per_bin):
-            samples.append(np.random.uniform(window[0], window[1], size=n).tolist())
+            samples.append(np.random.uniform(window[0], window[1], size=int(n)).tolist())
 
         return np.array(flatten(samples))
 

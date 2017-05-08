@@ -116,3 +116,10 @@ def distribute_samples(n_samples, n_bins):
         index_counter += space_size
 
     return samples_per_bin
+
+def divide_zerosafe( a, b ):
+    """ diving by zero returns 0 """
+    with np.errstate(divide='ignore', invalid='ignore'):
+        c = np.true_divide(a, b)
+        c[~np.isfinite(c)] = 0  # -inf inf NaN
+    return c

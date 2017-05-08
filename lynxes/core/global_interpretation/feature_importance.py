@@ -8,19 +8,13 @@ from .base import BaseGlobalInterpretation
 from ...util.plotting import COLORS
 from ...util.exceptions import *
 from ...model.model import ModelType
+from ...util.data import divide_zerosafe
 
 
 class FeatureImportance(BaseGlobalInterpretation):
-    """Contains methods for feature importance. Subclass of BaseGlobalInterpretation"""
+    """Contains methods for feature importance. Subclass of BaseGlobalInterpretation.
 
-    @staticmethod
-    def _build_fresh_metadata_dict():
-        return {
-            'pdp_cols': {},
-            'sd_col': '',
-            'val_cols': []
-        }
-
+    """
 
     def feature_importance(self, modelinstance, filter_classes=None):
 
@@ -43,9 +37,8 @@ class FeatureImportance(BaseGlobalInterpretation):
             >>> rf.fit(X,y)
 
 
-            >>> model = InMemoryModel(rf, examples = X)
-            >>> interpreter = Interpretation()
-            >>> interpreter.load_data(X)
+            >>> model = InMemoryModel(rf, examples=X)
+            >>> interpreter = Interpretation(X)
             >>> interpreter.feature_importance.feature_importance(model)
 
             Supports classification, multi-class classification, and regression.
@@ -74,33 +67,39 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         n = original_predictions.shape[0]
 
-        # instead of copying the whole dataset, should we copy a column, change column values,
-        # revert column back to copy?
-        copy_of_data_set = DataManager(self.data_set.data,
+        copy_of_data_set = DataManager(self.data_set.data.copy(),
                                        feature_names=self.data_set.feature_ids,
                                        index=self.data_set.index)
 
         for feature_id in self.data_set.feature_ids:
+
             # collect perturbations
             samples = self.data_set.generate_column_sample(feature_id, n_samples=n, method='stratified')
             copy_of_data_set[feature_id] = samples
 
-            # get size of perturbations
-            # feature_perturbations = self.data_set[feature_id] - copy_of_data_set[feature_id]
-
             # predict based on perturbed values
             new_predictions = predict_wrapper(modelinstance.predict(copy_of_data_set.data), filter_classes)
 
-            # evaluated entropy of scaled changes.
-            changes_in_predictions = new_predictions - original_predictions
-            importance = np.mean(np.std(changes_in_predictions, axis=0))
+            importance = self.compute_importance(new_predictions, original_predictions, self.data_set[feature_id], samples)
             importances[feature_id] = importance
 
             # reset copy
             copy_of_data_set[feature_id] = self.data_set[feature_id]
 
         importances = pd.Series(importances).sort_values()
-        importances = importances / importances.sum()
+
+        if not importances.sum() > 0:
+            self.interpreter.logger.debug("Importances that caused a bug: {}".format(importances))
+            raise(FeatureImportanceError("Something went wrong. Importances do not sum to a positive value"
+                                         "This could be due to:"
+                                         "1) 0 or infinite divisions"
+                                         "2) perturbed values == original values"
+                                         "3) feature is a constant"
+                                         ""
+                                         "Please submit an issue here:"
+                                         "https://github.com/datascienceinc/model-interpretation/issues"))
+
+        importances = divide_zerosafe(importances, (np.ones(importances.shape[0]) * importances.sum()))
         return importances
 
 
@@ -158,3 +157,37 @@ class FeatureImportance(BaseGlobalInterpretation):
         color = next(colors)
         importances.sort_values().plot(kind='barh', ax=ax, color=color)
         return f, ax
+
+
+    def compute_importance(self, new_predictions, original_predictions, original_x, perturbed_x,
+                           method='output-variance', scaled=False):
+        if method == 'output-variance':
+            importance = self._compute_importance_via_output_variance(np.array(new_predictions),
+                                                                      np.array(original_predictions),
+                                                                      np.array(original_x),
+                                                                      np.array(perturbed_x),
+                                                                      scaled)
+        else:
+            raise(KeyError("Unrecongized method for computing feature_importance: {}".format(method)))
+        return importance
+
+    def _compute_importance_via_output_variance(self, new_predictions, original_predictions,
+                                                original_x, perturbed_x, scaled=True):
+        """Mean absolute error of predictions given perturbations in a feature"""
+        changes_in_predictions = abs(new_predictions - original_predictions)
+
+        if scaled:
+            changes_in_predictions = self._importance_scaler(changes_in_predictions, original_x, perturbed_x)
+
+        importance = np.mean(changes_in_predictions, axis=0)
+        return importance
+
+    def _importance_scaler(self, values, original_x, perturbed_x):
+        raise(NotImplementedError("We currently don't support scaling, we are researching the best"
+                                  "approaches to do so."))
+        #diffs = abs(perturbed_x - original_x)
+        #if sum(diffs) == 0:
+        #    return values
+        #else:
+        #    return divide_zerosafe(values, diffs)
+

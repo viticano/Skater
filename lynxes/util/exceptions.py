@@ -18,6 +18,8 @@ DataSetNotLoadedError = exception_factory('DataSetNotLoadedError')
 
 PartialDependenceError = exception_factory('PartialDependenceError')
 
+FeatureImportanceError = exception_factory('FeatureImportanceError')
+
 DataSetError = exception_factory('DataSetError')
 
 ModelError = exception_factory("ModelError")
@@ -38,4 +40,5 @@ MalformedGridRangeError = exception_factory("MalformedGridRangeError",
                                             base_exception=PartialDependenceError)
 
 MatplotlibUnavailableError = exception_factory('MatplotlibUnavailableError', base_exception=ImportError)
+
 MatplotlibDisplayError = exception_factory('MatplotlibDisplayError', base_exception=RuntimeError)
