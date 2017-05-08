@@ -1,6 +1,4 @@
-# Reference: http://python-packaging.readthedocs.io/en/latest/dependencies.html
-from setuptools import setup, find_packages
-
+# Reference: http://python-packaging.readthedocs.io/en/latest/dependencies.htmlfrom setuptools import setup, find_packages
 
 __title__ = 'lynxes'
 __version__ = '1.0.0b'

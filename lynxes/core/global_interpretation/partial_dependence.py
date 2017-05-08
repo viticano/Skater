@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 from pathos.multiprocessing import Pool
 import functools
-from six.moves import copyreg as copy_reg
 
 from ...data import DataManager
 from .base import BaseGlobalInterpretation
@@ -71,7 +70,7 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data, fil
     for feature_idx, feature_id in enumerate(feature_ids):
         data_set[feature_id] = new_row[feature_idx]
 
-    #generate statistics for the new predictions
+    # generate statistics for the new predictions
     predictions = estimator_fn(data_set.data)
     mean_prediction = np.mean(predictions, axis=0)
     std_prediction = np.std(predictions, axis=0)
@@ -243,13 +242,14 @@ class PartialDependence(BaseGlobalInterpretation):
         feature_ids = self._check_features(feature_ids)
 
         if filter_classes:
-            assert all([i in modelinstance.target_names for i in filter_classes]), "members of filter classes must be" \
-                                                                                  "members of modelinstance.classes." \
-                                                                                  "Expected members of: " \
-                                                                                  "{0}\n" \
-                                                                                  "got: " \
-                                                                                  "{1}".format(modelinstance.target_names,
-                                                                                               filter_classes)
+            err_msg = "members of filter classes must be" \
+                      "members of modelinstance.classes." \
+                      "Expected members of: " \
+                      "{0}\n" \
+                      "got: " \
+                      "{1}".format(modelinstance.target_names,
+                                   filter_classes)
+            assert all([i in modelinstance.target_names for i in filter_classes]), err_msg
 
         # TODO: There might be a better place to do this check
         if not isinstance(modelinstance, ModelType):
@@ -262,8 +262,9 @@ class PartialDependence(BaseGlobalInterpretation):
             if modelinstance.unique_values is None:
                 raise(exceptions.ModelError('If using classifier without probability scores, unique_values cannot '
                                             'be None'))
-            self.interpreter.logger.warn("Classifiers with probability scores can be explained more granularly than those"
-                                         "without scores. If a prediction method with scores is available, use that instead.")
+            self.interpreter.logger.warn("Classifiers with probability scores can be explained "
+                                         "more granularly than those without scores. If a prediction method with "
+                                         "scores is available, use that instead.")
 
         # TODO: This we can change easily to functional style
         missing_feature_ids = []
@@ -342,7 +343,7 @@ class PartialDependence(BaseGlobalInterpretation):
         arg_list = [i for i in range(grid_expanded.shape[0])]
         executor_instance = Pool(n_jobs)
         try:
-           pd_list = executor_instance.map(pd_func, arg_list)
+            pd_list = executor_instance.map(pd_func, arg_list)
         except:
             self.interpreter.logger.debug("Multiprocessing failed, going single process")
             pd_list = map(pd_func, arg_list)
@@ -466,12 +467,11 @@ class PartialDependence(BaseGlobalInterpretation):
         except RuntimeError:
             raise (MatplotlibDisplayError("Matplotlib unable to open display"))
 
-
         # in the event that a user wants a 3D pdp with multiple classes, how should
         # we handle this? currently each class will get its own figure
         if not hasattr(feature_ids, "__iter__"):
             pd_df, metadata = self.partial_dependence(feature_ids, modelinstance,
-                                                      filter_classes=filter_classes,grid=grid,
+                                                      filter_classes=filter_classes, grid=grid,
                                                       grid_resolution=grid_resolution,
                                                       grid_range=grid_range, sample=sample,
                                                       sampling_strategy=sampling_strategy,
@@ -603,11 +603,11 @@ class PartialDependence(BaseGlobalInterpretation):
         if len(target_columns) == 2:
             target_columns = [target_columns[-1]]
 
-        feature_1_data = pdp[feature1].values
-        feature_2_data = pdp[feature2].values
+        feature_1_is_categorical = self.data_set.feature_info[feature1]['unique'] == 2 or \
+                                   not self.data_set.feature_info[feature1]['numeric']
 
-        feature_1_is_categorical = self.data_set.feature_info[feature1]['unique'] == 2 or not self.data_set.feature_info[feature1]['numeric']
-        feature_2_is_categorical = self.data_set.feature_info[feature2]['unique'] == 2 or not self.data_set.feature_info[feature2]['numeric']
+        feature_2_is_categorical = self.data_set.feature_info[feature2]['unique'] == 2 or \
+                                   not self.data_set.feature_info[feature2]['numeric']
 
         if not feature_1_is_categorical and not feature_2_is_categorical:
             self.interpreter.logger.debug("Neither feature is binary, so plotting 3D mesh")
@@ -622,12 +622,12 @@ class PartialDependence(BaseGlobalInterpretation):
         elif feature_1_is_categorical and feature_2_is_categorical:
             self.interpreter.logger.debug("Both features are binary, so plotting groups")
             plot_objects = self._plot_2d_2_categorical_features_bar(pdp,
-                                                                feature1,
-                                                                feature2,
-                                                                sd_column,
-                                                                target_columns,
-                                                                with_variance=with_variance,
-                                                                figsize=figsize)
+                                                                    feature1,
+                                                                    feature2,
+                                                                    sd_column,
+                                                                    target_columns,
+                                                                    with_variance=with_variance,
+                                                                    figsize=figsize)
         else:
             # one feature is binary and one isnt.
             categorical_feature, non_categorical_feature = {
@@ -711,8 +711,14 @@ class PartialDependence(BaseGlobalInterpretation):
         return flatten([figure_list, axis_list])
 
 
-    def _plot_3d_2_categorical_features(self, pdp, feature1, feature2, sd_column,
-                                  target_columns, with_variance=False, figsize=(16, 10)):
+    def _plot_3d_2_categorical_features(self,
+                                        pdp,
+                                        feature1,
+                                        feature2,
+                                        sd_column,
+                                        target_columns,
+                                        with_variance=False,
+                                        figsize=(16, 10)):
         # colors = cycle(COLORS)
         figure_list, axis_list = [], []
         for target_column in target_columns:
@@ -736,9 +742,14 @@ class PartialDependence(BaseGlobalInterpretation):
             ax.legend(handles, labels)
         return flatten([figure_list, axis_list])
 
-    def _plot_2d_2_categorical_features_lines(self, pdp, feature1, feature2, sd_col,
-                                  target_columns, with_variance=False,
-                                  figsize=(16, 10)):
+    def _plot_2d_2_categorical_features_lines(self,
+                                              pdp,
+                                              feature1,
+                                              feature2,
+                                              sd_col,
+                                              target_columns,
+                                              with_variance=False,
+                                              figsize=(16, 10)):
         figure_list, axis_list = [], []
 
         std_error = pdp.set_index([feature1, feature2])[sd_col].unstack()
@@ -768,17 +779,21 @@ class PartialDependence(BaseGlobalInterpretation):
 
         return flatten([figure_list, axis_list])
 
-    def _plot_2d_2_categorical_features_bar(self, pdp, feature1, feature2, sd_col,
-                                  target_columns, with_variance=False,
-                                  figsize=(16, 10)):
+    def _plot_2d_2_categorical_features_bar(self,
+                                            pdp,
+                                            feature1,
+                                            feature2,
+                                            sd_col,
+                                            target_columns,
+                                            with_variance=False,
+                                            figsize=(16, 10)):
         figure_list, axis_list = [], []
 
         std_error = pdp.set_index([feature1, feature2])[sd_col].unstack()
         for target_column in target_columns:
             f = pyplot.figure(figsize=figsize)
             ax = f.add_subplot(111)
-            # feature2 is columns
-            # feature1 is index
+            # feature2 is columns, feature1 is index
             plot_data = pdp.set_index([feature1, feature2])[target_column].unstack()
 
             if with_variance:
@@ -794,14 +809,15 @@ class PartialDependence(BaseGlobalInterpretation):
 
         return flatten([figure_list, axis_list])
 
+
     def _plot_2d_1_categorical_feature_and_1_continuous(self,
-                                                   pdp,
-                                                   categorical_feature,
-                                                   non_categorical_feature,
-                                                   sd_column,
-                                                   target_columns,
-                                                   with_variance=False,
-                                                   figsize=(16, 10)):
+                                                        pdp,
+                                                        categorical_feature,
+                                                        non_categorical_feature,
+                                                        sd_column,
+                                                        target_columns,
+                                                        with_variance=False,
+                                                        figsize=(16, 10)):
 
         figure_list, axis_list = [], []
 
@@ -818,14 +834,14 @@ class PartialDependence(BaseGlobalInterpretation):
 
             plot_data.plot(ax=ax, color=COLORS)
             if with_variance:
-                non_categorical_values = map(float,plot_data.index.values)
+                non_categorical_values = map(float, plot_data.index.values)
                 categorical_values = plot_data.columns.values
                 upper_plane = plot_data + sd
                 lower_plane = plot_data - sd
                 for categorical_value in categorical_values:
                     color = next(colors)
-                    ax.fill_between(non_categorical_values, lower_plane[categorical_value].values, upper_plane[categorical_value].values, alpha=.2,
-                                    color=color)
+                    ax.fill_between(non_categorical_values, lower_plane[categorical_value].values,
+                                    upper_plane[categorical_value].values, alpha=.2, color=color)
             ax.set_ylabel(target_column)
         return flatten([figure_list, axis_list])
 

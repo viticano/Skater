@@ -49,13 +49,13 @@ class FeatureImportance(BaseGlobalInterpretation):
         """
 
         if filter_classes:
-            assert all([i in modelinstance.target_names for i in filter_classes]), "members of filter classes must be" \
-                                                                                  "members of modelinstance.classes." \
-                                                                                  "Expected members of: " \
-                                                                                  "{0}\n" \
-                                                                                  "got: " \
-                                                                                  "{1}".format(modelinstance.target_names,
-                                                                                               filter_classes)
+            err_msg = "members of filter classes must be" \
+                      "members of modelinstance.classes." \
+                      "Expected members of: {0}\n" \
+                       "got: {1}".format(modelinstance.target_names,
+                                    filter_classes)
+            assert all([i in modelinstance.target_names for i in filter_classes]), err_msg
+
         def predict_wrapper(predictions, filter_classes):
             if filter_classes:
                 return ModelType._filter_outputs(predictions, modelinstance.target_names, filter_classes)
@@ -185,9 +185,9 @@ class FeatureImportance(BaseGlobalInterpretation):
     def _importance_scaler(self, values, original_x, perturbed_x):
         raise(NotImplementedError("We currently don't support scaling, we are researching the best"
                                   "approaches to do so."))
-        #diffs = abs(perturbed_x - original_x)
-        #if sum(diffs) == 0:
+        # diffs = abs(perturbed_x - original_x)
+        # if sum(diffs) == 0:
         #    return values
-        #else:
+        # else:
         #    return divide_zerosafe(values, diffs)
 
