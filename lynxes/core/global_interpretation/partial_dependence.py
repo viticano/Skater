@@ -603,11 +603,13 @@ class PartialDependence(BaseGlobalInterpretation):
         if len(target_columns) == 2:
             target_columns = [target_columns[-1]]
 
-        feature_1_is_categorical = self.data_set.feature_info[feature1]['unique'] == 2 or \
-                                   not self.data_set.feature_info[feature1]['numeric']
+        feature1_n_uniques = self.data_set.feature_info[feature1]['unique']
+        feature2_n_uniques = self.data_set.feature_info[feature2]['unique']
+        feature1_numeric = self.data_set.feature_info[feature1]['numeric']
+        feature2_numeric = self.data_set.feature_info[feature2]['numeric']
 
-        feature_2_is_categorical = self.data_set.feature_info[feature2]['unique'] == 2 or \
-                                   not self.data_set.feature_info[feature2]['numeric']
+        feature_1_is_categorical = (feature1_n_uniques == 2) or not feature1_numeric
+        feature_2_is_categorical = (feature2_n_uniques == 2) or not feature2_numeric
 
         if not feature_1_is_categorical and not feature_2_is_categorical:
             self.interpreter.logger.debug("Neither feature is binary, so plotting 3D mesh")

@@ -52,8 +52,8 @@ class FeatureImportance(BaseGlobalInterpretation):
             err_msg = "members of filter classes must be" \
                       "members of modelinstance.classes." \
                       "Expected members of: {0}\n" \
-                       "got: {1}".format(modelinstance.target_names,
-                                    filter_classes)
+                      "got: {1}".format(modelinstance.target_names,
+                                        filter_classes)
             assert all([i in modelinstance.target_names for i in filter_classes]), err_msg
 
         def predict_wrapper(predictions, filter_classes):
@@ -80,7 +80,10 @@ class FeatureImportance(BaseGlobalInterpretation):
             # predict based on perturbed values
             new_predictions = predict_wrapper(modelinstance.predict(copy_of_data_set.data), filter_classes)
 
-            importance = self.compute_importance(new_predictions, original_predictions, self.data_set[feature_id], samples)
+            importance = self.compute_importance(new_predictions,
+                                                 original_predictions,
+                                                 self.data_set[feature_id],
+                                                 samples)
             importances[feature_id] = importance
 
             # reset copy
@@ -185,9 +188,3 @@ class FeatureImportance(BaseGlobalInterpretation):
     def _importance_scaler(self, values, original_x, perturbed_x):
         raise(NotImplementedError("We currently don't support scaling, we are researching the best"
                                   "approaches to do so."))
-        # diffs = abs(perturbed_x - original_x)
-        # if sum(diffs) == 0:
-        #    return values
-        # else:
-        #    return divide_zerosafe(values, diffs)
-

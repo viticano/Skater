@@ -2,6 +2,7 @@
 import numpy as np
 import six
 
+
 class ModelTypes(object):
     """Stores values for model types and keywords"""
     regressor = 'regressor'
@@ -41,6 +42,7 @@ class DataTypes(object):
 
     numeric = 'numeric'
     nonnumeric = 'nonnumeric'
+
 
 class StaticTypes(object):
     """Stores values for model types, output types, and keywords"""

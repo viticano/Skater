@@ -2,8 +2,10 @@ from __future__ import division
 import numpy as np
 from sklearn.preprocessing import LabelBinarizer
 
+
 def flatten(array):
     return [item for sublist in array for item in sublist]
+
 
 class MultiColumnLabelBinarizer(LabelBinarizer):
     def __init__(self, neg_label=0, pos_label=1, sparse_output=False):
@@ -12,11 +14,13 @@ class MultiColumnLabelBinarizer(LabelBinarizer):
         self.sparse_output = sparse_output
         self.binarizers = []
 
+
     def fit(self, X):
         for x in X.T:
             binarizer = LabelBinarizer()
             binarizer.fit(x)
             self.binarizers.append(binarizer)
+
 
     def transform(self, X):
         results = []
@@ -24,9 +28,11 @@ class MultiColumnLabelBinarizer(LabelBinarizer):
             results.append(self.binarizers[i].transform(x))
         return np.concatenate(results, axis=1)
 
+
     def fit_transform(self, X):
         self.fit(X)
         return self.transform(X)
+
 
     def inverse_transform(self, X):
         results = []
@@ -117,7 +123,8 @@ def distribute_samples(n_samples, n_bins):
 
     return samples_per_bin
 
-def divide_zerosafe( a, b ):
+
+def divide_zerosafe(a, b):
     """ diving by zero returns 0 """
     with np.errstate(divide='ignore', invalid='ignore'):
         c = np.true_divide(a, b)

@@ -20,5 +20,3 @@ class ControlledDict(dict):
         if self.__readonly:
             raise(TypeError, "__delitem__ is not supported")
         return dict.__delitem__(self, key)
-
-

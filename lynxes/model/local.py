@@ -1,5 +1,6 @@
 """Model subclass for in memory predict functions"""
 
+from ..data import DataManager
 from .model import ModelType
 from ..util import exceptions
 
@@ -48,6 +49,7 @@ class InMemoryModel(ModelType):
 
     def predict_wrapper(data, modelinstance, filter_classes):
         return DataManager(modelinstance.predict(data), feature_names=modelinstance.target_names)[filter_classes]
+
 
     @staticmethod
     def _predict(data, predict_fn, formatter):

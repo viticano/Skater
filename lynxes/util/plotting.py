@@ -41,7 +41,6 @@ class ColorMap(object):
             global colors
             global cm
             from matplotlib import colors, cm
-
         except ImportError:
             raise (MatplotlibUnavailableError("Matplotlib is required but unavailable on your system."))
         except RuntimeError:
@@ -108,11 +107,8 @@ def coordinate_gradients_to_1d_colorscale(dx, dy,
 
     color = np.array(colorx) + np.array(colory)
     color[:, :, 3] = 1.
-    return color, \
-           xmin + xbuffer, \
-           xmax - xbuffer, \
-           ymin + ybuffer, \
-           ymax - ybuffer
+    xmin, xmax, ymin, ymax = xmin + xbuffer, xmax - xbuffer, ymin + ybuffer, ymax - ybuffer
+    return color, xmin, xmax, ymin, ymax
 
 
 def plot_2d_color_scale(x1_min, x1_max, x2_min, x2_max, plot_point=None,

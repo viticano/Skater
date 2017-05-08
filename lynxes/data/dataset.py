@@ -404,7 +404,8 @@ class DataManager(object):
             return self._generate_column_sample_random_choice(feature_id, n_samples=n_samples)
         elif method == 'stratified':
             return self._generate_column_sample_stratified(feature_id, n_samples=n_samples)
-        else: raise(NotImplementedError("Currenly we only support random-choice, stratified for "
+        else:
+            raise(NotImplementedError("Currenly we only support random-choice, stratified for "
                                         "column level sampling, not {} ".format(method)))
 
     def _generate_column_sample_random_choice(self, feature_id, n_samples=None):
@@ -423,7 +424,7 @@ class DataManager(object):
         samples
         """
         bin_count, samples_per_bin = reconcile_bins_to_n_samples(n_samples)
-        percentiles = [100 *(i / bin_count) for i in range(bin_count+1)]
+        percentiles = [100 *(i / bin_count) for i in range(bin_count + 1)]
 
         bins = list(np.percentile(self[feature_id], percentiles))
         sample_windows = [(bins[i], bins[i + 1]) for i in range(len(bins) - 1)]
