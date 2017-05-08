@@ -719,7 +719,9 @@ class PartialDependence(BaseGlobalInterpretation):
                                         target_columns,
                                         with_variance=False,
                                         figsize=(16, 10)):
-        # colors = cycle(COLORS)
+        """This method is not currently implemented, and is incomplete. If enabled,
+        we need to add handling for if with_variance.
+        """
         figure_list, axis_list = [], []
         for target_column in target_columns:
             fig = pyplot.figure(figsize=figsize)

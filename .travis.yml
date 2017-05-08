@@ -23,8 +23,8 @@ install:
 - python -c "import numpy"
 - python -c "import lime"
 script:
-- "flake8 lynxes"
-- ". run_test.sh"
+- python tests/all_tests.py
+- flake8 .
 branches:
   only:
   - master
