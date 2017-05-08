@@ -378,7 +378,8 @@ class DataManager(object):
             elif self.data_type == np.ndarray:
                 return np.array(samples)
             else:
-                self.logger.warn("Type {} not in explictely supported. Returning sample as list")
+                self.logger.warn("Type {} not in explictely supported. "
+                                 "Returning sample as list".format(self.data_type))
                 return samples
 
     def generate_column_sample(self, feature_id, n_samples=None, method='random-choice'):
