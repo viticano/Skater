@@ -8,12 +8,12 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn import datasets
 from functools import partial
 
-from lynxes.core.explanations import Interpretation
-from lynxes.util import exceptions
+from skater.core.explanations import Interpretation
+from skater.util import exceptions
 from arg_parser import create_parser
-from lynxes.model import InMemoryModel, DeployedModel
-from lynxes.util.data import MultiColumnLabelBinarizer
-from lynxes.core.global_interpretation.partial_dependence import PartialDependence
+from skater.model import InMemoryModel, DeployedModel
+from skater.util.arrayops import MultiColumnLabelBinarizer
+from skater.core.global_interpretation.partial_dependence import PartialDependence
 
 class TestPartialDependence(unittest.TestCase):
 
@@ -83,7 +83,7 @@ class TestPartialDependence(unittest.TestCase):
         pdp_df = self.interpreter.partial_dependence.partial_dependence([self.features[0]],
                                                                        self.regressor_predict_fn,
                                                                        sample=True)
-        self.assertEquals(pdp_df.shape, (100, 3)) # default grid resolution is 100
+        self.assertEquals(pdp_df.shape, (30, 3)) # default grid resolution is 30
 
     def test_pd_with_categorical_features(self):
         interpreter = Interpretation(self.sample_x_categorical, feature_names=self.categorical_feature_names)
@@ -95,6 +95,7 @@ class TestPartialDependence(unittest.TestCase):
             interpreter.partial_dependence.plot_partial_dependence([self.categorical_feature_names], self.categorical_model)
         except:
             self.fail("PDP plotting function failed with categorical features")
+
 
 
     def test_partial_dependence_binary_classification(self):

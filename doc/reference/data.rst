@@ -3,13 +3,13 @@ DataManagers
 
 Overview
 ---------------------------------------
-lynxes contains an abstraction for data, the DataManager. The DataManager
+skater contains an abstraction for data, the DataManager. The DataManager
 is initialized with some data, and optionally some feature names and indexes. One created, the
 DataManager offers a generate_samples method, which includes options for several sampling algorithms.
 Any and all updates for handling, accessing, manipulating, saving, and loading data will be
 handled by the DataManager to ensure isolation from the rest of the code base.
 
-Currently, lynxes supports numpy ndarrays and pandas dataframes, with plans on supporting
+Currently, skater supports numpy ndarrays and pandas dataframes, with plans on supporting
 sparse arrays in future versions.
 
 .. code-block:: python
@@ -24,7 +24,7 @@ sparse arrays in future versions.
    features = breast_cancer.feature_names
 
 
-   from lynxes.data import DataManager
+   from skater.data import DataManager
    data = DataManager(X, feature_names = features)
 
    data.generate_sample(n, strategy='random-choice')
@@ -35,13 +35,13 @@ sparse arrays in future versions.
 API
 ---------------------------------------
 
-.. automethod:: lynxes.data.DataManager.__init__
+.. automethod:: skater.data.DataManager.__init__
 
 
-.. automethod:: lynxes.data.DataManager.generate_sample
+.. automethod:: skater.data.DataManager.generate_sample
 
 
-.. automethod:: lynxes.data.DataManager.generate_grid
+.. automethod:: skater.data.DataManager.generate_grid
 
 
-.. automethod:: lynxes.data.DataManager.generate_column_sample
+.. automethod:: skater.data.DataManager.generate_column_sample

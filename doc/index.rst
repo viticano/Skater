@@ -1,6 +1,6 @@
 .. _contents:
 
-lynxes documentation!
+skater documentation!
 =======================================
 
 .. only:: html

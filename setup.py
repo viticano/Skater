@@ -18,7 +18,7 @@ def setup_package():
     root = os.path.abspath(os.path.dirname(__file__))
 
     with chdir(root):
-        with io.open(os.path.join(root, 'lynxes', 'about.py'), encoding='utf8') as f:
+        with io.open(os.path.join(root, 'skater', 'about.py'), encoding='utf8') as f:
             about = {}
             exec(f.read(), about)
 

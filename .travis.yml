@@ -12,7 +12,9 @@ before_script: # configure a headless display to test plot generation
 - "export DISPLAY=:99.0"
 - "sh -e /etc/init.d/xvfb start"
 - sleep 3 # give xvfb some time to start
-
+before_install:
+- pip install -U setuptools
+- pip install -U pip
 install:
 - pip install numpy
 - pip install scipy
@@ -23,8 +25,8 @@ install:
 - python -c "import numpy"
 - python -c "import lime"
 script:
-- "flake8 lynxes"
-- ". run_test.sh"
+- python tests/all_tests.py
+- flake8 skater
 branches:
   only:
   - master
