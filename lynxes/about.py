@@ -1,4 +1,4 @@
-# Reference: http://python-packaging.readthedocs.io/en/latest/dependencies.html
+# meant to define package metadata in one and only one place
 from setuptools import setup, find_packages
 
 
