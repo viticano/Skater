@@ -3,7 +3,7 @@
 API Reference
 ===========
 
-.. automodule:: skate
+.. automodule:: skater
    :members:
 
 

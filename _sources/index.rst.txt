@@ -1,6 +1,6 @@
 .. _contents:
 
-skate documentation!
+skater documentation!
 =======================================
 
 .. only:: html

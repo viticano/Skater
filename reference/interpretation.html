@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Interpretation Objects &mdash; skate 0 documentation</title>
+  <title>Interpretation Objects &mdash; skater 0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="skate 0 documentation" href="../index.html"/>
+    <link rel="top" title="skater 0 documentation" href="../index.html"/>
         <link rel="up" title="API Reference" href="../api.html"/>
         <link rel="next" title="Model Objects" href="model.html"/>
         <link rel="prev" title="API Reference" href="../api.html"/> 
@@ -57,7 +57,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> skate
+            <a href="../index.html" class="icon icon-home"> skater
           
 
           
@@ -128,7 +128,7 @@
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">skate</a>
+          <a href="../index.html">skater</a>
         
       </nav>
 
@@ -187,7 +187,7 @@
 <div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
 3
-4</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">skate</span> <span class="kn">import</span> <span class="n">Interpretation</span><span class="p">()</span>
+4</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">skater</span> <span class="kn">import</span> <span class="n">Interpretation</span><span class="p">()</span>
 <span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span>
 <span class="n">interpreter</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 <span class="n">interpreter</span><span class="o">.</span><span class="n">feature_importance</span><span class="o">.</span><span class="n">feature_importance</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
@@ -203,8 +203,8 @@ and observation names, as well as providing various sampling algorithms.</p>
 <p>Currently load_data requires a numpy ndarray or pandas DataFrame, though we may add support for additional data structures in the future.
 For more details on what the DataManager does, please see the relevant documentation [PROVIDE LINK].</p>
 <dl class="method">
-<dt id="skate.core.explanations.Interpretation.load_data">
-<code class="descclassname">Interpretation.</code><code class="descname">load_data</code><span class="sig-paren">(</span><em>training_data</em>, <em>feature_names=None</em>, <em>index=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skate/core/explanations.html#Interpretation.load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skate.core.explanations.Interpretation.load_data" title="Permalink to this definition">¶</a></dt>
+<dt id="skater.core.explanations.Interpretation.load_data">
+<code class="descclassname">Interpretation.</code><code class="descname">load_data</code><span class="sig-paren">(</span><em>training_data</em>, <em>feature_names=None</em>, <em>index=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/explanations.html#Interpretation.load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.explanations.Interpretation.load_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a DataSet object from inputs, ties to interpretation object.
 This will be exposed to all submodules.</p>
 <dl class="docutils">
@@ -229,25 +229,25 @@ In an ideal world there would exist some representation that would allow a human
 to interpret a decision function in any number of dimensions. Given that we generally can only
 intuit visualizations of a few dimensions at time, global interpretation algorithms either aggregate
 or subset the feature space.</p>
-<p>Currently, model agnostic global interpretation algorithms supported by skate include
+<p>Currently, model agnostic global interpretation algorithms supported by skater include
 partial dependence and feature importance.</p>
 <div class="section" id="feature-importance">
 <span id="interpretation-feature-importance"></span><h3>Feature Importance<a class="headerlink" href="#feature-importance" title="Permalink to this headline">¶</a></h3>
 <p>Feature importance is generic term for the degree to which a predictive model relies on a particular
-feature. skate feature importance implementation is based on an information theoretic criteria,
+feature. skater feature importance implementation is based on an information theoretic criteria,
 measuring the entropy in the change of predictions, given a perturbation of a given feature.
 The intuition is that the more a model&#8217;s decision criteria depend on a feature, the
 more we&#8217;ll see predictions change as a function of perturbing a feature.</p>
 <dl class="class">
-<dt id="skate.core.global_interpretation.feature_importance.FeatureImportance">
-<em class="property">class </em><code class="descclassname">skate.core.global_interpretation.feature_importance.</code><code class="descname">FeatureImportance</code><span class="sig-paren">(</span><em>interpreter</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skate/core/global_interpretation/feature_importance.html#FeatureImportance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skate.core.global_interpretation.feature_importance.FeatureImportance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Contains methods for feature importance. Subclass of BaseGlobalInterpretation</p>
+<dt id="skater.core.global_interpretation.feature_importance.FeatureImportance">
+<em class="property">class </em><code class="descclassname">skater.core.global_interpretation.feature_importance.</code><code class="descname">FeatureImportance</code><span class="sig-paren">(</span><em>interpreter</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/feature_importance.html#FeatureImportance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.feature_importance.FeatureImportance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains methods for feature importance. Subclass of BaseGlobalInterpretation.</p>
 <dl class="method">
-<dt id="skate.core.global_interpretation.feature_importance.FeatureImportance.feature_importance">
-<code class="descname">feature_importance</code><span class="sig-paren">(</span><em>modelinstance</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skate/core/global_interpretation/feature_importance.html#FeatureImportance.feature_importance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skate.core.global_interpretation.feature_importance.FeatureImportance.feature_importance" title="Permalink to this definition">¶</a></dt>
+<dt id="skater.core.global_interpretation.feature_importance.FeatureImportance.feature_importance">
+<code class="descname">feature_importance</code><span class="sig-paren">(</span><em>modelinstance</em>, <em>filter_classes=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/feature_importance.html#FeatureImportance.feature_importance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.feature_importance.FeatureImportance.feature_importance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes feature importance of all features related to a model instance.</p>
 <dl class="docutils">
-<dt>modelinstance: skate.model.model.Model subtype</dt>
+<dt>modelinstance: skater.model.model.Model subtype</dt>
 <dd><p class="first">the machine learning model &#8220;prediction&#8221; function to explain, such that
 predictions = predict_fn(data).</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -258,36 +258,37 @@ predictions = predict_fn(data).</p>
 </tr>
 </tbody>
 </table>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skate.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skate.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="k">import</span> <span class="n">RandomForestClassier</span>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="k">import</span> <span class="n">RandomForestClassifier</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span> <span class="o">=</span> <span class="n">RandomForestClassier</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">rf</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">rf</span><span class="p">,</span> <span class="n">examples</span><span class="o">=</span><span class="n">X</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">feature_importance</span><span class="o">.</span><span class="n">feature_importance</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="last">Supports classification, multi-class classification, and regression.</p>
 </dd>
+<dt>filter_classes: array type</dt>
+<dd>The classes for which we compute feature importance. Useful
+if interested in features&#8217; contributions to a subset of classes.
+Default None invokes all classes. Only used in classification models.</dd>
 </dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="skate.core.global_interpretation.feature_importance.FeatureImportance.plot_feature_importance">
-<code class="descname">plot_feature_importance</code><span class="sig-paren">(</span><em>predict_fn</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skate/core/global_interpretation/feature_importance.html#FeatureImportance.plot_feature_importance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skate.core.global_interpretation.feature_importance.FeatureImportance.plot_feature_importance" title="Permalink to this definition">¶</a></dt>
+<dt id="skater.core.global_interpretation.feature_importance.FeatureImportance.plot_feature_importance">
+<code class="descname">plot_feature_importance</code><span class="sig-paren">(</span><em>predict_fn</em>, <em>filter_classes=None</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/feature_importance.html#FeatureImportance.plot_feature_importance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.feature_importance.FeatureImportance.plot_feature_importance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes feature importance of all features related to a model instance,
 then plots the results.</p>
 <dl class="docutils">
-<dt>modelinstance: skate.model.model.Model subtype</dt>
+<dt>modelinstance: skater.model.model.Model subtype</dt>
 <dd><p class="first">the machine learning model &#8220;prediction&#8221; function to explain, such that
 predictions = predict_fn(data).</p>
 <p>For instance:
-&gt;&gt;&gt; from skate.model import InMemoryModel
-&gt;&gt;&gt; from skate.core.explanations import Interpretation
+&gt;&gt;&gt; from skater.model import InMemoryModel
+&gt;&gt;&gt; from skater.core.explanations import Interpretation
 &gt;&gt;&gt; from sklearn.ensemble import RandomForestClassier
 &gt;&gt;&gt; rf = RandomForestClassier()
 &gt;&gt;&gt; rf.fit(X,y)</p>
@@ -299,6 +300,9 @@ predictions = predict_fn(data).</p>
 </div>
 <p class="last">Supports classification, multi-class classification, and regression.</p>
 </dd>
+<dt>filter_classes: array type</dt>
+<dd>The classes to run partial dependence on. Default None invokes all classes.
+Only used in classification models.</dd>
 <dt>ax: matplotlib.axes._subplots.AxesSubplot</dt>
 <dd>existing subplot on which to plot feature importance. If none is provided,
 one will be created.</dd>
@@ -314,12 +318,12 @@ one will be created.</dd>
 other features in the model constant. The derivative of partial dependence describes the impact of a feature (analogous to a feature coefficient
 in a regression model).</p>
 <dl class="class">
-<dt id="skate.core.global_interpretation.partial_dependence.PartialDependence">
-<em class="property">class </em><code class="descclassname">skate.core.global_interpretation.partial_dependence.</code><code class="descname">PartialDependence</code><span class="sig-paren">(</span><em>interpreter</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skate/core/global_interpretation/partial_dependence.html#PartialDependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skate.core.global_interpretation.partial_dependence.PartialDependence" title="Permalink to this definition">¶</a></dt>
+<dt id="skater.core.global_interpretation.partial_dependence.PartialDependence">
+<em class="property">class </em><code class="descclassname">skater.core.global_interpretation.partial_dependence.</code><code class="descname">PartialDependence</code><span class="sig-paren">(</span><em>interpreter</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/partial_dependence.html#PartialDependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.partial_dependence.PartialDependence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Contains methods for partial dependence. Subclass of BaseGlobalInterpretation</p>
 <dl class="staticmethod">
-<dt id="skate.core.global_interpretation.partial_dependence.PartialDependence.compute_3d_gradients">
-<em class="property">static </em><code class="descname">compute_3d_gradients</code><span class="sig-paren">(</span><em>pdp</em>, <em>mean_col</em>, <em>feature_1</em>, <em>feature_2</em>, <em>scaled=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skate/core/global_interpretation/partial_dependence.html#PartialDependence.compute_3d_gradients"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skate.core.global_interpretation.partial_dependence.PartialDependence.compute_3d_gradients" title="Permalink to this definition">¶</a></dt>
+<dt id="skater.core.global_interpretation.partial_dependence.PartialDependence.compute_3d_gradients">
+<em class="property">static </em><code class="descname">compute_3d_gradients</code><span class="sig-paren">(</span><em>pdp</em>, <em>mean_col</em>, <em>feature_1</em>, <em>feature_2</em>, <em>scaled=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/partial_dependence.html#PartialDependence.compute_3d_gradients"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.compute_3d_gradients" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes component-wise gradients of pdp dataframe.</p>
 <dl class="docutils">
 <dt>pdp: pandas.DataFrame</dt>
@@ -337,11 +341,10 @@ in a regression model).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="skate.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence">
-<code class="descname">partial_dependence</code><span class="sig-paren">(</span><em>feature_ids</em>, <em>modelinstance</em>, <em>grid=None</em>, <em>grid_resolution=None</em>, <em>n_jobs=-1</em>, <em>grid_range=None</em>, <em>sample=True</em>, <em>sampling_strategy='random-choice'</em>, <em>n_samples=10000</em>, <em>bin_count=50</em>, <em>samples_per_bin=10</em>, <em>return_metadata=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skate/core/global_interpretation/partial_dependence.html#PartialDependence.partial_dependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skate.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes partial_dependence of a set of variables. Essentially approximates
-the partial partial_dependence of the predict_fn with respect to the variables
-passed.</p>
+<dt id="skater.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence">
+<code class="descname">partial_dependence</code><span class="sig-paren">(</span><em>feature_ids</em>, <em>modelinstance</em>, <em>filter_classes=None</em>, <em>grid=None</em>, <em>grid_resolution=30</em>, <em>n_jobs=-1</em>, <em>grid_range=None</em>, <em>sample=True</em>, <em>sampling_strategy='random-choice'</em>, <em>n_samples=500</em>, <em>bin_count=50</em>, <em>samples_per_bin=10</em>, <em>return_metadata=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/partial_dependence.html#PartialDependence.partial_dependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Approximates the partial dependence of the predict_fn with respect to the
+variables passed.</p>
 <dl class="docutils">
 <dt>feature_ids: list</dt>
 <dd>the names/ids of the features for which partial dependence is to be computed.
@@ -349,13 +352,16 @@ Note that the algorithm&#8217;s complexity scales exponentially with additional
 features, so generally one should only look at one or two features at a
 time. These feature ids must be available in the class&#8217;s associated DataSet.
 As of now, we only support looking at 1 or 2 features at a time.</dd>
-<dt>modelinstance: skate.model.model.Model subtype</dt>
+<dt>modelinstance: skater.model.model.Model subtype</dt>
 <dd><p class="first">an estimator function of a fitted model used to derive prediction. Supports
 classification and regression. Supports classification(binary, multi-class) and regression.
 predictions = predict_fn(data)</p>
-<p class="last">Can either by a skate.model.remote.DeployedModel or a
-skate.model.local.InMemoryModel</p>
+<p class="last">Can either by a skater.model.remote.DeployedModel or a
+skater.model.local.InMemoryModel</p>
 </dd>
+<dt>filter_classes: array type</dt>
+<dd>The classes to run partial dependence on. Default None invokes all classes.
+Only used in classification models.</dd>
 <dt>grid: numpy.ndarray</dt>
 <dd>2 dimensional array on which we fix values of features. Note this is
 determined automatically if not given based on the percentiles of the
@@ -363,7 +369,7 @@ dataset.</dd>
 <dt>grid_resolution: int</dt>
 <dd>how many unique values to include in the grid. If the percentile range
 is 5% to 95%, then that range will be cut into &lt;grid_resolution&gt;
-equally size bins. Defaults to 100 for 1D and 30 for 2D.</dd>
+equally size bins. Defaults to 30.</dd>
 <dt>n_jobs: int</dt>
 <dd>The number of CPUs to use to compute the PDs. -1 means &#8216;all CPUs&#8217;.
 Defaults to using all cores(-1).</dd>
@@ -400,8 +406,8 @@ total samples = bin_count * samples per bin.</dd>
 </tr>
 </tbody>
 </table>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skate.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skate.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="k">import</span> <span class="n">RandomForestClassier</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="k">import</span> <span class="n">load_boston</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">boston</span> <span class="o">=</span> <span class="n">load_boston</span><span class="p">()</span>
@@ -424,8 +430,8 @@ total samples = bin_count * samples per bin.</dd>
 </dd></dl>
 
 <dl class="method">
-<dt id="skate.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence">
-<code class="descname">plot_partial_dependence</code><span class="sig-paren">(</span><em>feature_ids</em>, <em>modelinstance</em>, <em>grid=None</em>, <em>grid_resolution=None</em>, <em>grid_range=None</em>, <em>n_jobs=-1</em>, <em>sample=True</em>, <em>sampling_strategy='random-choice'</em>, <em>n_samples=10000</em>, <em>bin_count=50</em>, <em>samples_per_bin=10</em>, <em>with_variance=False</em>, <em>figsize=(16</em>, <em>10)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skate/core/global_interpretation/partial_dependence.html#PartialDependence.plot_partial_dependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skate.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence" title="Permalink to this definition">¶</a></dt>
+<dt id="skater.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence">
+<code class="descname">plot_partial_dependence</code><span class="sig-paren">(</span><em>feature_ids</em>, <em>modelinstance</em>, <em>filter_classes=None</em>, <em>grid=None</em>, <em>grid_resolution=30</em>, <em>grid_range=None</em>, <em>n_jobs=-1</em>, <em>sample=True</em>, <em>sampling_strategy='random-choice'</em>, <em>n_samples=10000</em>, <em>bin_count=50</em>, <em>samples_per_bin=10</em>, <em>with_variance=False</em>, <em>figsize=(16</em>, <em>10)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/partial_dependence.html#PartialDependence.plot_partial_dependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes partial_dependence of a set of variables. Essentially approximates
 the partial partial_dependence of the predict_fn with respect to the variables
 passed.</p>
@@ -436,12 +442,12 @@ Note that the algorithm&#8217;s complexity scales exponentially with additional
 features, so generally one should only look at one or two features at a
 time. These feature ids must be available in the class&#8217;s associated DataSet.
 As of now, we only support looking at 1 or 2 features at a time.</dd>
-<dt>modelinstance: skate.model.model.Model subtype</dt>
+<dt>modelinstance: skater.model.model.Model subtype</dt>
 <dd><p class="first">an estimator function of a fitted model used to derive prediction. Supports
 classification and regression. Supports classification(binary, multi-class) and regression.
 predictions = predict_fn(data)</p>
-<p class="last">Can either by a skate.model.remote.DeployedModel or a
-skate.model.local.InMemoryModel</p>
+<p class="last">Can either by a skater.model.remote.DeployedModel or a
+skater.model.local.InMemoryModel</p>
 </dd>
 <dt>grid: numpy.ndarray</dt>
 <dd>2 dimensional array on which we fix values of features. Note this is
@@ -450,7 +456,7 @@ dataset.</dd>
 <dt>grid_resolution: int</dt>
 <dd>how many unique values to include in the grid. If the percentile range
 is 5% to 95%, then that range will be cut into &lt;grid_resolution&gt;
-equally size bins. Defaults to 100 for 1D and 30 for 2D.</dd>
+equally size bins. Defaults to 30.</dd>
 <dt>grid_range: tuple</dt>
 <dd>the percentile extrama to consider. 2 element tuple, increasing, bounded
 between 0 and 1.</dd>
@@ -495,12 +501,12 @@ plots for visibility. If you have a use case where you&#8217;d like error bars f
 <span class="gp">&gt;&gt;&gt; </span><span class="n">estimator</span> <span class="o">=</span> <span class="n">GradientBoostingRegressor</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
 <span class="gp">&gt;&gt;&gt; </span>                            <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s">&#39;huber&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skate.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s">&quot;Feature name: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">names</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="n">names</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s">&quot;Input feature name: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">names</span><span class="p">[</span><span class="mi">5</span><span class="p">]])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skate.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">plot_partial_dependence</span><span class="p">([</span><span class="n">names</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">names</span><span class="p">[</span><span class="mi">5</span><span class="p">]],</span> <span class="n">model</span><span class="p">,</span>
 <span class="gp">&gt;&gt;&gt; </span>                                                        <span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -521,8 +527,8 @@ surrogates around a point correspond to anchorLIME.</p>
 <div class="section" id="lime">
 <h3>LIME<a class="headerlink" href="#lime" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
-<dt id="skate.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer">
-<em class="property">class </em><code class="descclassname">skate.core.local_interpretation.lime.lime_tabular.</code><code class="descname">LimeTabularExplainer</code><span class="sig-paren">(</span><em>training_data</em>, <em>training_labels=None</em>, <em>feature_names=None</em>, <em>categorical_features=None</em>, <em>categorical_names=None</em>, <em>kernel_width=None</em>, <em>verbose=False</em>, <em>class_names=None</em>, <em>feature_selection='auto'</em>, <em>discretize_continuous=True</em>, <em>discretizer='quartile'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skate.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer" title="Permalink to this definition">¶</a></dt>
+<dt id="skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer">
+<em class="property">class </em><code class="descclassname">skater.core.local_interpretation.lime.lime_tabular.</code><code class="descname">LimeTabularExplainer</code><span class="sig-paren">(</span><em>training_data</em>, <em>training_labels=None</em>, <em>feature_names=None</em>, <em>categorical_features=None</em>, <em>categorical_names=None</em>, <em>kernel_width=None</em>, <em>verbose=False</em>, <em>class_names=None</em>, <em>feature_selection='auto'</em>, <em>discretize_continuous=True</em>, <em>discretizer='quartile'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Explains predictions on tabular (i.e. matrix) data.
 For numerical features, perturb them by sampling from a Normal(0,1) and
 doing the inverse operation of mean-centering and scaling, according to the
@@ -531,8 +537,8 @@ sampling according to the training distribution, and making a binary
 feature that is 1 when the value is the same as the instance being
 explained.</p>
 <dl class="method">
-<dt id="skate.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_instance">
-<code class="descname">explain_instance</code><span class="sig-paren">(</span><em>data_row</em>, <em>classifier_fn</em>, <em>labels=(1</em>, <em>)</em>, <em>top_labels=None</em>, <em>num_features=10</em>, <em>num_samples=5000</em>, <em>distance_metric='euclidean'</em>, <em>model_regressor=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer.explain_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skate.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_instance" title="Permalink to this definition">¶</a></dt>
+<dt id="skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_instance">
+<code class="descname">explain_instance</code><span class="sig-paren">(</span><em>data_row</em>, <em>classifier_fn</em>, <em>labels=(1</em>, <em>)</em>, <em>top_labels=None</em>, <em>num_features=10</em>, <em>num_samples=5000</em>, <em>distance_metric='euclidean'</em>, <em>model_regressor=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer.explain_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_instance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates explanations for a prediction.</p>
 <p>First, we generate neighborhood data by randomly perturbing features
 from the instance (see __data_inverse). We then learn locally weighted
@@ -557,35 +563,6 @@ model_regressor: sklearn regressor to use in explanation. Defaults
 to Ridge regression in LimeBase. Must have <a href="#id1"><span class="problematic" id="id2">model_regressor.coef_</span></a>
 and &#8216;sample_weight&#8217; as a parameter to model_regressor.fit()</p>
 </dd>
-<dt>Returns:</dt>
-<dd>An Explanation object (see explanation.py) with the corresponding
-explanations.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="skate.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_regressor_instance">
-<code class="descname">explain_regressor_instance</code><span class="sig-paren">(</span><em>data_row</em>, <em>predict_fn</em>, <em>num_features=10</em>, <em>num_samples=5000</em>, <em>distance_metric='euclidean'</em>, <em>model_regressor=None</em>, <em>testing=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer.explain_regressor_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skate.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_regressor_instance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates explanations for a prediction.
-First, we generate neighborhood data by randomly perturbing features
-from the instance (see __data_inverse). We then learn locally weighted
-linear models on this neighborhood data to explain changes in the prediction
-in an interpretable way (see lime_base.py).
-Args:</p>
-<blockquote>
-<div><p>data_row: 1d numpy array, corresponding to a row
-predict_fn: prediction function, which</p>
-<blockquote>
-<div>takes a numpy array and expected values.  For
-ScikitRegressors , this is classifier.predict.</div></blockquote>
-<p>num_features: maximum number of features present in explanation
-num_samples: size of the neighborhood to learn the linear model
-distance_metric: the distance metric to use for weights.
-model_regressor: sklearn regressor to use in explanation. Defaults
-to Ridge regression in LimeBase. Must have <a href="#id3"><span class="problematic" id="id4">model_regressor.coef_</span></a>
-and &#8216;sample_weight&#8217; as a parameter to model_regressor.fit()</p>
-</div></blockquote>
-<dl class="docutils">
 <dt>Returns:</dt>
 <dd>An Explanation object (see explanation.py) with the corresponding
 explanations.</dd>
