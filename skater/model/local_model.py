@@ -11,7 +11,8 @@ class InMemoryModel(ModelType):
     This model can be called directly from memory
     """
 
-    def __init__(self, prediction_fn, log_level=30, target_names=None, examples=None, unique_values=None):
+    def __init__(self, prediction_fn, log_level=30, target_names=None,
+                 examples=None, unique_values=None, input_formatter=None, output_formatter=None):
         """This model can be called directly from memory
 
         Parameters
@@ -38,7 +39,10 @@ class InMemoryModel(ModelType):
         self.prediction_fn = prediction_fn
         super(InMemoryModel, self).__init__(log_level=log_level,
                                             target_names=target_names,
-                                            examples=examples, unique_values=unique_values)
+                                            examples=examples,
+                                            unique_values=unique_values,
+                                            input_formatter=input_formatter,
+                                            output_formatter=output_formatter)
 
 
     def _execute(self, *args, **kwargs):

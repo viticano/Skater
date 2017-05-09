@@ -44,15 +44,17 @@ class DeployedModel(ModelType):
         self.request_kwargs = request_kwargs
         super(DeployedModel, self).__init__(examples=examples,
                                             target_names=target_names,
+                                            input_formatter=input_formatter,
+                                            output_formatter=output_formatter,
                                             log_level=log_level,
                                             feature_names=feature_names)
 
 
-    def _execute(self, *args, **kwargs):
+    def _execute(self, data):
         """
         Just use the function itself for predictions
         """
-        return requests.post(*args, **kwargs)
+        return requests.post(self.uri, json=data, **self.request_kwargs)
 
 
     @staticmethod
