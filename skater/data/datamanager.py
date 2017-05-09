@@ -7,7 +7,7 @@ from sklearn.metrics.pairwise import cosine_distances
 from ..util.logger import build_logger
 from ..util import exceptions
 from ..util.static_types import StaticTypes
-from ..util.arrayops import add_column_numpy_array, reconcile_bins_to_n_samples, flatten
+from ..util.dataops import add_column_numpy_array, allocate_samples_to_bins, flatten
 
 __all__ = ['DataManager']
 
@@ -411,7 +411,7 @@ class DataManager(object):
     def _generate_column_sample_random_choice(self, feature_id, n_samples=None):
         return np.random.choice(self[feature_id], size=n_samples)
 
-    def _generate_column_sample_stratified(self, feature_id, n_samples=None):
+    def _generate_column_sample_stratified(self, feature_id, n_samples=None, n_bins=100):
         """
         Tries to capture all relevant regions of space, relative to how many samples are allowed.
         Parameters:
@@ -423,7 +423,7 @@ class DataManager(object):
         ---------
         samples
         """
-        bin_count, samples_per_bin = reconcile_bins_to_n_samples(n_samples)
+        bin_count, samples_per_bin = allocate_samples_to_bins(n_samples, ideal_bin_count=n_bins)
         percentiles = [100 * (i / bin_count) for i in range(bin_count + 1)]
 
         bins = list(np.percentile(self[feature_id], percentiles))

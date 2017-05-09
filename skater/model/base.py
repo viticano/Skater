@@ -25,7 +25,8 @@ class ModelType(object):
     __metaclass__ = abc.ABCMeta
 
 
-    def __init__(self, log_level=30, target_names=None, examples=None, feature_names=None, unique_values=None):
+    def __init__(self, log_level=30, target_names=None, examples=None, feature_names=None, unique_values=None,
+                 input_formatter=None, output_formatter=None):
         """
         Base model class for wrapping prediction functions. Common methods
         involve output type inference in requiring predict methods
@@ -56,12 +57,14 @@ class ModelType(object):
         self.n_classes = StaticTypes.unknown
         self.input_shape = StaticTypes.unknown
         self.probability = StaticTypes.unknown
-        self.formatter = lambda x: x
+        self.transformer = self.identity_function
         self.label_encoder = LabelEncoder()
         self.one_hot_encoder = OneHotEncoder()
         self.target_names = target_names
         self.feature_names = feature_names
         self.unique_values = unique_values
+        self.input_formatter = input_formatter or self.identity_function
+        self.output_formatter = output_formatter or self.identity_function
 
         if examples is not None:
             self.input_type = type(examples)
@@ -72,11 +75,31 @@ class ModelType(object):
             self.logger.warn("No examples provided, cannot infer model type")
 
 
-    @abc.abstractmethod
     def predict(self, *args, **kwargs):
         """
         The way in which the submodule predicts values given an input
         """
+        return self.transformer(self.output_formatter(self._execute(self.input_formatter(*args, **kwargs))))
+
+
+    @abc.abstractmethod
+    def _execute(self, *args, **kwargs):
+        """
+        The way in which the submodule predicts values given an input
+        """
+        return
+
+
+    @abc.abstractmethod
+    def _predict(self, *args, **kwargs):
+        """
+        The way in which the submodule predicts values given an input
+        """
+        return
+
+    @abc.abstractmethod
+    def _get_static_predictor(self, *args, **kwargs):
+        """Return a static prediction function to avoid shared state in multiprocessing"""
         return
 
 
@@ -174,7 +197,7 @@ class ModelType(object):
             raise (exceptions.ModelError('If using classifier without probability scores, unique_values cannot '
                                          'be None'))
 
-        self.formatter = self.transformer_func_factory(outputs)
+        self.transformer = self.transformer_func_factory(outputs)
 
         reports = self.model_report(dataset.data)
         for report in reports:
@@ -276,3 +299,8 @@ class ModelType(object):
             return self.predict(data)
         else:
             return DataManager(self.predict(data), feature_names=self.target_names)[subset_of_classes]
+
+
+    @staticmethod
+    def identity_function(x):
+        return x

@@ -1,7 +1,8 @@
 """Model subclass for in memory predict functions"""
+from functools import partial
 
 from ..data import DataManager
-from .model import ModelType
+from .base import ModelType
 from ..util import exceptions
 
 
@@ -40,15 +41,15 @@ class InMemoryModel(ModelType):
                                             examples=examples, unique_values=unique_values)
 
 
-    def predict(self, *args, **kwargs):
+    def _execute(self, *args, **kwargs):
         """
         Just use the function itself for predictions
         """
-        return self.formatter(self.prediction_fn(*args, **kwargs))
+        return self.prediction_fn(*args, **kwargs)
 
 
     @staticmethod
-    def _predict(data, predict_fn, formatter):
+    def _predict(data, predict_fn, input_formatter, output_formatter, transformer=None):
         """Static prediction function for multiprocessing usecases
 
         Parameters
@@ -65,8 +66,21 @@ class InMemoryModel(ModelType):
         -----------
         predictions: arraytype
         """
-        results = predict_fn(data)
-        if formatter:
-            return formatter(results)
+        results = output_formatter(predict_fn(input_formatter(data)))
+        if transformer:
+            return transformer(results)
         else:
             return results
+
+    def _get_static_predictor(self):
+        transformer = self.transformer
+        input_formatter = self.input_formatter
+        output_formatter = self.output_formatter
+        prediction_fn = self.prediction_fn
+        predict_fn = partial(self._predict,
+                             transformer=transformer,
+                             predict_fn=prediction_fn,
+                             input_formatter=input_formatter,
+                             output_formatter=output_formatter,
+                             )
+        return predict_fn

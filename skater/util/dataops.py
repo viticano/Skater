@@ -81,7 +81,7 @@ def add_column_numpy_array(array, new_col):
         return result
 
 
-def reconcile_bins_to_n_samples(n_samples, ideal_bin_count=100):
+def allocate_samples_to_bins(n_samples, ideal_bin_count=100):
     """goal is as best as possible pick a number of bins
     and per bin samples to a achieve a given number
     of samples.
