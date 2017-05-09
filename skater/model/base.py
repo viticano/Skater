@@ -9,7 +9,6 @@ import pandas as pd
 from ..util.static_types import StaticTypes
 from ..util.logger import build_logger
 from ..util import exceptions
-from ..util.model import identity_function
 from ..data import DataManager
 
 
@@ -58,14 +57,14 @@ class ModelType(object):
         self.n_classes = StaticTypes.unknown
         self.input_shape = StaticTypes.unknown
         self.probability = StaticTypes.unknown
-        self.transformer = identity_function
+        self.transformer = self.identity_function
         self.label_encoder = LabelEncoder()
         self.one_hot_encoder = OneHotEncoder()
         self.target_names = target_names
         self.feature_names = feature_names
         self.unique_values = unique_values
-        self.input_formatter = input_formatter or identity_function
-        self.output_formatter = output_formatter or identity_function
+        self.input_formatter = input_formatter or self.identity_function
+        self.output_formatter = output_formatter or self.identity_function
 
         if examples is not None:
             self.input_type = type(examples)
@@ -92,10 +91,15 @@ class ModelType(object):
 
 
     @abc.abstractmethod
-    def _static_predict(self, *args, **kwargs):
+    def _predict(self, *args, **kwargs):
         """
         The way in which the submodule predicts values given an input
         """
+        return
+
+    @abc.abstractmethod
+    def _get_static_predictor(self, *args, **kwargs):
+        """Return a static prediction function to avoid shared state in multiprocessing"""
         return
 
 
@@ -193,7 +197,7 @@ class ModelType(object):
             raise (exceptions.ModelError('If using classifier without probability scores, unique_values cannot '
                                          'be None'))
 
-        self.formatter = self.transformer_func_factory(outputs)
+        self.transformer = self.transformer_func_factory(outputs)
 
         reports = self.model_report(dataset.data)
         for report in reports:
@@ -295,3 +299,8 @@ class ModelType(object):
             return self.predict(data)
         else:
             return DataManager(self.predict(data), feature_names=self.target_names)[subset_of_classes]
+
+
+    @staticmethod
+    def identity_function(x):
+        return x

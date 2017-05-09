@@ -39,12 +39,12 @@ def setup_package():
         install_requires=[
             'scikit-learn>=0.18',
             'pandas>=0.19',
-            'lime>=0.1.1.20',
+            'lime>=0.1.1.21',
             'requests',
             'pathos==0.2.0',
             'dill>=0.2.6'],
         extras_require ={'all':'matplotlib'},
-         dependency_links=['https://github.com/datascienceinc/lime/tarball/v1-release#egg=lime-0.1.1.20'],
+         dependency_links=['https://github.com/datascienceinc/lime/tarball/v1-release#egg=lime-0.1.1.21'],
         )
 
 if __name__ == '__main__':

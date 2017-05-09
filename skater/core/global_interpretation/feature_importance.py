@@ -7,8 +7,8 @@ from ...data import DataManager
 from .base import BaseGlobalInterpretation
 from ...util.plotting import COLORS
 from ...util.exceptions import *
-from ...model.model import ModelType
-from ...util.arrayops import divide_zerosafe
+from ...model.base import ModelType
+from ...util.dataops import divide_zerosafe
 
 
 class FeatureImportance(BaseGlobalInterpretation):
@@ -55,12 +55,6 @@ class FeatureImportance(BaseGlobalInterpretation):
                                         filter_classes)
             assert all([i in modelinstance.target_names for i in filter_classes]), err_msg
 
-        def predict_wrapper(predictions, filter_classes):
-            if filter_classes:
-                return ModelType._filter_outputs(predictions, modelinstance.target_names, filter_classes)
-            else:
-                return predictions
-
         importances = {}
         original_predictions = modelinstance.predict_subset_classes(self.data_set.data, filter_classes)
 
@@ -77,7 +71,7 @@ class FeatureImportance(BaseGlobalInterpretation):
             copy_of_data_set[feature_id] = samples
 
             # predict based on perturbed values
-            new_predictions = predict_wrapper(modelinstance.predict(copy_of_data_set.data), filter_classes)
+            new_predictions = modelinstance.predict_subset_classes(copy_of_data_set.data, filter_classes)
 
             importance = self.compute_importance(new_predictions,
                                                  original_predictions,

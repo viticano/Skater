@@ -8,10 +8,9 @@ import functools
 
 from ...data import DataManager
 from .base import BaseGlobalInterpretation
-from ...model.model import ModelType
+from ...model.base import ModelType
 from ...util import exceptions
-from ...util.data_structures import ControlledDict
-from ...util.model import get_predictor
+from ...util.user_defined_types import ControlledDict
 from ...util.kernels import flatten
 from ...util.plotting import COLORS, \
     coordinate_gradients_to_1d_colorscale, plot_2d_color_scale
@@ -332,7 +331,7 @@ class PartialDependence(BaseGlobalInterpretation):
                                           "grid shape: {}".format(grid_expanded.shape)
             raise(exceptions.MalformedGridError(empty_grid_expanded_err_msg))
 
-        predict_fn = get_predictor(modelinstance)
+        predict_fn = modelinstance._get_static_predictor()
 
         n_jobs = None if n_jobs < 0 else n_jobs
         pd_func = functools.partial(_compute_pd,

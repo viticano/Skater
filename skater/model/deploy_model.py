@@ -1,7 +1,9 @@
 "Subclass of Model for deployed models"
 import requests
 import numpy as np
-from .model import ModelType
+from functools import partial
+
+from .base import ModelType
 
 
 class DeployedModel(ModelType):
@@ -97,8 +99,20 @@ class DeployedModel(ModelType):
         query = input_formatter(data)
         response = requests.post(uri, json=query, **request_kwargs)
         results = output_formatter(response)
-        if formatter:
-            results = formatter(results)
+        if transformer:
+            results = transformer(results)
         return results
 
 
+    def _get_static_predictor(self):
+
+        uri = self.uri
+        input_formatter = self.input_formatter
+        output_formatter = self.output_formatter
+        transformer = self.transformer
+        predict_fn = partial(self._predict,
+                             uri=uri,
+                             input_formatter=input_formatter,
+                             output_formatter=output_formatter,
+                             transformer=transformer)
+        return predict_fn

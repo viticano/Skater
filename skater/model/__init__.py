@@ -5,7 +5,7 @@ and of converting data throughout. Once a prediction pipeline is defined, we use
 to define how to type inference.
 """
 
-from .local import InMemoryModel
-from .deploy import DeployedModel
+from .local_model import InMemoryModel
+from .deploy_model import DeployedModel
 
 __all__ = ['InMemoryModel', 'DeployedModel']

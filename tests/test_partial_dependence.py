@@ -12,7 +12,7 @@ from skater.core.explanations import Interpretation
 from skater.util import exceptions
 from arg_parser import create_parser
 from skater.model import InMemoryModel, DeployedModel
-from skater.util.arrayops import MultiColumnLabelBinarizer
+from skater.util.dataops import MultiColumnLabelBinarizer
 from skater.core.global_interpretation.partial_dependence import PartialDependence
 
 class TestPartialDependence(unittest.TestCase):
@@ -228,6 +228,9 @@ class TestPartialDependence(unittest.TestCase):
 
 
     def test_pdp_1d_classifier_no_proba(self):
+        self.interpreter.partial_dependence.partial_dependence(self.features[:1],
+                                                               self.classifier_predict_fn,
+                                                               grid_resolution=10)
         try:
             self.interpreter.partial_dependence.partial_dependence(self.features[:1],
                                                                    self.classifier_predict_fn,

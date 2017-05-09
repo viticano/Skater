@@ -1,4 +1,4 @@
-skate package
+skater package
 ===========
 
 Master: |Build Status-master|

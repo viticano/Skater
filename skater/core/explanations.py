@@ -1,10 +1,8 @@
 """Interpretation Class"""
 
 from .global_interpretation.partial_dependence import PartialDependence
-from .local_interpretation.local_interpreter import LocalInterpreter
 from .global_interpretation.feature_importance import FeatureImportance
-from ..data.dataset import DataManager
-from ..model.local import InMemoryModel
+from ..data import DataManager
 from ..util.logger import build_logger
 
 
@@ -52,7 +50,6 @@ class Interpretation(object):
         """
         self._log_level = log_level
         self.logger = build_logger(log_level, __name__)
-        self.local_interpreter = LocalInterpreter(self)
         self.partial_dependence = PartialDependence(self)
         self.feature_importance = FeatureImportance(self)
         self.data_set = None
@@ -91,31 +88,3 @@ class Interpretation(object):
         self.logger.info("Data loaded")
         self.logger.debug("Data shape: {}".format(self.data_set.data.shape))
         self.logger.debug("Dataset Feature_ids: {}".format(self.data_set.feature_ids))
-
-    def build_annotated_model(self, prediction_function, target_names=None, examples=None):
-        """
-        Returns a callable model that has annotations.
-        Uses examples from the Interpreter's dataset if available
-
-        Parameters
-        ----------
-        prediction_function: callable
-            function to generate predictions
-
-        examples: np.ndarray or pd.DataFrame
-            The examples to use when calling InMemoryModel.check_output_types(examples).
-
-
-        Returns
-        ----------
-        annotated_model: skater.model.InMemoryModel
-        """
-
-        if examples is None:
-            self.logger.warn('Model will not be annotated, no examples provided.')
-
-        annotated_model = InMemoryModel(prediction_function,
-                                        target_names=target_names,
-                                        examples=examples,
-                                        log_level=self._log_level)
-        return annotated_model
