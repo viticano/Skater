@@ -24,7 +24,7 @@ install:
 - python -c "import lime"
 script:
 - python tests/all_tests.py
-- flake8 lynxes
+- flake8 skater
 branches:
   only:
   - master

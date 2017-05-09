@@ -4,12 +4,12 @@ import numpy as np
 import pandas as pd
 from numpy.testing import assert_array_equal
 
-from lynxes.data import DataManager
+from skater.data import DataManager
 from arg_parser import arg_parse, create_parser
 
 class TestData(unittest.TestCase):
     """
-    Tests the lynxes.data.DataManager object
+    Tests the skater.data.DataManager object
     """
 
     def setUp(self):

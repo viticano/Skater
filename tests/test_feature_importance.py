@@ -9,10 +9,10 @@ from sklearn import datasets
 from functools import partial
 
 
-from lynxes.core.explanations import Interpretation
-from lynxes.util import exceptions
+from skater.core.explanations import Interpretation
+from skater.util import exceptions
 from arg_parser import create_parser
-from lynxes.model import InMemoryModel, DeployedModel
+from skater.model import InMemoryModel, DeployedModel
 
 class TestFeatureImportance(unittest.TestCase):
 
