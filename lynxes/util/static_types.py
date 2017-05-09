@@ -16,6 +16,7 @@ class OutputTypes(object):
     int = 'int'
     string = 'string'
     iterable = 'iterable'
+    numeric = 'numeric'
     unknown = 'unknown'
 
 
@@ -31,17 +32,16 @@ class DataTypes(object):
         except TypeError:
             return False
 
+
     @staticmethod
     def is_string(thing):
         return isinstance(thing, (six.text_type, six.binary_type))
+
 
     @staticmethod
     def is_dtype_numeric(dtype):
         assert isinstance(dtype, np.dtype), "expect numpy.dtype, got {}".format(type(dtype))
         return np.issubdtype(dtype, np.number)
-
-    numeric = 'numeric'
-    nonnumeric = 'nonnumeric'
 
 
 class StaticTypes(object):
@@ -55,12 +55,14 @@ class StaticTypes(object):
 
 def return_data_type(thing):
     """Returns an output type given a variable"""
-    if isinstance(thing, (str, unicode)):
+    if isinstance(thing, (six.text_type, six.binary_type)):
         return StaticTypes.output_types.string
     elif isinstance(thing, int):
         return StaticTypes.output_types.int
     elif isinstance(thing, float):
         return StaticTypes.output_types.float
+    elif DataTypes.is_numeric(thing):
+        return StaticTypes.output_types.numeric
     elif hasattr(thing, "__iter__"):
         return StaticTypes.output_types.iterable
     else:
