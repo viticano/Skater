@@ -46,6 +46,13 @@ class DeployedModel(ModelType):
                                             feature_names=feature_names)
 
 
+    def _execute(self, *args, **kwargs):
+        """
+        Just use the function itself for predictions
+        """
+        return requests.post(*args, **kwargs)
+
+
     @staticmethod
     def default_input_wrapper(data, key='input'):
         return {key: data.tolist()}
@@ -57,7 +64,7 @@ class DeployedModel(ModelType):
 
 
     @staticmethod
-    def _predict(data, uri, input_formatter, output_formatter, request_kwargs={}, formatter=None):
+    def _predict(data, uri, input_formatter, output_formatter, request_kwargs={}, transformer=None):
         """Static prediction function for multiprocessing usecases
 
         Parameters
@@ -95,27 +102,3 @@ class DeployedModel(ModelType):
         return results
 
 
-    def predict(self, data):
-        """Predict method for deployed models. Takes an array,
-        passes it through a formatter for the requests library,
-        which makes a request. The response is then passed to the
-        output formatter, which parses results into an array type.
-        Finally, the interal formatter (one hot encoding, etc),
-        formats the final results.
-
-        Parameters
-        ----------
-        data: array type
-
-        Returns
-        ----------
-        predictions: array type
-        """
-        return self._predict(data,
-                             uri=self.uri,
-                             input_formatter=self.input_formatter,
-                             output_formatter=self.output_formatter,
-                             formatter=self.formatter,
-                             request_kwargs=self.request_kwargs
-
-                             )

@@ -9,6 +9,7 @@ import pandas as pd
 from ..util.static_types import StaticTypes
 from ..util.logger import build_logger
 from ..util import exceptions
+from ..util.model import identity_function
 from ..data import DataManager
 
 
@@ -25,7 +26,8 @@ class ModelType(object):
     __metaclass__ = abc.ABCMeta
 
 
-    def __init__(self, log_level=30, target_names=None, examples=None, feature_names=None, unique_values=None):
+    def __init__(self, log_level=30, target_names=None, examples=None, feature_names=None, unique_values=None,
+                 input_formatter=None, output_formatter=None):
         """
         Base model class for wrapping prediction functions. Common methods
         involve output type inference in requiring predict methods
@@ -56,12 +58,14 @@ class ModelType(object):
         self.n_classes = StaticTypes.unknown
         self.input_shape = StaticTypes.unknown
         self.probability = StaticTypes.unknown
-        self.formatter = lambda x: x
+        self.transformer = identity_function
         self.label_encoder = LabelEncoder()
         self.one_hot_encoder = OneHotEncoder()
         self.target_names = target_names
         self.feature_names = feature_names
         self.unique_values = unique_values
+        self.input_formatter = input_formatter or identity_function
+        self.output_formatter = output_formatter or identity_function
 
         if examples is not None:
             self.input_type = type(examples)
@@ -72,8 +76,23 @@ class ModelType(object):
             self.logger.warn("No examples provided, cannot infer model type")
 
 
-    @abc.abstractmethod
     def predict(self, *args, **kwargs):
+        """
+        The way in which the submodule predicts values given an input
+        """
+        return self.transformer(self.output_formatter(self._execute(self.input_formatter(*args, **kwargs))))
+
+
+    @abc.abstractmethod
+    def _execute(self, *args, **kwargs):
+        """
+        The way in which the submodule predicts values given an input
+        """
+        return
+
+
+    @abc.abstractmethod
+    def _static_predict(self, *args, **kwargs):
         """
         The way in which the submodule predicts values given an input
         """
