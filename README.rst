@@ -1,6 +1,6 @@
 .. raw:: html
 
-    <a href="https://www.datascience.com/"><img src="https://cdn2.hubspot.net/hubfs/532045/Logos/DS_Skater%2BDataScience_Colored.svg" alt="Skater.png" height="300" align="middle"></a>
+    <img src="https://cdn2.hubspot.net/hubfs/532045/Logos/DS_Skater%2BDataScience_Colored.svg" alt="Skater.png" height="300" align="middle">
 
 
 Skater
