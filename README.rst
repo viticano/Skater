@@ -57,7 +57,7 @@ is recommended that you use a virtual environment (virtualenv, conda environment
 
 Usage
 ==============
-
+The code below illustrates a typical workflow with the Skater package.
 ::
 
     import numpy as np
