@@ -2,9 +2,9 @@
 .. raw:: html
 
     <div align="center">
-    <a href="www.datascience.com">
+    <a href="https://www.datascience.com">
     <img src ="https://cdn2.hubspot.net/hubfs/532045/Logos/DS_Skater%2BDataScience_Colored.svg" height="300" width="400"/>
-    </a>   
+    </a>
     </div>
 
 Skater
