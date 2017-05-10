@@ -1,6 +1,8 @@
 # skater
 ##### Master: ![Build Status-master](https://api.travis-ci.com/repositories/datascienceinc/model-interpretation.svg?token=okdWYn5kDgeoCPJZGPEz&branch=master)
 
+<a href="https://www.datascience.com/"><img src="https://cdn2.hubspot.net/hubfs/532045/DS_LogoHorizontal%20Colored.svg" width="125" height="125" align="right" /></a>
+
 <!--![layout](../master/skater.png?raw=true)
 =======
 -->
