@@ -1,14 +1,7 @@
 
-.. image:: https://cdn2.hubspot.net/hubfs/532045/Logos/DS_Skater%2BDataScience_Colored.svg
-   :target: www.datascience.com
-   :align: right
-   :height: 300px
-   :width: 400px
-
-
 .. raw:: html
 
-    <div style="text-align:center"><img src ="https://cdn2.hubspot.net/hubfs/532045/Logos/DS_Skater%2BDataScience_Colored.svg"/></div>
+    <div style="text-align:center"><img src ="https://cdn2.hubspot.net/hubfs/532045/Logos/DS_Skater%2BDataScience_Colored.svg" height="300" width="400"/></div>
 
 Skater
 ===========
