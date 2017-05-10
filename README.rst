@@ -37,30 +37,26 @@ Skater to learn about the models internal decision criteria.
 Master: |Build Status-master|
 '''''''''''''''''''''''''''''
 
-.. raw:: html
 
-   <!--![layout](../master/skate.png?raw=true)
-   =======
-   -->
+Install Skater
+----------------
 
-Dev Installation
+Dependencies
 ~~~~~~~~~~~~~~~~
+Skater relies on numpy, pandas, scikit-learn, and the DataScience.com fork of
+the LIME package. Plotting functionality requires matplotlib, though it is not
+required to install the package. Currently we only distribute to pypi, though
+adding a conda distribution is on the roadmap.
 
+pip
+~~~~~~~~~~~~~~~~
+[Note on whether we distribute sources/binaries]
+When using pip, to ensure your system is not modified by an installation, it
+is recommended that you use a virtual environment (virtualenv, conda environment).
 ::
 
-    git clone git@github.com:datascienceinc/skate.git
-    cd skate
-    sudo python setup.py install
+    pip install -U Skater
 
-Prod Installation (platform)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Requires that pip.conf is configured with pypi.datascience.com
-credentials.
-
-::
-
-    pip install skate
 
 Use this kind of this stuff to do cool stuff.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
