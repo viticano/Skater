@@ -1,7 +1,7 @@
 
 .. raw:: html
 
-    <div align="center"><img src ="https://cdn2.hubspot.net/hubfs/532045/Logos/DS_Skater%2BDataScience_Colored.svg" height="300" width="400"/></div>
+    <div align="center"><img src ="https://cdn2.hubspot.net/hubfs/532045/Logos/DS_Skater%2BDataScience_Colored.svg" height="300" width="400" target="www.datascience.com"/></div>
 
 Skater
 ===========
