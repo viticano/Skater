@@ -36,10 +36,10 @@ Skater to learn about the models internal decision criteria.
 
 
 Install Skater
-==============
+================
 
 Dependencies
-------------
+----------------
 Skater relies on numpy, pandas, scikit-learn, and the DataScience.com fork of
 the LIME package. Plotting functionality requires matplotlib, though it is not
 required to install the package. Currently we only distribute to pypi, though
@@ -47,9 +47,12 @@ adding a conda distribution is on the roadmap.
 
 pip
 ~~~~~~~~~~~~~~~~
-[Note on whether we distribute sources/binaries]
+
+TODO: Add a note on whether we distribute sources/binaries
+
 When using pip, to ensure your system is not modified by an installation, it
 is recommended that you use a virtual environment (virtualenv, conda environment).
+
 ::
 
     pip install -U Skater
@@ -58,6 +61,7 @@ is recommended that you use a virtual environment (virtualenv, conda environment
 Usage
 ==============
 The code below illustrates a typical workflow with the Skater package.
+
 ::
 
     import numpy as np
