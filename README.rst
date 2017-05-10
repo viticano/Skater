@@ -24,6 +24,8 @@ Skater to learn about the models internal decision criteria.
 =================== ===
 
 .. _Overview: https://datascienceinc.github.io/Skater/overview.html
+.. _Installing: https://datascienceinc.github.io/Skater/install.html
+.. _Tutorial: https://datascienceinc.github.io/Skater/tutorial.html
 .. _API Reference: https://datascienceinc.github.io/Skater/api.html
 
 
