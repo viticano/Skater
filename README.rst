@@ -26,14 +26,28 @@ Skater to learn about the models internal decision criteria.
 `Installing`_       How to install the Skater library
 `Tutorial`_         Steps to use Skater effectively.
 `API Reference`_    The detailed reference for Skater's API.
+`Contributing`_     Guide to contributing to the Skater project.
 =================== ===
 
 .. _Overview: https://datascienceinc.github.io/Skater/overview.html
 .. _Installing: https://datascienceinc.github.io/Skater/install.html
 .. _Tutorial: https://datascienceinc.github.io/Skater/tutorial.html
 .. _API Reference: https://datascienceinc.github.io/Skater/api.html
+.. _Contributing: https://github.com/datascienceinc/Skater/blob/readme/CONTRIBUTING.rst
 
+💬 Feedback/Questions
+==========================
 
+======================     ===
+**Feature Requests/Bugs**  `GitHub issue tracker`_
+**Usage questions**        `StackOverflow`_, `Gitter chat TODO`_, `Reddit TODO`_
+**General discussion**     `Gitter chat`_, `Reddit user group`_
+======================     ===
+
+.. _GitHub issue tracker: https://github.com/datascienceinc/Skater/issues
+.. _StackOverflow: http://stackoverflow.com/questions/tagged/skater
+.. _Gitter chat TODO: https://gitter.im/datascienceinc/skater
+.. _Reddit user group TODO: https://www.reddit.com/r/spacynlp
 
 Install Skater
 ================
