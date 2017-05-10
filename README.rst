@@ -116,11 +116,5 @@ Testing
 
     python skate/tests/all_tests.py --debug --n=1000 --dim=3 --seed=1
 
-API documentation
-~~~~~~~~~~~~~~~~~
-
-::
-
-    https://datascienceinc.github.io/model-interpretation/py-modindex.html
 
 .. |Build Status-master| image:: https://api.travis-ci.com/repositories/datascienceinc/Skater.svg?token=okdWYn5kDgeoCPJZGPEz&branch=master
