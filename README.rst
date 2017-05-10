@@ -38,11 +38,11 @@ Skater to learn about the models internal decision criteria.
 💬 Feedback/Questions
 ==========================
 
-======================     ===
+=========================  ===
 **Feature Requests/Bugs**  `GitHub issue tracker`_
 **Usage questions**        `StackOverflow`_, `Gitter chat TODO`_, `Reddit TODO`_
 **General discussion**     `Gitter chat`_, `Reddit user group`_
-======================     ===
+=========================  ===
 
 .. _GitHub issue tracker: https://github.com/datascienceinc/Skater/issues
 .. _StackOverflow: http://stackoverflow.com/questions/tagged/skater
