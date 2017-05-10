@@ -1,7 +1,7 @@
 
 .. image:: https://cdn2.hubspot.net/hubfs/532045/Logos/DS_Skater%2BDataScience_Colored.svg
    :target: www.datascience.com
-   :align: center
+   :align: right
    :height: 300px
    :width: 400px
 
