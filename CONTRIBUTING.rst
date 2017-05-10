@@ -33,7 +33,13 @@ We may augment this tag set as needed.
 
 Submitting a test
 -----------------
-TODO
+Tests are organized under the tests folder, with a unique python file for:
+
+- feature importance
+- partial dependence
+- lime
+- data manager
+- model object
 
 Contributing Code
 -----------------
