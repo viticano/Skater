@@ -1,7 +1,7 @@
 .. raw:: html
 
     <a href="https://www.datascience.com/"><img src="https://cdn2.hubspot.net/hubfs/532045/DS_LogoHorizontal%20Colored.svg" width="300" height="50" align="right" /></a>
-    
+
 Skater
 ===========
 Skater is a python package for model agnostic interpretation of predictive models.
@@ -18,6 +18,8 @@ Skater to learn about the models internal decision criteria.
 
 =================== ===
 `Overview`_         Introduction to the Skater library
+`Installing`_       How to install the Skater library
+`Tutorial`_         Steps to use Skater effectively.
 `API Reference`_    The detailed reference for Skater's API.
 =================== ===
 
