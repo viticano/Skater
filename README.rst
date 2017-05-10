@@ -55,8 +55,8 @@ is recommended that you use a virtual environment (virtualenv, conda environment
     pip install -U Skater
 
 
-Use this kind of this stuff to do cool stuff.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Usage
+==============
 
 ::
 
