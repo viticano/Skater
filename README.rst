@@ -34,9 +34,6 @@ Skater to learn about the models internal decision criteria.
 .. _API Reference: https://datascienceinc.github.io/Skater/api.html
 
 
-Master: |Build Status-master|
-'''''''''''''''''''''''''''''
-
 
 Install Skater
 ----------------
