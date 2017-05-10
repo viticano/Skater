@@ -40,7 +40,7 @@ Skater to learn about the models internal decision criteria.
 
 =========================  ===
 **Feature Requests/Bugs**  `GitHub issue tracker`_
-**Usage questions**        `StackOverflow`_, `Gitter chat TODO`_, `Reddit TODO`_
+**Usage questions**        `StackOverflow`_, `Gitter chat TODO`_, `Reddit user group TODO`_
 **General discussion**     `Gitter chat TODO`_, `Reddit user group TODO`_
 =========================  ===
 
