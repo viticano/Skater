@@ -18,6 +18,45 @@ on the documentation and codebase.
 
 Reporting a bug
 ---------------
+As with any github project, one should always begin addressing a bug by searching through existing issues.
+If an issue for the bug does not exist, please create one with the relevant tags:
+
+=================== ===
+Performance         Memory and speed related issues.
+Installation        Issues experienced attempting to install Skater.
+Plotting            Issues associated with Skater's plotting functionality.
+Enhancement         Request for a new feature, or augmentation of an existing feature.
+Bug                 Errors or unexpected behavior.
+=================== ===
+
+We may augment this tag set as needed.
+
+Submitting a test
+-----------------
+TODO
+
+Contributing Code
+-----------------
+TODO
+
+Code Conventions
+~~~~~~~~~~~~~~~~~~~~
+
+Contributor Agreement
+~~~~~~~~~~~~~~~~~~~~
+
+Changing the Documentation
+--------------------------
+TODO
+
+
+Submitting an Example
+---------------------
+TODO
+
+
+Submitting an Example
+---------------------
 
 
 .. |Build Status-master| image:: https://api.travis-ci.com/repositories/datascienceinc/Skater.svg?token=okdWYn5kDgeoCPJZGPEz&branch=master
