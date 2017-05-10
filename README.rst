@@ -1,5 +1,29 @@
-skater package
+.. raw:: html
+
+    <a href="https://www.datascience.com/"><img src="https://cdn2.hubspot.net/hubfs/532045/DS_LogoHorizontal%20Colored.svg" width="300" height="50" align="right" /></a>
+    
+Skater
 ===========
+Skater is a python package for model agnostic interpretation of predictive models.
+With Skater, you can unpack the internal mechanics of arbitrary models; as long
+as you can obtain inputs, and use a function to obtain outputs, you can use
+Skater to learn about the models internal decision criteria.
+
+.. image:: https://api.travis-ci.com/repositories/datascienceinc/Skater.svg?token=okdWYn5kDgeoCPJZGPEz&branch=master
+    :target: https://travis-ci.com/datascienceinc/Skater
+    :alt: Build Status
+
+📖 Documentation
+================
+
+=================== ===
+`Overview`_         Introduction to the Skater library
+`API Reference`_    The detailed reference for Skater's API.
+=================== ===
+
+.. _Overview: https://datascienceinc.github.io/Skater/overview.html
+.. _API Reference: https://datascienceinc.github.io/Skater/api.html
+
 
 Master: |Build Status-master|
 '''''''''''''''''''''''''''''
@@ -79,4 +103,4 @@ API documentation
 
     https://datascienceinc.github.io/model-interpretation/py-modindex.html
 
-.. |Build Status-master| image:: https://api.travis-ci.com/repositories/datascienceinc/model-interpretation.svg?token=okdWYn5kDgeoCPJZGPEz&branch=master
+.. |Build Status-master| image:: https://api.travis-ci.com/repositories/datascienceinc/Skater.svg?token=okdWYn5kDgeoCPJZGPEz&branch=master
