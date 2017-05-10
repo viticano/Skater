@@ -3,6 +3,10 @@
     <img src="https://cdn2.hubspot.net/hubfs/532045/Logos/DS_Skater%2BDataScience_Colored.svg" alt="Skater.png" height="300" align="middle">
 
 
+.. image:: https://cdn2.hubspot.net/hubfs/532045/Logos/DS_Skater%2BDataScience_Colored.svg
+   :target: www.datascience.com
+
+
 Skater
 ===========
 Skater is a python package for model agnostic interpretation of predictive models.
