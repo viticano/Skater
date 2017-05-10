@@ -39,7 +39,7 @@ Install Skater
 ================
 
 Dependencies
-----------------
+~~~~~~~~~~~~~~~~
 Skater relies on numpy, pandas, scikit-learn, and the DataScience.com fork of
 the LIME package. Plotting functionality requires matplotlib, though it is not
 required to install the package. Currently we only distribute to pypi, though
