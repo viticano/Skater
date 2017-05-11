@@ -18,7 +18,7 @@ on the documentation and codebase.
 
 Reporting a bug
 ---------------
-As with any github project, one should always begin addressing a bug by searching through existing issues.
+As with any GitHub project, one should always begin addressing a bug by searching through existing issues.
 If an issue for the bug does not exist, please create one with the relevant tags:
 
 =================== ===
@@ -36,11 +36,11 @@ Submitting a test
 Currently there are 4 test files:
 
 ============================ ===
-test_feature_importance.py   Feature Importance
-test_partial_dependence.py   Partial Dependence
-test_lime.py                 Tests of LIME functionality
-test_data.py                 DataManager
-============================ ====
+Feature Importance           test_feature_importance.py
+Partial Dependence           test_partial_dependence.py
+Tests of LIME functionality  test_lime.py
+DataManager                  test_data.py
+============================ ===
 
 New tests should be added to relevant test file. If no current file covers
 the feature, please add a new file with the following structure:
