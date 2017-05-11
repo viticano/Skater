@@ -46,6 +46,7 @@ New tests should be added to relevant test file. If no current file covers
 the feature, please add a new file with the following structure:
 
 ::
+
     class MyNewTestClass(unittest.TestCase):
         def setUp(self):
             create objects and data
