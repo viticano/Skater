@@ -284,7 +284,7 @@ class DataManager(object):
         else:
             raise(ValueError("Unrecongized index type: {}. This should not happen, "
                              "submit a issue here: "
-                             "https://github.com/datascienceinc/model-interpretation/issues"
+                             "https://github.com/datascienceinc/Skater/issues"
                              .format(type(i))))
         return self.data[:, idx]
 

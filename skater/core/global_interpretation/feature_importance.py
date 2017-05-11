@@ -93,7 +93,7 @@ class FeatureImportance(BaseGlobalInterpretation):
                                          "3) feature is a constant"
                                          ""
                                          "Please submit an issue here:"
-                                         "https://github.com/datascienceinc/model-interpretation/issues"))
+                                         "https://github.com/datascienceinc/Skater/issues"))
 
         importances = divide_zerosafe(importances, (np.ones(importances.shape[0]) * importances.sum()))
         return importances
@@ -122,7 +122,7 @@ class FeatureImportance(BaseGlobalInterpretation):
             >>> model = InMemoryModel(rf, examples = X)
             >>> interpreter = Interpretation()
             >>> interpreter.load_data(X)
-            >>> interpreter.feature_importance.feature_importance(model)
+            >>> interpreter.feature_importance.plot_feature_importance(model)
 
             Supports classification, multi-class classification, and regression.
 
