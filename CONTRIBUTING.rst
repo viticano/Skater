@@ -35,12 +35,12 @@ Submitting a test
 -----------------
 Currently there are 4 test files:
 
-========================== ===
-test_feature_importance.py Feature Importance
-test_partial_dependence.py Partial Dependence
-test_lime.py               Tests of LIME functionality
-test_data.py               DataManager
-========================== ====
+============================ ===
+test_feature_importance.py   Feature Importance
+test_partial_dependence.py   Partial Dependence
+test_lime.py                 Tests of LIME functionality
+test_data.py                 DataManager
+============================ ====
 
 New tests should be added to relevant test file. If no current file covers
 the feature, please add a new file with the following structure:
