@@ -6,6 +6,6 @@ to define how to type inference.
 """
 
 from .local_model import InMemoryModel
-from .deploy_model import DeployedModel
+from .deployed_model import DeployedModel
 
 __all__ = ['InMemoryModel', 'DeployedModel']
