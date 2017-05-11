@@ -33,36 +33,61 @@ We may augment this tag set as needed.
 
 Submitting a test
 -----------------
-Tests are organized under the tests folder, with a unique python file for:
+Currently there are 4 test files:
 
-- feature importance
-- partial dependence
-- lime
-- data manager
-- model object
+========================== ===
+test_feature_importance.py Feature Importance
+test_partial_dependence.py Partial Dependence
+test_lime.py               Tests of LIME functionality
+test_data.py               DataManager
+========================== ====
+
+New tests should be added to relevant test file. If no current file covers
+the feature, please add a new file with the following structure:
+
+::
+    class MyNewTestClass(unittest.TestCase):
+        def setUp(self):
+            create objects and data
+
+        def test_function_1(self):
+            ...
+        def test_function_2(self):
+            ...
+    if __name__ == '__main__':
+        runner = unittest.TextTestRunner(verbosity=2)
+        runner.run(unittest.makeSuite(TestData))
+
 
 Contributing Code
 -----------------
-TODO
+Skater is distributed under an MIT license. By submitting a pull request for this project,
+you agree to license your contribution under the MIT license to this project as well.
 
-Code Conventions
+Style
 ~~~~~~~~~~~~~~~~~~~~
+Stylistically, contributions should follow PEP8, with the exception that methods
+are separated by 2 lines instead of 1.
 
-Contributor Agreement
+
+Pull Requests
 ~~~~~~~~~~~~~~~~~~~~
-
-Changing the Documentation
---------------------------
-TODO
+Before a PR is accepted, travis builds must pass on all environments, and flake8
+tests must all pass.
 
 
-Submitting an Example
----------------------
-TODO
+Dependencies
+~~~~~~~~~~~~~~~~~~~~
+Every additional package dependency adds a potential installation complexity,
+so only dependencies that are critical to the package should be added to the
+code base. PRs that involve the addition of a new dependency will be evaluated
+by the following criteria:
 
+- Is the application of the dependency isolated, such that removing it is trivial, or
+  will it be deeply integrated into the package.
+- Does the dependency have known installation issues on common platforms?
+- Does the application using the dependency need to be in the Skater package?
 
-Submitting an Example
----------------------
 
 
 .. |Build Status-master| image:: https://api.travis-ci.com/repositories/datascienceinc/Skater.svg?token=okdWYn5kDgeoCPJZGPEz&branch=master
