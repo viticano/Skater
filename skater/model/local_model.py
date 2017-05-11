@@ -1,7 +1,6 @@
 """Model subclass for in memory predict functions"""
 from functools import partial
 
-from ..data import DataManager
 from .base import ModelType
 from ..util import exceptions
 
