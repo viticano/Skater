@@ -175,7 +175,7 @@ class FeatureImportance(BaseGlobalInterpretation):
         if scaled:
             changes_in_predictions = self._importance_scaler(changes_in_predictions, original_x, perturbed_x)
 
-        importance = np.mean(changes_in_predictions, axis=0)
+        importance = np.mean(changes_in_predictions)
         return importance
 
     def _importance_scaler(self, values, original_x, perturbed_x):

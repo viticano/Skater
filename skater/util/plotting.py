@@ -174,6 +174,7 @@ def plot_2d_color_scale(x1_min, x1_max, x2_min, x2_max, plot_point=None,
     if plot_point:
         ax.scatter([plot_point[0]], [plot_point[1]], s=75.,
                    color='yellow', alpha=1, zorder=2)
+    ax.grid()
     return ax
 
 
