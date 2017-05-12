@@ -15,6 +15,7 @@ from skater.model import InMemoryModel, DeployedModel
 from skater.util.dataops import MultiColumnLabelBinarizer
 from skater.core.global_interpretation.partial_dependence import PartialDependence
 
+
 class TestPartialDependence(unittest.TestCase):
 
     def setUp(self):
@@ -49,7 +50,7 @@ class TestPartialDependence(unittest.TestCase):
         if debug:
             self.interpreter = Interpretation(log_level='DEBUG')
         else:
-            self.interpreter = Interpretation() # default level is 'WARNING'
+            self.interpreter = Interpretation()  # default level is 'WARNING'
         self.interpreter.load_data(self.X, feature_names=self.features)
 
         self.regressor = LinearRegression()
@@ -68,7 +69,7 @@ class TestPartialDependence(unittest.TestCase):
 
         # Yet another set of input!!
         self.sample_x_categorical = np.array([['B', -1], ['A', -1], ['A', -2], ['C', 1], ['C', 2], ['A', 1]])
-        self.sample_y_categorical = np.array(['A','A','A','B','B','B'])
+        self.sample_y_categorical = np.array(['A', 'A', 'A', 'B', 'B', 'B'])
         self.categorical_feature_names = ['Letters','Numbers']
         self.categorical_transformer = MultiColumnLabelBinarizer()
         self.categorical_transformer.fit(self.sample_x_categorical)
@@ -81,9 +82,9 @@ class TestPartialDependence(unittest.TestCase):
 
     def test_pdp_with_default_sampling(self):
         pdp_df = self.interpreter.partial_dependence.partial_dependence([self.features[0]],
-                                                                       self.regressor_predict_fn,
-                                                                       sample=True)
-        self.assertEquals(pdp_df.shape, (30, 3)) # default grid resolution is 30
+                                                                        self.regressor_predict_fn,
+                                                                        sample=True)
+        self.assertEquals(pdp_df.shape, (30, 3))  # default grid resolution is 30
 
     def test_pd_with_categorical_features(self):
         interpreter = Interpretation(self.sample_x_categorical, feature_names=self.categorical_feature_names)
@@ -111,8 +112,10 @@ class TestPartialDependence(unittest.TestCase):
         classifier_predict_fn = InMemoryModel(clf.predict_proba, examples=self.sample_x)
         interpreter = Interpretation()
         interpreter.load_data(np.array(self.sample_x), self.sample_feature_name)
-        pdp_df = interpreter.partial_dependence.partial_dependence(['0'], classifier_predict_fn,
-                                                                  grid_resolution=5, sample=True)
+        pdp_df = interpreter.partial_dependence.partial_dependence(['0'],
+                                                                   classifier_predict_fn,
+                                                                   grid_resolution=5,
+                                                                   sample=True)
 
         self.assertEquals(pdp_df.shape[0], len(np.unique(interpreter.data_set['0'])))
 
@@ -128,7 +131,7 @@ class TestPartialDependence(unittest.TestCase):
     def test_partial_dependence_multiclass(self):
         # Iris data classes: ['setosa', 'versicolor', 'virginica']
         iris = datasets.load_iris()
-        #1. Using GB Classifier
+        # 1. Using GB Classifier
         clf = GradientBoostingClassifier(n_estimators=10, random_state=1)
         clf.fit(iris.data, iris.target)
         classifier_predict_fn = InMemoryModel(clf.predict_proba, examples=iris.data)
@@ -141,8 +144,8 @@ class TestPartialDependence(unittest.TestCase):
 
         self.assertIn(expected_feature_name,
                       pdp_df.columns.values,
-                      "{} not in columns {}".format(*[expected_feature_name,
-                                                     pdp_df.columns.values]))
+                      "{0} not in columns {1}".format(expected_feature_name,
+                                                      pdp_df.columns.values))
         # 2. Using SVC
         from sklearn import svm
         # With SVC, predict_proba is supported only if probability flag is enabled, by default it is false
@@ -156,14 +159,14 @@ class TestPartialDependence(unittest.TestCase):
         self.assertIn(expected_feature_name,
                       pdp_df.columns.values,
                       "{} not in columns {}".format(*[expected_feature_name,
-                                                     pdp_df.columns.values]))
+                                                      pdp_df.columns.values]))
 
 
 
 
     def test_pdp_regression_coefs_closeness(self, epsilon=1):
         pdp_df = self.interpreter.partial_dependence.partial_dependence([self.features[0]],
-                                                                       self.regressor_predict_fn)
+                                                                        self.regressor_predict_fn)
         val_col = PartialDependence.feature_column_name_formatter(self.features[0])
 
         y = np.array(pdp_df[self.regressor_predict_fn.target_names[0]])
@@ -235,7 +238,7 @@ class TestPartialDependence(unittest.TestCase):
     def test_fail_when_grid_range_is_outside_0_and_1(self):
         pdp_func = partial(self.interpreter.partial_dependence.partial_dependence,
                            *[[self.features[0]], self.regressor_predict_fn],
-                           **{'grid_range':(.01, 1.01)})
+                           **{'grid_range': (.01, 1.01)})
         self.assertRaises(exceptions.MalformedGridRangeError, pdp_func)
 
 
