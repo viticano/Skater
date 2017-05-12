@@ -3,7 +3,7 @@ Model Objects
 
 Overview
 ---------------------------------------
-skater contains an abstraction for predictive models. Models apis vary by implementation.
+Skater contains an abstraction for predictive models. Models apis vary by implementation.
 The skater Model object manages variations in how models are called, the inputs they expect,
 and the outputs they generate, so that inputs, outputs, and calls are standardized to both the
 user and to the rest of the code base. Currently the Model object acts as the base class for the

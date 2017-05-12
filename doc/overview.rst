@@ -5,14 +5,14 @@ Overview
 '''''''''''''''''''''''''''''
 
 
-skater
+Skater
 ~~~~~~~~~~~~~~~~
 
-skater is a python package for model agnostic interpretation of predictive models. With skater, you can unpack the internal
-mechanics of arbitrary models; as long as you can obtain inputs, and use a function to obtain outputs, you can use skater to learn
-about the models internal decision criteria.
+Skater is a python package for model agnostic interpretation of predictive models. With Skater, one can understand the internal
+mechanics of arbitrary models based on the interaction of independent variable(input data) and dependent variable(target response).
+One can use Skater to query the model to understand more about the learned decision policies of a "black box".
 
-So that models produced by different learning algorithms, implementations, and environments can be compared, the skater philosophy
+So that models produced by different learning algorithms, implementations, and environments can be compared, the Skater philosophy
 is that all models should be evaluated as black boxes; decision criteria are inferred based on input perturbations and observing
 corresponding outputs.
 
