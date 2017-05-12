@@ -9,8 +9,9 @@ from .base import ModelType
 class DeployedModel(ModelType):
     """Model that gets predictions from a deployed model"""
     def __init__(self, uri, input_formatter, output_formatter,
-                 log_level=30, target_names=None, examples=None, feature_names=None,
-                 request_kwargs={}):
+                 target_names=None, unique_values=None,
+                 examples=None, feature_names=None,
+                 request_kwargs={}, log_level=30):
         """This model can be called by making http requests
         to the passed in uri.
 
@@ -29,13 +30,22 @@ class DeployedModel(ModelType):
             results to interpretation objects. This usually should take
             request objects and convert them to array types.
 
-        log_level: int
-            see skater.model.Model for details
-
         target_names: array type
             see skater.model.Model for details
 
+        unique_values: array type
+            The set of possible output values. Only use on classifier models that
+            return "best guess" predictions, not probability scores, e.g.
+
+            model.predict(fruit1) -> 'apple'
+            model.predict(fruit2) -> 'banana'
+
+            ['apple','banana'] are the unique_values of the classifier
+
         examples:
+            optional examples to use to make inferences about the function.
+
+        log_level: int
             see skater.model.Model for details
         """
         self.uri = uri
@@ -47,6 +57,7 @@ class DeployedModel(ModelType):
                                             input_formatter=input_formatter,
                                             output_formatter=output_formatter,
                                             log_level=log_level,
+                                            unique_values=unique_values,
                                             feature_names=feature_names)
 
 

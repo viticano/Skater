@@ -10,8 +10,9 @@ class InMemoryModel(ModelType):
     This model can be called directly from memory
     """
 
-    def __init__(self, prediction_fn, log_level=30, target_names=None,
-                 examples=None, unique_values=None, input_formatter=None, output_formatter=None):
+    def __init__(self, prediction_fn, input_formatter=None,
+                 output_formatter=None, target_names=None,
+                 unique_values=None, examples=None, log_level=30):
         """This model can be called directly from memory
 
         Parameters
@@ -19,17 +20,36 @@ class InMemoryModel(ModelType):
         prediction_fn: callable
             function that returns predictions
 
-        log_level: int
-            config setting to see model logs. 10 is a good value for seeing debug messages.
-            30 is warnings only.
+        input_formatter: callable
+            This function will run on input data before passing
+            to the prediction_fn. This usually should take your data type
+            and convert them to numpy arrays or dataframes.
+
+        output_formatter: callable
+            This function will run on input data before passing
+            to the prediction_fn. This usually should take your data type
+            and convert them to numpy arrays or dataframes.
 
         target_names: array type
             optional names of classes that describe model outputs.
 
+        unique_values: array type
+            The set of possible output values. Only use on classifier models that
+            return "best guess" predictions, not probability scores, e.g.
+
+            model.predict(fruit1) -> 'apple'
+            model.predict(fruit2) -> 'banana'
+
+            ['apple','banana'] are the unique_values of the classifier
+
         examples: numpy.array or pandas.dataframe
-            examples to use to make inferences about the function.
-            prediction_fn must be able to take examples as an
-            argument.
+            optional examples to use to make inferences about the function.
+
+        log_level: int
+            config setting to see model logs. 10 is a good value for seeing debug messages.
+            30 is warnings only.
+
+
         """
 
         if not hasattr(prediction_fn, "__call__"):
