@@ -70,7 +70,7 @@ class TestPartialDependence(unittest.TestCase):
         # Yet another set of input!!
         self.sample_x_categorical = np.array([['B', -1], ['A', -1], ['A', -2], ['C', 1], ['C', 2], ['A', 1]])
         self.sample_y_categorical = np.array(['A', 'A', 'A', 'B', 'B', 'B'])
-        self.categorical_feature_names = ['Letters','Numbers']
+        self.categorical_feature_names = ['Letters', 'Numbers']
         self.categorical_transformer = MultiColumnLabelBinarizer()
         self.categorical_transformer.fit(self.sample_x_categorical)
         self.sample_x_categorical_transormed = self.categorical_transformer.transform(self.sample_x_categorical)
