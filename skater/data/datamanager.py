@@ -423,6 +423,10 @@ class DataManager(object):
         ---------
         samples
         """
+        if not self.data_info['feature_info'][feature_id]['numeric']:
+            raise exceptions.DataSetError("Stratified sampling is currently "
+                                          "supported for numeric features only.")
+
         bin_count, samples_per_bin = allocate_samples_to_bins(n_samples, ideal_bin_count=n_bins)
         percentiles = [100 * (i / bin_count) for i in range(bin_count + 1)]
 
