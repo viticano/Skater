@@ -19,3 +19,11 @@ is recommended that you use a virtual environment (virtualenv, conda environment
 ::
 
     pip install -U Skater
+
+
+testing
+~~~~~~~~~~~~~~~~
+
+::
+
+    python -c "from skater.tests.all_tests import run_tests; run_tests()"
