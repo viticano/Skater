@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; skater 0 documentation</title>
+  <title>Install Skater &mdash; skater 0 documentation</title>
   
 
   
@@ -92,12 +92,9 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#dev-installation">Dev Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#prod-installation-platform">Prod Installation (platform)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#use-this-kind-of-this-stuff-to-do-cool-stuff">Use this kind of this stuff to do cool stuff.</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#testing">Testing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#api-documentation">API documentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Install Skater</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pip">pip</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
@@ -146,7 +143,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Installation</li>
+      <li>Install Skater</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -165,68 +162,21 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="dev-installation">
-<h2>Dev Installation<a class="headerlink" href="#dev-installation" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">datascienceinc</span><span class="o">/</span><span class="n">skater</span><span class="o">.</span><span class="n">git</span>
-<span class="n">cd</span> <span class="n">skater</span>
-<span class="n">sudo</span> <span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
-</pre></div>
+  <div class="section" id="install-skater">
+<h1>Install Skater<a class="headerlink" href="#install-skater" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
+<p>Skater relies on numpy, pandas, scikit-learn, and the DataScience.com fork of
+the LIME package. Plotting functionality requires matplotlib, though it is not
+required to install the package. Currently we only distribute to pypi, though
+adding a conda distribution is on the roadmap.</p>
 </div>
-</div>
-<div class="section" id="prod-installation-platform">
-<h2>Prod Installation (platform)<a class="headerlink" href="#prod-installation-platform" title="Permalink to this headline">¶</a></h2>
-<p>Requires that pip.conf is configured with pypi.datascience.com
-credentials.</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">pip</span> <span class="n">install</span> <span class="n">skater</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="use-this-kind-of-this-stuff-to-do-cool-stuff">
-<h2>Use this kind of this stuff to do cool stuff.<a class="headerlink" href="#use-this-kind-of-this-stuff-to-do-cool-stuff" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">norm</span>
-
-<span class="c">#gen some data</span>
-<span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span>
-<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-<span class="n">feature_names</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;feature_{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
-<span class="n">e</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span> <span class="o">+</span> <span class="n">e</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
-<span class="n">example</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-<span class="c">#model it</span>
-<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="k">import</span> <span class="n">RandomForestRegressor</span>
-<span class="n">regressor</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">()</span>
-<span class="n">regressor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-
-
-<span class="c">#partial dependence</span>
-<span class="kn">from</span> <span class="nn">skater.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
-<span class="kn">from</span> <span class="nn">skater.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
-<span class="n">i</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span>
-<span class="n">i</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">feature_names</span> <span class="o">=</span> <span class="n">feature_names</span><span class="p">)</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">)</span>
-<span class="n">i</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">plot_partial_dependence</span><span class="p">([</span><span class="n">feature_names</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">feature_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
-                                            <span class="n">model</span><span class="p">)</span>
-
-<span class="c">#local interpretation</span>
-<span class="kn">from</span> <span class="nn">skater.core.local_interpretation.lime.lime_tabular</span> <span class="k">import</span> <span class="n">LimeTabularExplainer</span>
-<span class="n">explainer</span> <span class="o">=</span> <span class="n">LimeTabularExplainer</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">feature_names</span> <span class="o">=</span> <span class="n">feature_names</span><span class="p">)</span>
-<span class="n">explainer</span><span class="o">.</span><span class="n">explain_instance</span><span class="p">(</span><span class="n">example</span><span class="p">,</span>  <span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">)</span><span class="o">.</span><span class="n">show_in_notebook</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="testing">
-<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">python</span> <span class="n">skater</span><span class="o">/</span><span class="n">tests</span><span class="o">/</span><span class="n">all_tests</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">debug</span> <span class="o">--</span><span class="n">n</span><span class="o">=</span><span class="mi">1000</span> <span class="o">--</span><span class="n">dim</span><span class="o">=</span><span class="mi">3</span> <span class="o">--</span><span class="n">seed</span><span class="o">=</span><span class="mi">1</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="api-documentation">
-<h2>API documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default"><div class="highlight"><pre><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">datascienceinc</span><span class="o">.</span><span class="n">github</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">model</span><span class="o">-</span><span class="n">interpretation</span><span class="o">/</span><span class="n">py</span><span class="o">-</span><span class="n">modindex</span><span class="o">.</span><span class="n">html</span>
+<div class="section" id="pip">
+<h2>pip<a class="headerlink" href="#pip" title="Permalink to this headline">¶</a></h2>
+<p>TODO: Add a note on whether we distribute sources/binaries</p>
+<p>When using pip, to ensure your system is not modified by an installation, it
+is recommended that you use a virtual environment (virtualenv, conda environment).</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">Skater</span>
 </pre></div>
 </div>
 </div>

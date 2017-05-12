@@ -93,7 +93,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Install Skater</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="interpretation.html">Interpretation Objects</a></li>
@@ -175,7 +175,7 @@
 <h1>Model Objects<a class="headerlink" href="#model-objects" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
-<p>skater contains an abstraction for predictive models. Models apis vary by implementation.
+<p>Skater contains an abstraction for predictive models. Models apis vary by implementation.
 The skater Model object manages variations in how models are called, the inputs they expect,
 and the outputs they generate, so that inputs, outputs, and calls are standardized to both the
 user and to the rest of the code base. Currently the Model object acts as the base class for the
@@ -211,7 +211,7 @@ InMemoryModel and DeployedModel class, though this API may change in later versi
 <p>Models that are callable function are exposed via the InMemoryModel object.</p>
 <dl class="method">
 <dt id="skater.model.InMemoryModel.__init__">
-<code class="descclassname">InMemoryModel.</code><code class="descname">__init__</code><span class="sig-paren">(</span><em>prediction_fn</em>, <em>log_level=30</em>, <em>target_names=None</em>, <em>examples=None</em>, <em>unique_values=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/model/local.html#InMemoryModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.model.InMemoryModel.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">InMemoryModel.</code><code class="descname">__init__</code><span class="sig-paren">(</span><em>prediction_fn</em>, <em>log_level=30</em>, <em>target_names=None</em>, <em>examples=None</em>, <em>unique_values=None</em>, <em>input_formatter=None</em>, <em>output_formatter=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/model/local_model.html#InMemoryModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.model.InMemoryModel.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>This model can be called directly from memory</p>
 <dl class="docutils">
 <dt>prediction_fn: callable</dt>
@@ -235,7 +235,7 @@ argument.</dd>
 DeployedModel object.</p>
 <dl class="method">
 <dt id="skater.model.DeployedModel.__init__">
-<code class="descclassname">DeployedModel.</code><code class="descname">__init__</code><span class="sig-paren">(</span><em>uri</em>, <em>input_formatter</em>, <em>output_formatter</em>, <em>log_level=30</em>, <em>target_names=None</em>, <em>examples=None</em>, <em>feature_names=None</em>, <em>request_kwargs={}</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/model/deploy.html#DeployedModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.model.DeployedModel.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">DeployedModel.</code><code class="descname">__init__</code><span class="sig-paren">(</span><em>uri</em>, <em>input_formatter</em>, <em>output_formatter</em>, <em>log_level=30</em>, <em>target_names=None</em>, <em>examples=None</em>, <em>feature_names=None</em>, <em>request_kwargs={}</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/model/deployed_model.html#DeployedModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.model.DeployedModel.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>This model can be called by making http requests
 to the passed in uri.</p>
 <dl class="docutils">

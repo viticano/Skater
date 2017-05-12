@@ -93,7 +93,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Install Skater</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Interpretation Objects</a><ul>
@@ -295,7 +295,7 @@ predictions = predict_fn(data).</p>
 <div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">rf</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">feature_importance</span><span class="o">.</span><span class="n">feature_importance</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">feature_importance</span><span class="o">.</span><span class="n">plot_feature_importance</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="last">Supports classification, multi-class classification, and regression.</p>
@@ -567,6 +567,24 @@ and &#8216;sample_weight&#8217; as a parameter to model_regressor.fit()</p>
 <dd>An Explanation object (see explanation.py) with the corresponding
 explanations.</dd>
 </dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_regressor_instance">
+<code class="descname">explain_regressor_instance</code><span class="sig-paren">(</span><em>data_row</em>, <em>predict_fn</em>, <em>num_features=10</em>, <em>num_samples=5000</em>, <em>distance_metric='euclidean'</em>, <em>model_regressor=None</em>, <em>testing=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer.explain_regressor_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_regressor_instance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates explanations for a prediction.
+First, we generate neighborhood data by randomly perturbing features
+from the instance (see __data_inverse). We then learn locally weighted
+linear models on this neighborhood data to explain changes in the prediction
+in an interpretable way (see lime_base.py).
+Args:</p>
+<blockquote>
+<div><p>data_row: 1d numpy array, corresponding to a row
+predict_fn: prediction function, which</p>
+<blockquote>
+<div>takes a numpy array and expected values.  For
+ScikitRegressors , this is classifier.predict.</div></blockquote>
+</div></blockquote>
 </dd></dl>
 
 </dd></dl>
