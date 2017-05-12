@@ -65,9 +65,8 @@ class FeatureImportance(BaseGlobalInterpretation):
                                        index=self.data_set.index)
 
         for feature_id in self.data_set.feature_ids:
-
             # collect perturbations
-            if self.data_set.data_info['feature_info'][feature_id]['numeric']:
+            if self.data_set.feature_info[feature_id]['numeric']:
                 samples = self.data_set.generate_column_sample(feature_id, n_samples=n, method='stratified')
             else:
                 samples = self.data_set.generate_column_sample(feature_id, n_samples=n, method='random-choice')
