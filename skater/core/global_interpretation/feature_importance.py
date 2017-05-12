@@ -65,9 +65,11 @@ class FeatureImportance(BaseGlobalInterpretation):
                                        index=self.data_set.index)
 
         for feature_id in self.data_set.feature_ids:
-
             # collect perturbations
-            samples = self.data_set.generate_column_sample(feature_id, n_samples=n, method='stratified')
+            if self.data_set.feature_info[feature_id]['numeric']:
+                samples = self.data_set.generate_column_sample(feature_id, n_samples=n, method='stratified')
+            else:
+                samples = self.data_set.generate_column_sample(feature_id, n_samples=n, method='random-choice')
             copy_of_data_set[feature_id] = samples
 
             # predict based on perturbed values
