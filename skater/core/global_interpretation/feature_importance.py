@@ -167,6 +167,7 @@ class FeatureImportance(BaseGlobalInterpretation):
             raise(KeyError("Unrecongized method for computing feature_importance: {}".format(method)))
         return importance
 
+
     def _compute_importance_via_output_variance(self, new_predictions, original_predictions,
                                                 original_x, perturbed_x, scaled=True):
         """Mean absolute error of predictions given perturbations in a feature"""
@@ -177,6 +178,7 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         importance = np.mean(changes_in_predictions)
         return importance
+
 
     def _importance_scaler(self, values, original_x, perturbed_x):
         raise(NotImplementedError("We currently don't support scaling, we are researching the best"

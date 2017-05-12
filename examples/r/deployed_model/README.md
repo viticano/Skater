@@ -4,6 +4,9 @@ Reference:
     - https://github.com/Knowru/plumber_example/blob/master/create_ml_credit_model.R
 * Once the model is build, invoke the following steps to start the plumber
 daemon
+    - cd `Skater/examples/r`
+    - launch an R kernel from the terminal 
+    - setwd("deployed_model/")
     - install.packages('plumber')
     - library(plumber)
     - source("credit_model.R")
