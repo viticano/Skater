@@ -8,11 +8,11 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn import datasets
 from functools import partial
 
-
 from skater.core.explanations import Interpretation
 from skater.util import exceptions
 from arg_parser import create_parser
 from skater.model import InMemoryModel, DeployedModel
+
 
 class TestFeatureImportance(unittest.TestCase):
 
@@ -48,7 +48,7 @@ class TestFeatureImportance(unittest.TestCase):
         if debug:
             self.interpreter = Interpretation(log_level='DEBUG')
         else:
-            self.interpreter = Interpretation() # default level is 'WARNING'
+            self.interpreter = Interpretation()  # default level is 'WARNING'
         self.interpreter.load_data(self.X, feature_names=self.features)
 
         self.regressor = LinearRegression()
@@ -73,7 +73,9 @@ class TestFeatureImportance(unittest.TestCase):
 
     def test_feature_importance(self):
         importances = self.interpreter.feature_importance.feature_importance(self.regressor_predict_fn)
-        self.assertEquals(np.isclose(importances.sum(), 1), True) # default grid resolution is 100
+        self.assertEquals(np.isclose(importances.sum(), 1), True)  # default grid resolution is 100
+
+
     def test_plot_feature_importance(self):
         self.interpreter.feature_importance.plot_feature_importance(self.regressor_predict_fn)
 

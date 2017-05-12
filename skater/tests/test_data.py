@@ -7,6 +7,7 @@ from numpy.testing import assert_array_equal
 from skater.data import DataManager
 from arg_parser import arg_parse, create_parser
 
+
 class TestData(unittest.TestCase):
     """
     Tests the skater.data.DataManager object
@@ -40,12 +41,16 @@ class TestData(unittest.TestCase):
         else:
             self.log_level = 30
 
+
     def test_datamanager_data_returns_original(self):
         """
         ensure DataManager(data).data == data
         """
-        data_set = DataManager(self.X, feature_names=self.feature_names, index=self.index)
+        data_set = DataManager(self.X,
+                               feature_names=self.feature_names,
+                               index=self.index)
         assert_array_equal(data_set.data, self.X)
+
 
     def test_1d_numpy_array(self):
         """
@@ -57,11 +62,12 @@ class TestData(unittest.TestCase):
         feature_names = [self.feature_names[feature_id]]
 
         data_set = DataManager(array_1d,
-                           feature_names=feature_names,
-                           index=self.index,
-                           log_level=self.log_level)
+                               feature_names=feature_names,
+                               index=self.index,
+                               log_level=self.log_level)
         assert_array_equal(data_set.data, array_1d)
         assert data_set.feature_ids == feature_names
+
 
     def test_2d_numpy_array(self):
         """
@@ -73,11 +79,12 @@ class TestData(unittest.TestCase):
         feature_names = [self.feature_names[i] for i in feature_ids]
 
         data_set = DataManager(array_2d,
-                           feature_names=feature_names,
-                           index=self.index,
-                           log_level=self.log_level)
+                               feature_names=feature_names,
+                               index=self.index,
+                               log_level=self.log_level)
         assert_array_equal(data_set.data, array_2d)
         assert data_set.feature_ids == feature_names
+
 
     def test_pandas_dataframe(self):
         """
@@ -86,22 +93,24 @@ class TestData(unittest.TestCase):
         X_as_dataframe = pd.DataFrame(self.X, columns=self.feature_names, index=self.index)
         data_set = DataManager(X_as_dataframe, log_level=self.log_level)
 
-        feature_names_warning = "Feature Names from DataFrame not loaded properly"
-
-        assert data_set.feature_ids == self.feature_names
-        assert data_set.index == self.index
+        assert data_set.feature_ids == self.feature_names, "Feature Names from DataFrame " \
+                                                           "not loaded properly"
+        assert data_set.index == self.index, "Index from DataFrame not loaded properly"
         assert_array_equal(data_set.data, self.X)
+
+
     def test_generate_grid_1_variable(self):
         """Ensures generate grid works with 1 variable"""
         data_set = DataManager(self.X, feature_names=self.feature_names, index=self.index)
         grid = data_set.generate_grid(data_set.feature_ids[0:1], grid_resolution=100)
         self.assertEquals(len(grid), 1)
 
+
     def test_generate_grid_2_variables(self):
         """Ensures generate grid works with 2 variables"""
         data_set = DataManager(self.X, feature_names=self.feature_names, index=self.index)
         grid = data_set.generate_grid(self.feature_names[0:2], grid_resolution=100)
-        self.assertEquals(len(grid),2)
+        self.assertEquals(len(grid), 2)
 
 
 if __name__ == '__main__':

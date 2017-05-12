@@ -42,7 +42,7 @@ before_script: # configure a headless display to test plot generation
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # give xvfb some time to start
 script:
-  - python tests/all_tests.py
+  - python skater/tests/all_tests.py
   - flake8 skater
 branches:
   only:
