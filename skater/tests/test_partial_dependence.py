@@ -143,7 +143,7 @@ class TestPartialDependence(unittest.TestCase):
                       pdp_df.columns.values,
                       "{} not in columns {}".format(*[expected_feature_name,
                                                      pdp_df.columns.values]))
-        #2. Using SVC
+        # 2. Using SVC
         from sklearn import svm
         # With SVC, predict_proba is supported only if probability flag is enabled, by default it is false
         clf = svm.SVC(probability=True)
@@ -179,45 +179,57 @@ class TestPartialDependence(unittest.TestCase):
     def test_pdp_inputs(self):
         clf = GradientBoostingClassifier(n_estimators=10, random_state=1)
         clf.fit(self.sample_x, self.sample_y)
-        classifier_predict_fn = clf.predict_proba
         interpreter = Interpretation()
-
         self.assertRaisesRegexp(Exception, "Invalid Data", interpreter.load_data, None, self.sample_feature_name)
 
 
     def test_2D_pdp(self):
-        coefs = self.interpreter.partial_dependence.partial_dependence(self.features[:2],
-                                                                       self.regressor_predict_fn,
-                                                                       grid_resolution=10,
-                                                                       sample=True)
+        try:
+            self.interpreter.partial_dependence.partial_dependence(self.features[:2],
+                                                                   self.regressor_predict_fn,
+                                                                   grid_resolution=10,
+                                                                   sample=True)
+        except:
+            self.fail("2D regressor pd failed")
 
 
     def test_plot_1D_pdp(self):
-        coefs = self.interpreter.partial_dependence.plot_partial_dependence([self.features[0]],
-                                                                       self.regressor_predict_fn,
-                                                                       grid_resolution=10)
+        try:
+            self.interpreter.partial_dependence.plot_partial_dependence([self.features[0]],
+                                                                        self.regressor_predict_fn,
+                                                                        grid_resolution=10)
+        except:
+            self.fail("1D regressor plot failed")
 
 
     def test_plot_1D_pdp_with_sampling(self):
-        coefs = self.interpreter.partial_dependence.plot_partial_dependence(
-            [self.features[0]],
-            self.regressor_predict_fn,
-            grid_resolution=10,
-            sample=True
-        )
+        try:
+            self.interpreter.partial_dependence.plot_partial_dependence(
+                [self.features[0]],
+                self.regressor_predict_fn,
+                grid_resolution=10,
+                sample=True)
+        except:
+            self.fail("1D classifier plot with sampling failed")
 
 
     def test_plot_2D_pdp(self):
-        coefs = self.interpreter.partial_dependence.plot_partial_dependence(self.features[:2],
-                                                                       self.regressor_predict_fn,
-                                                                       grid_resolution=10,
-                                                                       sample=False)
+        try:
+            self.interpreter.partial_dependence.plot_partial_dependence(self.features[:2],
+                                                                        self.regressor_predict_fn,
+                                                                        grid_resolution=10,
+                                                                        sample=False)
+        except:
+            self.fail("2D partial dep plot failed")
 
     def test_plot_2D_pdp_with_sampling(self):
-        coefs = self.interpreter.partial_dependence.plot_partial_dependence(self.features[:2],
-                                                                       self.regressor_predict_fn,
-                                                                       grid_resolution=10,
-                                                                       sample=True)
+        try:
+            self.interpreter.partial_dependence.plot_partial_dependence(self.features[:2],
+                                                                        self.regressor_predict_fn,
+                                                                        grid_resolution=10,
+                                                                        sample=True)
+        except:
+            self.fail("2D regressor with sampling failed")
 
 
     def test_fail_when_grid_range_is_outside_0_and_1(self):
@@ -249,30 +261,42 @@ class TestPartialDependence(unittest.TestCase):
 
 
     def test_pdp_1d_classifier_with_proba(self):
-        coefs = self.interpreter.partial_dependence.partial_dependence(self.features[:1],
-                                                                            self.classifier_predict_proba_fn,
-                                                                            grid_resolution=10)
+        try:
+            self.interpreter.partial_dependence.partial_dependence(self.features[:1],
+                                                                   self.classifier_predict_proba_fn,
+                                                                   grid_resolution=10)
+        except:
+            self.fail("1D classifier with probability scores failed")
 
 
     def test_pdp_2d_classifier_with_proba(self):
-        coefs = self.interpreter.partial_dependence.partial_dependence(self.features[:2],
-                                                                            self.classifier_predict_proba_fn,
-                                                                            grid_resolution=10)
+        try:
+            self.interpreter.partial_dependence.partial_dependence(self.features[:2],
+                                                                   self.classifier_predict_proba_fn,
+                                                                   grid_resolution=10)
+        except:
+            self.fail("2D classifier with probability scores failed")
 
 
     def test_pdp_1d_string_classifier_no_proba(self):
-        self.assertRaises(exceptions.ModelError, lambda: self.interpreter.partial_dependence.partial_dependence(self.features[:1],
-                                                                       InMemoryModel(self.string_classifier.predict, examples=self.X),
-                                                                       grid_resolution=10))
+        def fail_func():
+            self.interpreter.partial_dependence.partial_dependence(self.features[:1],
+                                                                   InMemoryModel(self.string_classifier.predict,
+                                                                                 examples=self.X),
+                                                                   grid_resolution=10)
+        self.assertRaises(exceptions.ModelError, fail_func)
 
 
     def test_pdp_1d_string_classifier_with_proba(self):
-        coefs = self.interpreter.partial_dependence.partial_dependence(self.features[:1],
-                                                                       self.string_classifier_predict_fn,
-                                                                       grid_resolution=10)
+        try:
+            self.interpreter.partial_dependence.partial_dependence(self.features[:1],
+                                                                   self.string_classifier_predict_fn,
+                                                                   grid_resolution=10)
+        except:
+            self.fail('1D string classifier pd failed')
 
 
-    #TODO: Add tests for various kinds of kwargs like sampling for pdp funcs
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPartialDependence)
     unittest.TextTestRunner(verbosity=2).run(suite)
