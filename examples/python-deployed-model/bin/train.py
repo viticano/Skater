@@ -1,5 +1,5 @@
 from sklearn.datasets import load_boston
-from sklearn.linear_model import LinearRegression
+from sklearn.neighbors import KNeighborsRegressor
 from sklearn.externals import joblib
 
 if __name__ == '__main__':
@@ -7,7 +7,7 @@ if __name__ == '__main__':
     X = boston.data
     y = boston.target
 
-    model = LinearRegression()
+    model = KNeighborsRegressor()
     model.fit(X, y)
 
     joblib.dump(model, '../models/model.pkl')

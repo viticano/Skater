@@ -43,5 +43,10 @@ def train():
 if __name__ == '__main__':
     if not os.path.exists(MODELPATH):
         train()
-    estimator = joblib.load(MODELPATH)
+    try:
+        estimator = joblib.load(MODELPATH)
+    except IOError:
+        train()
+        estimator = joblib.load(MODELPATH)
+
     app.run("0.0.0.0", debug=True)
