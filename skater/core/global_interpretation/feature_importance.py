@@ -16,47 +16,51 @@ class FeatureImportance(BaseGlobalInterpretation):
 
     """
 
-    def feature_importance(self, modelinstance, filter_classes=None):
+    def feature_importance(self, model_instance, ascending=True, filter_classes=None):
 
         """
         Computes feature importance of all features related to a model instance.
+        Supports classification, multi-class classification, and regression.
 
-
-        Parameters:
-        -----------
-
-        modelinstance: skater.model.model.Model subtype
+        Parameters
+        ----------
+        model_instance: lynxes.model.model.Model subtype
             the machine learning model "prediction" function to explain, such that
             predictions = predict_fn(data).
+        ascending: boolean, default True
+            Helps with ordering Ascending vs Descending
+        filter_classes: array type
+            The classes to run partial dependence on. Default None invokes all classes.
+            Only used in classification models.
 
-            :Example:
-            >>> from skater.model import InMemoryModel
-            >>> from skater.core.explanations import Interpretation
-            >>> from sklearn.ensemble import RandomForestClassifier
+        Returns
+        -------
+        importances : Sorted Series
+
+
+        Examples
+        --------
+            >>> from lynxes.model import InMemoryModel
+            >>> from lynxes.core.explanations import Interpretation
+            >>> from sklearn.ensemble import RandomForestClassier
             >>> rf = RandomForestClassier()
             >>> rf.fit(X,y)
-            >>> model = InMemoryModel(rf, examples=X)
-            >>> interpreter = Interpretation(X)
+            >>> model = InMemoryModel(rf, examples = X)
+            >>> interpreter = Interpretation()
+            >>> interpreter.load_data(X)
             >>> interpreter.feature_importance.feature_importance(model)
-
-            Supports classification, multi-class classification, and regression.
-        filter_classes: array type
-            The classes for which we compute feature importance. Useful
-            if interested in features' contributions to a subset of classes.
-            Default None invokes all classes. Only used in classification models.
-
         """
 
         if filter_classes:
             err_msg = "members of filter classes must be" \
-                      "members of modelinstance.classes." \
+                      "members of model_instance.classes." \
                       "Expected members of: {0}\n" \
-                      "got: {1}".format(modelinstance.target_names,
+                      "got: {1}".format(model_instance.target_names,
                                         filter_classes)
-            assert all([i in modelinstance.target_names for i in filter_classes]), err_msg
+            assert all([i in model_instance.target_names for i in filter_classes]), err_msg
 
         importances = {}
-        original_predictions = modelinstance.predict_subset_classes(self.data_set.data, filter_classes)
+        original_predictions = model_instance.predict_subset_classes(self.data_set.data, filter_classes)
 
         n = original_predictions.shape[0]
 
@@ -73,7 +77,7 @@ class FeatureImportance(BaseGlobalInterpretation):
             copy_of_data_set[feature_id] = samples
 
             # predict based on perturbed values
-            new_predictions = modelinstance.predict_subset_classes(copy_of_data_set.data, filter_classes)
+            new_predictions = model_instance.predict_subset_classes(copy_of_data_set.data, filter_classes)
 
             importance = self.compute_importance(new_predictions,
                                                  original_predictions,
@@ -84,7 +88,7 @@ class FeatureImportance(BaseGlobalInterpretation):
             # reset copy
             copy_of_data_set[feature_id] = self.data_set[feature_id]
 
-        importances = pd.Series(importances).sort_values()
+        importances = pd.Series(importances).sort_values(ascending=ascending)
 
         if not importances.sum() > 0:
             self.interpreter.logger.debug("Importances that caused a bug: {}".format(importances))
@@ -101,40 +105,41 @@ class FeatureImportance(BaseGlobalInterpretation):
         return importances
 
 
-    def plot_feature_importance(self, predict_fn, filter_classes=None, ax=None):
+    def plot_feature_importance(self, predict_fn, filter_classes=None, ascending=True, ax=None):
         """Computes feature importance of all features related to a model instance,
-        then plots the results.
+        then plots the results. Supports classification, multi-class classification, and regression.
 
-
-        Parameters:
-        -----------
-
-        modelinstance: skater.model.model.Model subtype
-            the machine learning model "prediction" function to explain, such that
-            predictions = predict_fn(data).
-
-            For instance:
-            >>> from skater.model import InMemoryModel
-            >>> from skater.core.explanations import Interpretation
-            >>> from sklearn.ensemble import RandomForestClassier
-            >>> rf = RandomForestClassier()
-            >>> rf.fit(X,y)
-
-
-            >>> model = InMemoryModel(rf, examples = X)
-            >>> interpreter = Interpretation()
-            >>> interpreter.load_data(X)
-            >>> interpreter.feature_importance.plot_feature_importance(model)
-
-            Supports classification, multi-class classification, and regression.
-
+        Parameters
+        ----------
+        predict_fn: lynxes.model.model.Model subtype
+            estimator "prediction" function to explain the predictive model. Could be probability scores
+            or target values
         filter_classes: array type
             The classes to run partial dependence on. Default None invokes all classes.
             Only used in classification models.
-
+        ascending: boolean, default True
+            Helps with ordering Ascending vs Descending
         ax: matplotlib.axes._subplots.AxesSubplot
             existing subplot on which to plot feature importance. If none is provided,
             one will be created.
+
+        Returns
+        -------
+        f: figure instance
+        ax: matplotlib.axes._subplots.AxesSubplot
+            could be used to for further modification to the plots
+
+        Examples
+        --------
+            >>> from lynxes.model import InMemoryModel
+            >>> from lynxes.core.explanations import Interpretation
+            >>> from sklearn.ensemble import RandomForestClassier
+            >>> rf = RandomForestClassier()
+            >>> rf.fit(X,y)
+            >>> model = InMemoryModel(rf, examples = X)
+            >>> interpreter = Interpretation()
+            >>> interpreter.load_data(X)
+            >>> interpreter.feature_importance.plot_feature_importance(model, ascending=True, ax=ax)
             """
         try:
             global pyplot
@@ -153,7 +158,12 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         colors = cycle(COLORS)
         color = next(colors)
-        importances.sort_values().plot(kind='barh', ax=ax, color=color)
+        # Below is a weirdness because of how pandas plot is behaving. There might be a better way
+        # to resolve the issuse of sorting based on axis
+        if ascending is True:
+            importances.sort_values(ascending=False).plot(kind='barh', ax=ax, color=color)
+        else:
+            importances.sort_values(ascending=True).plot(kind='barh', ax=ax, color=color)
         return f, ax
 
 
