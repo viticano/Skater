@@ -1,7 +1,28 @@
-* Follow the instructions below to start a flask app
-    - cd to the `examples/python-deployed-model/api`
-    - python api/model.py
-* This should get the flask server started for a python deployed model
-* For this example, the model is pre built and placed under the models folder - model.pkl
-* REST endpoint: http://datsci.dev:5000/predict
+### Deploying a model via flask
+
+Ensure flask, numpy, and scikit-learn are available in your environment.
+
+To run, execute api/model.py, which will host the model as a service. The service should be available on localhost, so the model endpoint would be:
+
+-http://localhost:5000/predict
+or
+-http://127.0.0.1:5000/predict
+
+
+```
+def input_formatter(data):
+    return {'input':data.tolist()}
     
+def output_formatter(response, key='predictions'):
+    print
+    return np.array(response.json()[key])
+
+uri = 'http://datsci.dev:5000/predict'
+
+dep_model = DeployedModel(uri, 
+                         input_formatter,
+                         output_formatter,
+                         target_names=['Housing Prices'], 
+                         examples=X_boston[:1000])
+                         
+```
