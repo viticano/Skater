@@ -211,20 +211,33 @@ InMemoryModel and DeployedModel class, though this API may change in later versi
 <p>Models that are callable function are exposed via the InMemoryModel object.</p>
 <dl class="method">
 <dt id="skater.model.InMemoryModel.__init__">
-<code class="descclassname">InMemoryModel.</code><code class="descname">__init__</code><span class="sig-paren">(</span><em>prediction_fn</em>, <em>log_level=30</em>, <em>target_names=None</em>, <em>examples=None</em>, <em>unique_values=None</em>, <em>input_formatter=None</em>, <em>output_formatter=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/model/local_model.html#InMemoryModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.model.InMemoryModel.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">InMemoryModel.</code><code class="descname">__init__</code><span class="sig-paren">(</span><em>prediction_fn</em>, <em>input_formatter=None</em>, <em>output_formatter=None</em>, <em>target_names=None</em>, <em>unique_values=None</em>, <em>examples=None</em>, <em>log_level=30</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/model/local_model.html#InMemoryModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.model.InMemoryModel.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>This model can be called directly from memory</p>
 <dl class="docutils">
 <dt>prediction_fn: callable</dt>
 <dd>function that returns predictions</dd>
+<dt>input_formatter: callable</dt>
+<dd>This function will run on input data before passing
+to the prediction_fn. This usually should take your data type
+and convert them to numpy arrays or dataframes.</dd>
+<dt>output_formatter: callable</dt>
+<dd>This function will run on input data before passing
+to the prediction_fn. This usually should take your data type
+and convert them to numpy arrays or dataframes.</dd>
+<dt>target_names: array type</dt>
+<dd>optional names of classes that describe model outputs.</dd>
+<dt>unique_values: array type</dt>
+<dd><p class="first">The set of possible output values. Only use on classifier models that
+return &#8220;best guess&#8221; predictions, not probability scores, e.g.</p>
+<p>model.predict(fruit1) -&gt; &#8216;apple&#8217;
+model.predict(fruit2) -&gt; &#8216;banana&#8217;</p>
+<p class="last">[&#8216;apple&#8217;,&#8217;banana&#8217;] are the unique_values of the classifier</p>
+</dd>
+<dt>examples: numpy.array or pandas.dataframe</dt>
+<dd>optional examples to use to make inferences about the function.</dd>
 <dt>log_level: int</dt>
 <dd>config setting to see model logs. 10 is a good value for seeing debug messages.
 30 is warnings only.</dd>
-<dt>target_names: array type</dt>
-<dd>optional names of classes that describe model outputs.</dd>
-<dt>examples: numpy.array or pandas.dataframe</dt>
-<dd>examples to use to make inferences about the function.
-prediction_fn must be able to take examples as an
-argument.</dd>
 </dl>
 </dd></dl>
 
@@ -235,7 +248,7 @@ argument.</dd>
 DeployedModel object.</p>
 <dl class="method">
 <dt id="skater.model.DeployedModel.__init__">
-<code class="descclassname">DeployedModel.</code><code class="descname">__init__</code><span class="sig-paren">(</span><em>uri</em>, <em>input_formatter</em>, <em>output_formatter</em>, <em>log_level=30</em>, <em>target_names=None</em>, <em>examples=None</em>, <em>feature_names=None</em>, <em>request_kwargs={}</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/model/deployed_model.html#DeployedModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.model.DeployedModel.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">DeployedModel.</code><code class="descname">__init__</code><span class="sig-paren">(</span><em>uri</em>, <em>input_formatter</em>, <em>output_formatter</em>, <em>target_names=None</em>, <em>unique_values=None</em>, <em>examples=None</em>, <em>feature_names=None</em>, <em>request_kwargs={}</em>, <em>log_level=30</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/model/deployed_model.html#DeployedModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.model.DeployedModel.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>This model can be called by making http requests
 to the passed in uri.</p>
 <dl class="docutils">
@@ -249,11 +262,18 @@ and convert them to JSON.</dd>
 <dd>This function will run on outputs before returning
 results to interpretation objects. This usually should take
 request objects and convert them to array types.</dd>
-<dt>log_level: int</dt>
-<dd>see skater.model.Model for details</dd>
 <dt>target_names: array type</dt>
 <dd>see skater.model.Model for details</dd>
+<dt>unique_values: array type</dt>
+<dd><p class="first">The set of possible output values. Only use on classifier models that
+return &#8220;best guess&#8221; predictions, not probability scores, e.g.</p>
+<p>model.predict(fruit1) -&gt; &#8216;apple&#8217;
+model.predict(fruit2) -&gt; &#8216;banana&#8217;</p>
+<p class="last">[&#8216;apple&#8217;,&#8217;banana&#8217;] are the unique_values of the classifier</p>
+</dd>
 <dt>examples:</dt>
+<dd>optional examples to use to make inferences about the function.</dd>
+<dt>log_level: int</dt>
 <dd>see skater.model.Model for details</dd>
 </dl>
 </dd></dl>

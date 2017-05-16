@@ -244,69 +244,66 @@ more we&#8217;ll see predictions change as a function of perturbing a feature.</
 <dd><p>Contains methods for feature importance. Subclass of BaseGlobalInterpretation.</p>
 <dl class="method">
 <dt id="skater.core.global_interpretation.feature_importance.FeatureImportance.feature_importance">
-<code class="descname">feature_importance</code><span class="sig-paren">(</span><em>modelinstance</em>, <em>filter_classes=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/feature_importance.html#FeatureImportance.feature_importance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.feature_importance.FeatureImportance.feature_importance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes feature importance of all features related to a model instance.</p>
+<code class="descname">feature_importance</code><span class="sig-paren">(</span><em>model_instance</em>, <em>ascending=True</em>, <em>filter_classes=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/feature_importance.html#FeatureImportance.feature_importance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.feature_importance.FeatureImportance.feature_importance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes feature importance of all features related to a model instance.
+Supports classification, multi-class classification, and regression.</p>
 <dl class="docutils">
-<dt>modelinstance: skater.model.model.Model subtype</dt>
-<dd><p class="first">the machine learning model &#8220;prediction&#8221; function to explain, such that
-predictions = predict_fn(data).</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="k">import</span> <span class="n">RandomForestClassifier</span>
+<dt>model_instance: lynxes.model.model.Model subtype</dt>
+<dd>the machine learning model &#8220;prediction&#8221; function to explain, such that
+predictions = predict_fn(data).</dd>
+<dt>ascending: boolean, default True</dt>
+<dd>Helps with ordering Ascending vs Descending</dd>
+<dt>filter_classes: array type</dt>
+<dd>The classes to run partial dependence on. Default None invokes all classes.
+Only used in classification models.</dd>
+</dl>
+<p>importances : Sorted Series</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">lynxes.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">lynxes.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="k">import</span> <span class="n">RandomForestClassier</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span> <span class="o">=</span> <span class="n">RandomForestClassier</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">rf</span><span class="p">,</span> <span class="n">examples</span><span class="o">=</span><span class="n">X</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">rf</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">feature_importance</span><span class="o">.</span><span class="n">feature_importance</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="last">Supports classification, multi-class classification, and regression.</p>
-</dd>
-<dt>filter_classes: array type</dt>
-<dd>The classes for which we compute feature importance. Useful
-if interested in features&#8217; contributions to a subset of classes.
-Default None invokes all classes. Only used in classification models.</dd>
-</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="skater.core.global_interpretation.feature_importance.FeatureImportance.plot_feature_importance">
-<code class="descname">plot_feature_importance</code><span class="sig-paren">(</span><em>predict_fn</em>, <em>filter_classes=None</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/feature_importance.html#FeatureImportance.plot_feature_importance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.feature_importance.FeatureImportance.plot_feature_importance" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot_feature_importance</code><span class="sig-paren">(</span><em>predict_fn</em>, <em>filter_classes=None</em>, <em>ascending=True</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/feature_importance.html#FeatureImportance.plot_feature_importance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.feature_importance.FeatureImportance.plot_feature_importance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes feature importance of all features related to a model instance,
-then plots the results.</p>
+then plots the results. Supports classification, multi-class classification, and regression.</p>
 <dl class="docutils">
-<dt>modelinstance: skater.model.model.Model subtype</dt>
-<dd><p class="first">the machine learning model &#8220;prediction&#8221; function to explain, such that
-predictions = predict_fn(data).</p>
-<p>For instance:
-&gt;&gt;&gt; from skater.model import InMemoryModel
-&gt;&gt;&gt; from skater.core.explanations import Interpretation
-&gt;&gt;&gt; from sklearn.ensemble import RandomForestClassier
-&gt;&gt;&gt; rf = RandomForestClassier()
-&gt;&gt;&gt; rf.fit(X,y)</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">rf</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">feature_importance</span><span class="o">.</span><span class="n">plot_feature_importance</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-</pre></div>
-</div>
-<p class="last">Supports classification, multi-class classification, and regression.</p>
-</dd>
+<dt>predict_fn: lynxes.model.model.Model subtype</dt>
+<dd>estimator &#8220;prediction&#8221; function to explain the predictive model. Could be probability scores
+or target values</dd>
 <dt>filter_classes: array type</dt>
 <dd>The classes to run partial dependence on. Default None invokes all classes.
 Only used in classification models.</dd>
+<dt>ascending: boolean, default True</dt>
+<dd>Helps with ordering Ascending vs Descending</dd>
 <dt>ax: matplotlib.axes._subplots.AxesSubplot</dt>
 <dd>existing subplot on which to plot feature importance. If none is provided,
 one will be created.</dd>
 </dl>
+<p>f: figure instance
+ax: matplotlib.axes._subplots.AxesSubplot</p>
+<blockquote>
+<div>could be used to for further modification to the plots</div></blockquote>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">lynxes.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">lynxes.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="k">import</span> <span class="n">RandomForestClassier</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span> <span class="o">=</span> <span class="n">RandomForestClassier</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">rf</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpretation</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span><span class="o">.</span><span class="n">feature_importance</span><span class="o">.</span><span class="n">plot_feature_importance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="k">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </dd></dl>
