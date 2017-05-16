@@ -42,8 +42,12 @@ class DeployedModel(ModelType):
 
             ['apple','banana'] are the unique_values of the classifier
 
-        examples:
+        examples: 
             optional examples to use to make inferences about the function.
+
+        request_kwargs: dict
+            any additional request headers that need to be passed, such as api
+            keys, content types, etc.
 
         log_level: int
             see skater.model.Model for details
