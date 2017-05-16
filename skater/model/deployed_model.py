@@ -42,7 +42,7 @@ class DeployedModel(ModelType):
 
             ['apple','banana'] are the unique_values of the classifier
 
-        examples: 
+        examples:
             optional examples to use to make inferences about the function.
 
         request_kwargs: dict
