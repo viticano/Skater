@@ -24,7 +24,7 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         Parameters
         ----------
-        model_instance: lynxes.model.model.Model subtype
+        model_instance: skater.model.model.Model subtype
             the machine learning model "prediction" function to explain, such that
             predictions = predict_fn(data).
         ascending: boolean, default True
@@ -40,8 +40,8 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         Examples
         --------
-            >>> from lynxes.model import InMemoryModel
-            >>> from lynxes.core.explanations import Interpretation
+            >>> from skater.model import InMemoryModel
+            >>> from skater.core.explanations import Interpretation
             >>> from sklearn.ensemble import RandomForestClassier
             >>> rf = RandomForestClassier()
             >>> rf.fit(X,y)
@@ -111,7 +111,7 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         Parameters
         ----------
-        predict_fn: lynxes.model.model.Model subtype
+        predict_fn: skater.model.model.Model subtype
             estimator "prediction" function to explain the predictive model. Could be probability scores
             or target values
         filter_classes: array type
@@ -131,8 +131,8 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         Examples
         --------
-            >>> from lynxes.model import InMemoryModel
-            >>> from lynxes.core.explanations import Interpretation
+            >>> from skater.model import InMemoryModel
+            >>> from skater.core.explanations import Interpretation
             >>> from sklearn.ensemble import RandomForestClassier
             >>> rf = RandomForestClassier()
             >>> rf.fit(X,y)

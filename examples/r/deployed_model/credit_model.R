@@ -24,7 +24,7 @@ Status ~ Status.of.existing.checking.account + Duration.in.month + Credit.histor
 , data=data
 )
 
-install.packages("rpart.plot")
+install.packages("rpart.plot", repos='http://cran.us.r-project.org')
 library(rpart.plot)
 # Visualize the tree
 # 1 is good, 2 is bad
