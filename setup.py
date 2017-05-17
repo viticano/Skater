@@ -35,16 +35,7 @@ def setup_package():
         author_email=about['__email__'],
         version=about['__version__'],
         url=about['__uri__'],
-        license=about['__license__'],
-        install_requires=[
-            'scikit-learn>=0.18',
-            'pandas>=0.19',
-            'lime>=0.1.1.21',
-            'requests',
-            'pathos==0.2.0',
-            'dill>=0.2.6'],
-        extras_require ={'all':'matplotlib'},
-         dependency_links=['https://github.com/datascienceinc/lime/tarball/v1-release#egg=lime-0.1.1.21'],
+        license=about['__license__']
         )
 
 if __name__ == '__main__':
