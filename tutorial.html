@@ -94,9 +94,12 @@
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Install Skater</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#the-skater-workflow">The skater workflow</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#creating-an-interpretation-object">Creating an interpretation object</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#creating-a-model">Creating a Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#creating-an-interpretation-object">Creating an interpretation object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#creating-a-model">Creating a Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#local-models">Local Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#models-behind-an-api">Models behind an API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#model-input-output-data-types">Model Input/Output Data Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#model-types">Model Types</a></li>
 </ul>
 </li>
 </ul>
@@ -167,11 +170,9 @@
             
   <div class="section" id="tutorial">
 <h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="the-skater-workflow">
-<h2>The skater workflow<a class="headerlink" href="#the-skater-workflow" title="Permalink to this headline">¶</a></h2>
-<p>The general workflow within the skater package is to create an interpretation, create a model, and run interpretation algorithms.</p>
 <div class="section" id="creating-an-interpretation-object">
-<h3>Creating an interpretation object<a class="headerlink" href="#creating-an-interpretation-object" title="Permalink to this headline">¶</a></h3>
+<h2>Creating an interpretation object<a class="headerlink" href="#creating-an-interpretation-object" title="Permalink to this headline">¶</a></h2>
+<p>The general workflow within the skater package is to create an interpretation, create a model, and run interpretation algorithms.</p>
 <p>An Interpretation consumes a dataset, and optionally some meta data like feature names and row ids.
 Internally, the Interpretation will generate a DataManager to handle data requests and sampling.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_boston</span>
@@ -185,14 +186,15 @@ Internally, the Interpretation will generate a DataManager to handle data reques
 <p>To begin using the Interpretation to explain models, we need to create a skater Model.</p>
 </div>
 <div class="section" id="creating-a-model">
-<h3>Creating a Model<a class="headerlink" href="#creating-a-model" title="Permalink to this headline">¶</a></h3>
+<h2>Creating a Model<a class="headerlink" href="#creating-a-model" title="Permalink to this headline">¶</a></h2>
 <p>To ensure formatting consistency, and common functionality among various model types and interfaces,
 we require that models passed to Interpretations to be wrapped in a skater Model object. Currently we support regression type
-models and classifiers that return probability scores. If you have a need for explaining classifiers that dont provide probability scores, please
-let us know: <a class="reference external" href="https://github.com/datascienceinc/model-interpretation/issues/82">https://github.com/datascienceinc/model-interpretation/issues/82</a>.</p>
+models and classifiers.</p>
+<div class="section" id="local-models">
+<h3>Local Models<a class="headerlink" href="#local-models" title="Permalink to this headline">¶</a></h3>
 <p>To create a skater model based on a local function or method, pass in the predict function to an InMemoryModel. A user can optionally pass data samples
 to the examples keyword argument. This is only used to infer output types and formats. Out of the box, skater allows models return numpy arrays and
-pandas dataframes. If youd like support for additional formats, please let us know: <a class="reference external" href="https://github.com/datascienceinc/model-interpretation/issues/117">https://github.com/datascienceinc/model-interpretation/issues/117</a></p>
+pandas dataframes. If you would like support for additional formats, please let us know: <a class="reference external" href="https://github.com/datascienceinc/model-interpretation/issues/117">https://github.com/datascienceinc/model-interpretation/issues/117</a></p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostedRegressor</span>
 <span class="n">gb</span> <span class="o">=</span> <span class="n">GradientBoostedRegressor</span><span class="p">()</span>
 <span class="n">gb</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
@@ -210,6 +212,9 @@ data structure.</p>
 <span class="n">model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">predict_as_dataframe</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:</span><span class="mi">10</span><span class="p">])</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="models-behind-an-api">
+<h3>Models behind an API<a class="headerlink" href="#models-behind-an-api" title="Permalink to this headline">¶</a></h3>
 <p>If your model is accessible through an api, use a DeployedModel, which wraps the requests library. DeployedModels require two functions,
 an input formatter and an output formatter, which speak to the requests library for posting and parsing.</p>
 <p>The input formatter takes a pandas DataFrame or a numpy ndarray, and returns an object (such as a dict) that can be converted to json
@@ -231,10 +236,71 @@ to be posted. The output formatter takes a requests.response as an input and ret
 <span class="n">model</span> <span class="o">=</span> <span class="n">DeployedModel</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">input_formatter</span><span class="p">,</span> <span class="n">output_formatter</span><span class="p">,</span> <span class="n">examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:</span><span class="mi">10</span><span class="p">],</span> <span class="n">request_kwargs</span><span class="o">=</span><span class="n">req_kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>With an Interpretation and a Model, one can run all skater interpretation algorithms.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">interpreter</span><span class="o">.</span><span class="n">feature_importance</span><span class="o">.</span><span class="n">feature_importance</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</div>
+<div class="section" id="model-input-output-data-types">
+<h3>Model Input/Output Data Types<a class="headerlink" href="#model-input-output-data-types" title="Permalink to this headline">¶</a></h3>
+<p>Skater natively supports models that accept numpy arrays and pandas dataframes as inputs.
+If your model requires a different input type, such as the case of a model API
+requiring JSON, or an H20 model requiring a H20Frame, then you&#8217;ll need to include
+an input formatter function to the Skater Model object, for example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="k">def</span> <span class="nf">numpy_to_json</span><span class="p">(</span><span class="n">numpy_array</span><span class="p">):</span>
+   <span class="k">return</span> <span class="p">[{</span><span class="s">&#39;data&#39;</span><span class="p">:</span><span class="n">x</span><span class="p">}</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">numpy_array</span><span class="p">]</span>
 
-<span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">plot_partial_dependence</span><span class="p">([</span><span class="n">features</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">features</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">model</span><span class="p">)</span>
+ <span class="n">skater_model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">,</span> <span class="n">input_formatter</span> <span class="o">=</span> <span class="n">numpy_to_json</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Likewise, Skater natively supports models that return numpy arrays or pandas dataframes.
+If your model returns another data structure, you&#8217;ll need to define an output_formatter
+that takes your model&#8217;s return type, and returns a numpy array or pandas dataframe.</p>
+</div>
+<div class="section" id="model-types">
+<h3>Model Types<a class="headerlink" href="#model-types" title="Permalink to this headline">¶</a></h3>
+<p>Skater supports regressions, classifiers without probability scores, and classifiers
+with probability scores.</p>
+<p>Skater expects that regression models run on n examples will return numerical arrays
+of shape (n, ) or (n, 1), such as the following regression output run on 3 examples:</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.1</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Skater expects that classification models with probability scores of k classes run
+on n examples will return numerical arrays of shape (n, k), where elements are
+between 0 and 1 and rows sum to 1, such as the following classifier output run
+on 4 examples with 3 classes:</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">.</span><span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">32</span><span class="p">,</span> <span class="o">.</span><span class="mi">68</span><span class="p">],</span>
+         <span class="p">[</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">2</span><span class="p">,</span>  <span class="o">.</span><span class="mi">7</span><span class="p">],</span>
+         <span class="p">[</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="o">.</span><span class="mi">5</span><span class="p">,</span>  <span class="o">.</span><span class="mi">0</span><span class="p">],</span>
+         <span class="p">[</span><span class="o">.</span><span class="mi">8</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">,</span>  <span class="o">.</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Skater expects that classification models without probability scores of k classes run
+on n examples will return arrays of shape (n, ) or (n, 1), such as the following
+classifier run on 3 examples with 2 classes:</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s">&#39;apple&#39;</span><span class="p">,</span><span class="s">&#39;banana&#39;</span><span class="p">,</span><span class="s">&#39;banana&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Note that in this last case of classifiers that do not provide probabilities for
+all classes, there is no implicit definition of types of classes the model can
+predict. Therefore, these models require <cite>unique_values</cite> keyword argument when
+initializing a Skater model, which defines the unique classes that a model might
+return,</p>
+<p>such as:</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">unique_classes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">skater_model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">classifier</span><span class="o">.</span><span class="n">predict</span><span class="p">,</span> <span class="n">unique_classes</span><span class="o">=</span><span class="n">unique_classes</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="n">unique_classes</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;apple&#39;</span><span class="p">,</span><span class="s">&#39;banana&#39;</span><span class="p">]</span>
+<span class="n">skater_model</span> <span class="o">=</span> <span class="n">InMemoryModel</span><span class="p">(</span><span class="n">classifier</span><span class="o">.</span><span class="n">predict</span><span class="p">,</span> <span class="n">unique_classes</span><span class="o">=</span><span class="n">unique_classes</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>With an Interpretation and a Model, one can run all skater interpretation algorithms.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">interpreter</span><span class="o">.</span><span class="n">feature_importance</span><span class="o">.</span><span class="n">feature_importance</span><span class="p">(</span><span class="n">skater_model</span><span class="p">)</span>
+
+<span class="n">interpreter</span><span class="o">.</span><span class="n">partial_dependence</span><span class="o">.</span><span class="n">plot_partial_dependence</span><span class="p">([</span><span class="n">features</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">features</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">skater_model</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>For details on the interpretation algorithms currently available, please see the documentation for:</p>
