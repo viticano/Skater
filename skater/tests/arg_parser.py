@@ -16,6 +16,4 @@ def create_parser():
     parser.add_argument('--dim', default=3, type=int)
     parser.add_argument('--r_deploy_test', action='store_true')
     parser.add_argument('--python_deploy_test', action='store_true')
-    #parser.add_argument('--r_deploy_test', default=False, type=bool)
-    #parser.add_argument('--python_deploy_test', default=False, type=bool)
     return parser

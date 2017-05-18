@@ -289,8 +289,8 @@ class PartialDependence(BaseGlobalInterpretation):
 
         if not modelinstance.has_metadata:
             examples = self.data_set.generate_sample(strategy='random-choice',
-                                                        sample=True,
-                                                        n_samples_from_dataset=10)
+                                                     sample=True,
+                                                     n_samples_from_dataset=10)
             examples = DataManager(examples, feature_names=self.data_set.feature_ids)
             modelinstance._build_model_metadata(examples)
 
