@@ -1,14 +1,13 @@
+
 Tutorial
 ===========
 
 
-The skater workflow
+Creating an interpretation object
 ------------------
 
 The general workflow within the skater package is to create an interpretation, create a model, and run interpretation algorithms.
 
-Creating an interpretation object
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 An Interpretation consumes a dataset, and optionally some meta data like feature names and row ids.
 Internally, the Interpretation will generate a DataManager to handle data requests and sampling.
 
@@ -24,15 +23,16 @@ Internally, the Interpretation will generate a DataManager to handle data reques
 To begin using the Interpretation to explain models, we need to create a skater Model.
 
 Creating a Model
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------
 To ensure formatting consistency, and common functionality among various model types and interfaces,
 we require that models passed to Interpretations to be wrapped in a skater Model object. Currently we support regression type
-models and classifiers that return probability scores. If you have a need for explaining classifiers that dont provide probability scores, please
-let us know: https://github.com/datascienceinc/model-interpretation/issues/82.
+models and classifiers.
 
+Local Models
+~~~~~~~~~~~~~~~~~~~~~~~
 To create a skater model based on a local function or method, pass in the predict function to an InMemoryModel. A user can optionally pass data samples
 to the examples keyword argument. This is only used to infer output types and formats. Out of the box, skater allows models return numpy arrays and
-pandas dataframes. If youd like support for additional formats, please let us know: https://github.com/datascienceinc/model-interpretation/issues/117
+pandas dataframes. If you would like support for additional formats, please let us know: https://github.com/datascienceinc/model-interpretation/issues/117
 
 .. code-block:: python
 
@@ -54,6 +54,8 @@ data structure.
    from skater.model import InMemoryModel
    model = InMemoryModel(predict_as_dataframe, examples = X[:10])
 
+Models behind an API
+~~~~~~~~~~~~~~~~~~~~
 If your model is accessible through an api, use a DeployedModel, which wraps the requests library. DeployedModels require two functions,
 an input formatter and an output formatter, which speak to the requests library for posting and parsing.
 
@@ -82,13 +84,93 @@ If your api requires additional configuration like cookies, use request_kwargs:
    model = DeployedModel(uri, input_formatter, output_formatter, examples = X[:10], request_kwargs=req_kwargs)
 
 
+Model Input/Output Data Types
+~~~~~~~~~~~~~~~~~~~~~~~
+Skater natively supports models that accept numpy arrays and pandas dataframes as inputs.
+If your model requires a different input type, such as the case of a model API
+requiring JSON, or an H20 model requiring a H20Frame, then you'll need to include
+an input formatter function to the Skater Model object, for example:
+
+
+::
+
+   def numpy_to_json(numpy_array):
+      return [{'data':x} for x in numpy_array]
+
+    skater_model = InMemoryModel(model.predict, input_formatter = numpy_to_json)
+
+
+Likewise, Skater natively supports models that return numpy arrays or pandas dataframes.
+If your model returns another data structure, you'll need to define an output_formatter
+that takes your model's return type, and returns a numpy array or pandas dataframe.
+
+Model Types
+~~~~~~~~~~~~~~~~~~~~~~~
+Skater supports regressions, classifiers without probability scores, and classifiers
+with probability scores.
+
+Skater expects that regression models run on n examples will return numerical arrays
+of shape (n, ) or (n, 1), such as the following regression output run on 3 examples:
+
+::
+
+   np.array([1.2, -2.2, 3.1])
+
+
+Skater expects that classification models with probability scores of k classes run
+on n examples will return numerical arrays of shape (n, k), where elements are
+between 0 and 1 and rows sum to 1, such as the following classifier output run
+on 4 examples with 3 classes:
+
+::
+
+   np.array([.0, .32, .68],
+            [.1, .2,  .7],
+            [.5, .5,  .0],
+            [.8, .1,  .1])
+
+Skater expects that classification models without probability scores of k classes run
+on n examples will return arrays of shape (n, ) or (n, 1), such as the following
+classifier run on 3 examples with 2 classes:
+
+::
+
+   np.array(['apple','banana','banana'])
+
+or
+
+::
+
+   np.array([0, 1, 1])
+
+Note that in this last case of classifiers that do not provide probabilities for
+all classes, there is no implicit definition of types of classes the model can
+predict. Therefore, these models require `unique_values` keyword argument when
+initializing a Skater model, which defines the unique classes that a model might
+return,
+
+such as:
+
+::
+
+    unique_classes = [0, 1]
+    skater_model = InMemoryModel(classifier.predict, unique_classes=unique_classes)
+
+or
+
+::
+
+    unique_classes = ['apple','banana']
+    skater_model = InMemoryModel(classifier.predict, unique_classes=unique_classes)
+
+
 With an Interpretation and a Model, one can run all skater interpretation algorithms.
 
 .. code-block:: python
 
-   interpreter.feature_importance.feature_importance(model)
+   interpreter.feature_importance.feature_importance(skater_model)
 
-   interpreter.partial_dependence.plot_partial_dependence([features[0], features[1]], model)
+   interpreter.partial_dependence.plot_partial_dependence([features[0], features[1]], skater_model)
 
 For details on the interpretation algorithms currently available, please see the documentation for:
 
