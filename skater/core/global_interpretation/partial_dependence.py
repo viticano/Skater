@@ -151,7 +151,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
     def partial_dependence(self, feature_ids, modelinstance, filter_classes=None, grid=None,
                            grid_resolution=30, n_jobs=-1, grid_range=None, sample=True,
-                           sampling_strategy='random-choice', n_samples=500,
+                           sampling_strategy='random-choice', n_samples=1000,
                            bin_count=50, samples_per_bin=10, return_metadata=False):
 
         """
@@ -287,6 +287,13 @@ class PartialDependence(BaseGlobalInterpretation):
 
         self._check_grid_range(grid_range)
 
+        if not modelinstance.has_metadata:
+            examples = self.data_set.generate_sample(strategy='random-choice',
+                                                        sample=True,
+                                                        n_samples_from_dataset=10)
+            examples = DataManager(examples, feature_names=self.data_set.feature_ids)
+            modelinstance._build_model_metadata(examples)
+
         # if you dont pass a grid, build one.
         grid = np.array(grid)
         if not grid.any():
@@ -360,7 +367,7 @@ class PartialDependence(BaseGlobalInterpretation):
     def plot_partial_dependence(self, feature_ids, modelinstance, filter_classes=None,
                                 grid=None, grid_resolution=30, grid_range=None,
                                 n_jobs=-1, sample=True, sampling_strategy='random-choice',
-                                n_samples=10000, bin_count=50, samples_per_bin=10,
+                                n_samples=1000, bin_count=50, samples_per_bin=10,
                                 with_variance=False, figsize=(16, 10)):
         """
         Computes partial_dependence of a set of variables. Essentially approximates
