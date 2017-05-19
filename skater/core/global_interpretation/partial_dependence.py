@@ -690,9 +690,10 @@ class PartialDependence(BaseGlobalInterpretation):
 
             # add 2D color scale
             ax_colors = pyplot.subplot2grid((3, 3), (1, 2), colspan=1, rowspan=1)
-            ax_colors = plot_2d_color_scale(xmin, xmax, ymin, ymax, plot_point=mean_point, ax=ax_colors)
-            ax_colors.set_xlabel("Local Impact {}".format(feature1))
-            ax_colors.set_ylabel("Local Impact {}".format(feature2), rotation=270, labelpad=10)
+            ax_colors = plot_2d_color_scale(xmin, xmax, ymin, ymax, ax=ax_colors)
+            ax_colors.set_xlabel("{}".format(feature1))
+            ax_colors.set_ylabel("{}".format(feature2), rotation=270, labelpad=10)
+            ax_colors.set_title("Gradient of PDP")
             ax_colors.yaxis.tick_right()
             ax_colors.yaxis.set_label_position("right")
             ax_colors.xaxis.set_major_formatter(tick_formatter())
