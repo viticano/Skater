@@ -684,9 +684,10 @@ class PartialDependence(BaseGlobalInterpretation):
             axis_list.append(ax)
 
             ax.plot_surface(X, Y, Z, alpha=alpha, facecolors=color_gradient, linewidth=0., rstride=1, cstride=1)
-            dx_mean = np.mean(gradient_x)
-            dy_mean = np.mean(gradient_y)
-            mean_point = (dx_mean, dy_mean)
+            # in case we'd like to return these values to the user
+            # dx_mean = np.mean(gradient_x)
+            # dy_mean = np.mean(gradient_y)
+            # mean_point = (dx_mean, dy_mean)
 
             # add 2D color scale
             ax_colors = pyplot.subplot2grid((3, 3), (1, 2), colspan=1, rowspan=1)
