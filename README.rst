@@ -64,8 +64,6 @@ adding a conda distribution is on the roadmap.
 pip
 ~~~~~~~~~~~~~~~~
 
-TODO: Add a note on whether we distribute sources/binaries
-
 When using pip, to ensure your system is not modified by an installation, it
 is recommended that you use a virtual environment (virtualenv, conda environment).
 
