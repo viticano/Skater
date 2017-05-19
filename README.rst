@@ -9,14 +9,14 @@
 
 Skater
 ===========
-Skater is a open source python package for model agnostic interpretation of predictive models.
+Skater is a python package for model agnostic interpretation of predictive models.
 With Skater, you can unpack the internal mechanics of arbitrary models; as long
 as you can obtain inputs, and use a function to obtain outputs, you can use
-Skater to learn about the models internal decision criteria.
+Skater to learn about the models internal decision policies.
 
 
-The package was originally developed by Aaron Kramer and Pramit Choudhary at DataScience.com
-to help enable data scientists provide model insights to team members and 3rd parties.
+The package was originally developed by Aaron Kramer, Pramit Choudhary and internal DataScience Team at DataScience.com
+to help enable practitioners explain and interpret predictive "black boxes" in a human interpretable way.
 
 .. image:: https://api.travis-ci.com/repositories/datascienceinc/Skater.svg?token=okdWYn5kDgeoCPJZGPEz&branch=master
     :target: https://travis-ci.com/datascienceinc/Skater
@@ -44,14 +44,12 @@ to help enable data scientists provide model insights to team members and 3rd pa
 
 =========================  ===
 **Feature Requests/Bugs**  `GitHub issue tracker`_
-**Usage questions**        `StackOverflow`_, `Gitter chat TODO`_, `Reddit user group TODO`_
-**General discussion**     `Gitter chat TODO`_, `Reddit user group TODO`_
+**Usage questions**        `Gitter chat`_
+**General discussion**     `Gitter chat`_
 =========================  ===
 
 .. _GitHub issue tracker: https://github.com/datascienceinc/Skater/issues
-.. _StackOverflow: http://stackoverflow.com/questions/tagged/skater
-.. _Gitter chat TODO: https://gitter.im/datascienceinc/skater
-.. _Reddit user group TODO: https://www.reddit.com/r/spacynlp
+.. _Gitter chat: https://gitter.im/datascienceinc/skater
 
 Install Skater
 ================
@@ -65,8 +63,6 @@ adding a conda distribution is on the roadmap.
 
 pip
 ~~~~~~~~~~~~~~~~
-
-TODO: Add a note on whether we distribute sources/binaries
 
 When using pip, to ensure your system is not modified by an installation, it
 is recommended that you use a virtual environment (virtualenv, conda environment).
@@ -115,10 +111,15 @@ The code below illustrates a typical workflow with the Skater package.
 
 Testing
 ~~~~~~~
-
+1. If repo is cloned:
 ::
 
-    python skate/tests/all_tests.py --debug --n=1000 --dim=3 --seed=1
+    python skate/tests/all_tests.py
+
+2. If pip installed:
+::
+
+    python -c "from skater.tests.all_tests import run_tests; run_tests()"
 
 
 .. |Build Status-master| image:: https://api.travis-ci.com/repositories/datascienceinc/Skater.svg?token=okdWYn5kDgeoCPJZGPEz&branch=master
