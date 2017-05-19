@@ -146,6 +146,10 @@ def plot_2d_color_scale(x1_min, x1_max, x2_min, x2_max, plot_point=None,
         raise (MatplotlibDisplayError("Matplotlib unable to open display"))
 
     # xmin, xmax = min(0, np.percentile(x, 3)), max(np.percentile(x, 97), 0)
+
+    if ax is None:
+        f, ax = pyplot.subplots(1)
+
     x1_min, x1_max, x1_buffer = build_buffer(x1_min, x1_max, buffer_prop=x_buffer_prop)
     x2_min, x2_max, x2_buffer = build_buffer(x2_min, x2_max, buffer_prop=y_buffer_prop)
     ax.set_xlim(x1_min, x1_max)

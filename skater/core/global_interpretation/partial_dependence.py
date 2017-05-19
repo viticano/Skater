@@ -151,7 +151,7 @@ class PartialDependence(BaseGlobalInterpretation):
 
     def partial_dependence(self, feature_ids, modelinstance, filter_classes=None, grid=None,
                            grid_resolution=30, n_jobs=-1, grid_range=None, sample=True,
-                           sampling_strategy='random-choice', n_samples=500,
+                           sampling_strategy='random-choice', n_samples=1000,
                            bin_count=50, samples_per_bin=10, return_metadata=False):
 
         """
@@ -287,6 +287,13 @@ class PartialDependence(BaseGlobalInterpretation):
 
         self._check_grid_range(grid_range)
 
+        if not modelinstance.has_metadata:
+            examples = self.data_set.generate_sample(strategy='random-choice',
+                                                     sample=True,
+                                                     n_samples_from_dataset=10)
+            examples = DataManager(examples, feature_names=self.data_set.feature_ids)
+            modelinstance._build_model_metadata(examples)
+
         # if you dont pass a grid, build one.
         grid = np.array(grid)
         if not grid.any():
@@ -360,7 +367,7 @@ class PartialDependence(BaseGlobalInterpretation):
     def plot_partial_dependence(self, feature_ids, modelinstance, filter_classes=None,
                                 grid=None, grid_resolution=30, grid_range=None,
                                 n_jobs=-1, sample=True, sampling_strategy='random-choice',
-                                n_samples=10000, bin_count=50, samples_per_bin=10,
+                                n_samples=1000, bin_count=50, samples_per_bin=10,
                                 with_variance=False, figsize=(16, 10)):
         """
         Computes partial_dependence of a set of variables. Essentially approximates
@@ -677,15 +684,17 @@ class PartialDependence(BaseGlobalInterpretation):
             axis_list.append(ax)
 
             ax.plot_surface(X, Y, Z, alpha=alpha, facecolors=color_gradient, linewidth=0., rstride=1, cstride=1)
-            dx_mean = np.mean(gradient_x)
-            dy_mean = np.mean(gradient_y)
-            mean_point = (dx_mean, dy_mean)
+            # in case we'd like to return these values to the user
+            # dx_mean = np.mean(gradient_x)
+            # dy_mean = np.mean(gradient_y)
+            # mean_point = (dx_mean, dy_mean)
 
             # add 2D color scale
             ax_colors = pyplot.subplot2grid((3, 3), (1, 2), colspan=1, rowspan=1)
-            ax_colors = plot_2d_color_scale(xmin, xmax, ymin, ymax, plot_point=mean_point, ax=ax_colors)
-            ax_colors.set_xlabel("Local Impact {}".format(feature1))
-            ax_colors.set_ylabel("Local Impact {}".format(feature2), rotation=270, labelpad=10)
+            ax_colors = plot_2d_color_scale(xmin, xmax, ymin, ymax, ax=ax_colors)
+            ax_colors.set_xlabel("{}".format(feature1))
+            ax_colors.set_ylabel("{}".format(feature2), rotation=270, labelpad=10)
+            ax_colors.set_title("Gradient of PDP")
             ax_colors.yaxis.tick_right()
             ax_colors.yaxis.set_label_position("right")
             ax_colors.xaxis.set_major_formatter(tick_formatter())

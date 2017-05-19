@@ -65,6 +65,7 @@ class ModelType(object):
         self.unique_values = unique_values
         self.input_formatter = input_formatter or self.identity_function
         self.output_formatter = output_formatter or self.identity_function
+        self.has_metadata = False
 
         if examples is not None:
             self.input_type = type(examples)
@@ -202,6 +203,11 @@ class ModelType(object):
         reports = self.model_report(dataset.data)
         for report in reports:
             self.logger.debug(report)
+
+        if self.target_names is None:
+            self.target_names = range(self.n_classes)
+
+        self.has_metadata = True
 
 
     def predict_function_transformer(self, output):
