@@ -178,10 +178,13 @@ class DataManager(object):
         feature_info = {}
         for feature in self.feature_ids:
             x = self[feature]
+            samples = self.generate_column_sample(feature, n_samples=10)
+            samples_are_numeric = map(StaticTypes.data_types.is_numeric, samples)
+            is_numeric = all(samples_are_numeric)
             feature_info[feature] = {
                 'type': self.dtypes.loc[feature],
                 'unique': len(np.unique(x)),
-                'numeric': StaticTypes.data_types.is_dtype_numeric(x.dtype)
+                'numeric': is_numeric
             }
         return feature_info
 

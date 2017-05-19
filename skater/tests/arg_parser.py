@@ -14,4 +14,6 @@ def create_parser():
     parser.add_argument('--seed', default=1, type=int)
     parser.add_argument('--n', default=1000, type=int)
     parser.add_argument('--dim', default=3, type=int)
+    parser.add_argument('--r_deploy_test', action='store_true')
+    parser.add_argument('--python_deploy_test', action='store_true')
     return parser
