@@ -22,7 +22,7 @@ def setup_package():
             about = {}
             exec(f.read(), about)
 
-        with io.open(os.path.join(root, 'README.rst'), encoding='utf8') as f:
+        with io.open(os.path.join(root, 'README.md'), encoding='utf8') as f:
             readme = f.read()
 
     setup(
@@ -39,12 +39,11 @@ def setup_package():
         install_requires=[
             'scikit-learn>=0.18',
             'pandas>=0.19',
-            'lime>=0.1.1.21',
+            'ds-lime>=0.1.1.21',
             'requests',
             'pathos==0.2.0',
             'dill>=0.2.6'],
         extras_require ={'all':'matplotlib'},
-         dependency_links=['https://github.com/datascienceinc/lime/tarball/v1-release#egg=lime-0.1.1.21'],
         )
 
 if __name__ == '__main__':
