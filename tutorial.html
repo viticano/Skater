@@ -241,7 +241,7 @@ to be posted. The output formatter takes a requests.response as an input and ret
 <h3>Model Input/Output Data Types<a class="headerlink" href="#model-input-output-data-types" title="Permalink to this headline">¶</a></h3>
 <p>Skater natively supports models that accept numpy arrays and pandas dataframes as inputs.
 If your model requires a different input type, such as the case of a model API
-requiring JSON, or an H20 model requiring a H20Frame, then you&#8217;ll need to include
+requiring JSON, or an H20 model requiring a H20Frame, then you’ll need to include
 an input formatter function to the Skater Model object, for example:</p>
 <div class="highlight-default"><div class="highlight"><pre><span class="k">def</span> <span class="nf">numpy_to_json</span><span class="p">(</span><span class="n">numpy_array</span><span class="p">):</span>
    <span class="k">return</span> <span class="p">[{</span><span class="s">&#39;data&#39;</span><span class="p">:</span><span class="n">x</span><span class="p">}</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">numpy_array</span><span class="p">]</span>
@@ -250,8 +250,8 @@ an input formatter function to the Skater Model object, for example:</p>
 </pre></div>
 </div>
 <p>Likewise, Skater natively supports models that return numpy arrays or pandas dataframes.
-If your model returns another data structure, you&#8217;ll need to define an output_formatter
-that takes your model&#8217;s return type, and returns a numpy array or pandas dataframe.</p>
+If your model returns another data structure, you’ll need to define an output_formatter
+that takes your model’s return type, and returns a numpy array or pandas dataframe.</p>
 </div>
 <div class="section" id="model-types">
 <h3>Model Types<a class="headerlink" href="#model-types" title="Permalink to this headline">¶</a></h3>

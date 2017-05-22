@@ -232,15 +232,15 @@ feature names and row indices.</p>
 
 <dl class="method">
 <dt id="skater.data.DataManager.generate_sample">
-<code class="descclassname">DataManager.</code><code class="descname">generate_sample</code><span class="sig-paren">(</span><em>sample=True</em>, <em>strategy='random-choice'</em>, <em>n_samples_from_dataset=1000</em>, <em>replace=True</em>, <em>samples_per_bin=10</em>, <em>bin_count=50</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/data/datamanager.html#DataManager.generate_sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.data.DataManager.generate_sample" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">DataManager.</code><code class="descname">generate_sample</code><span class="sig-paren">(</span><em>sample=True</em>, <em>strategy=’random-choice’</em>, <em>n_samples_from_dataset=1000</em>, <em>replace=True</em>, <em>samples_per_bin=10</em>, <em>bin_count=50</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/data/datamanager.html#DataManager.generate_sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.data.DataManager.generate_sample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method for generating data from the dataset.</p>
 <blockquote>
 <div><dl class="docutils">
 <dt>sample(Bool):</dt>
-<dd>If False, we&#8217;ll take the full dataset, otherwise we&#8217;ll sample.</dd>
+<dd>If False, we’ll take the full dataset, otherwise we’ll sample.</dd>
 <dt>n_samples_from_dataset(int):</dt>
 <dd>Specifies the number of samples to return. Only implemented
-if strategy is &#8220;random-choice&#8221;.</dd>
+if strategy is “random-choice”.</dd>
 <dt>replace(Bool):</dt>
 <dd>Bool for sampling with or without replacement</dd>
 <dt>samples_per_bin(int):</dt>
@@ -258,7 +258,7 @@ yj of xi, we will fix xi = yj for every observation in X.</p>
 <blockquote>
 <div><dl class="docutils">
 <dt>feature_ids(list):</dt>
-<dd>Feature names for which we&#8217;ll generate a grid. Must be contained
+<dd>Feature names for which we’ll generate a grid. Must be contained
 by self.feature_ids</dd>
 <dt>grid_resolution(int):</dt>
 <dd>The number of unique values to choose for each feature.</dd>
@@ -275,7 +275,7 @@ the 5th and 95th percentiles, respectively.</dd>
 
 <dl class="method">
 <dt id="skater.data.DataManager.generate_column_sample">
-<code class="descclassname">DataManager.</code><code class="descname">generate_column_sample</code><span class="sig-paren">(</span><em>feature_id</em>, <em>n_samples=None</em>, <em>method='random-choice'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/data/datamanager.html#DataManager.generate_column_sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.data.DataManager.generate_column_sample" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">DataManager.</code><code class="descname">generate_column_sample</code><span class="sig-paren">(</span><em>feature_id</em>, <em>n_samples=None</em>, <em>method=’random-choice’</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/data/datamanager.html#DataManager.generate_column_sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.data.DataManager.generate_column_sample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sample a single feature from the data set.</p>
 <dl class="docutils">
 <dt>feature_id: hashable</dt>

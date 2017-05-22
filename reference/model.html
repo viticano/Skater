@@ -228,10 +228,10 @@ and convert them to numpy arrays or dataframes.</dd>
 <dd>optional names of classes that describe model outputs.</dd>
 <dt>unique_values: array type</dt>
 <dd><p class="first">The set of possible output values. Only use on classifier models that
-return &#8220;best guess&#8221; predictions, not probability scores, e.g.</p>
-<p>model.predict(fruit1) -&gt; &#8216;apple&#8217;
-model.predict(fruit2) -&gt; &#8216;banana&#8217;</p>
-<p class="last">[&#8216;apple&#8217;,&#8217;banana&#8217;] are the unique_values of the classifier</p>
+return “best guess” predictions, not probability scores, e.g.</p>
+<p>model.predict(fruit1) -&gt; ‘apple’
+model.predict(fruit2) -&gt; ‘banana’</p>
+<p class="last">[‘apple’,’banana’] are the unique_values of the classifier</p>
 </dd>
 <dt>examples: numpy.array or pandas.dataframe</dt>
 <dd>optional examples to use to make inferences about the function.</dd>
@@ -266,13 +266,16 @@ request objects and convert them to array types.</dd>
 <dd>see skater.model.Model for details</dd>
 <dt>unique_values: array type</dt>
 <dd><p class="first">The set of possible output values. Only use on classifier models that
-return &#8220;best guess&#8221; predictions, not probability scores, e.g.</p>
-<p>model.predict(fruit1) -&gt; &#8216;apple&#8217;
-model.predict(fruit2) -&gt; &#8216;banana&#8217;</p>
-<p class="last">[&#8216;apple&#8217;,&#8217;banana&#8217;] are the unique_values of the classifier</p>
+return “best guess” predictions, not probability scores, e.g.</p>
+<p>model.predict(fruit1) -&gt; ‘apple’
+model.predict(fruit2) -&gt; ‘banana’</p>
+<p class="last">[‘apple’,’banana’] are the unique_values of the classifier</p>
 </dd>
 <dt>examples:</dt>
 <dd>optional examples to use to make inferences about the function.</dd>
+<dt>request_kwargs: dict</dt>
+<dd>any additional request headers that need to be passed, such as api
+keys, content types, etc.</dd>
 <dt>log_level: int</dt>
 <dd>see skater.model.Model for details</dd>
 </dl>

@@ -236,8 +236,8 @@ partial dependence and feature importance.</p>
 <p>Feature importance is generic term for the degree to which a predictive model relies on a particular
 feature. skater feature importance implementation is based on an information theoretic criteria,
 measuring the entropy in the change of predictions, given a perturbation of a given feature.
-The intuition is that the more a model&#8217;s decision criteria depend on a feature, the
-more we&#8217;ll see predictions change as a function of perturbing a feature.</p>
+The intuition is that the more a model’s decision criteria depend on a feature, the
+more we’ll see predictions change as a function of perturbing a feature.</p>
 <dl class="class">
 <dt id="skater.core.global_interpretation.feature_importance.FeatureImportance">
 <em class="property">class </em><code class="descclassname">skater.core.global_interpretation.feature_importance.</code><code class="descname">FeatureImportance</code><span class="sig-paren">(</span><em>interpreter</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/feature_importance.html#FeatureImportance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.feature_importance.FeatureImportance" title="Permalink to this definition">¶</a></dt>
@@ -248,8 +248,8 @@ more we&#8217;ll see predictions change as a function of perturbing a feature.</
 <dd><p>Computes feature importance of all features related to a model instance.
 Supports classification, multi-class classification, and regression.</p>
 <dl class="docutils">
-<dt>model_instance: lynxes.model.model.Model subtype</dt>
-<dd>the machine learning model &#8220;prediction&#8221; function to explain, such that
+<dt>model_instance: skater.model.model.Model subtype</dt>
+<dd>the machine learning model “prediction” function to explain, such that
 predictions = predict_fn(data).</dd>
 <dt>ascending: boolean, default True</dt>
 <dd>Helps with ordering Ascending vs Descending</dd>
@@ -258,8 +258,8 @@ predictions = predict_fn(data).</dd>
 Only used in classification models.</dd>
 </dl>
 <p>importances : Sorted Series</p>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">lynxes.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">lynxes.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="k">import</span> <span class="n">RandomForestClassier</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span> <span class="o">=</span> <span class="n">RandomForestClassier</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
@@ -277,8 +277,8 @@ Only used in classification models.</dd>
 <dd><p>Computes feature importance of all features related to a model instance,
 then plots the results. Supports classification, multi-class classification, and regression.</p>
 <dl class="docutils">
-<dt>predict_fn: lynxes.model.model.Model subtype</dt>
-<dd>estimator &#8220;prediction&#8221; function to explain the predictive model. Could be probability scores
+<dt>predict_fn: skater.model.model.Model subtype</dt>
+<dd>estimator “prediction” function to explain the predictive model. Could be probability scores
 or target values</dd>
 <dt>filter_classes: array type</dt>
 <dd>The classes to run partial dependence on. Default None invokes all classes.
@@ -293,8 +293,8 @@ one will be created.</dd>
 ax: matplotlib.axes._subplots.AxesSubplot</p>
 <blockquote>
 <div>could be used to for further modification to the plots</div></blockquote>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">lynxes.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">lynxes.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.model</span> <span class="k">import</span> <span class="n">InMemoryModel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skater.core.explanations</span> <span class="k">import</span> <span class="n">Interpretation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="k">import</span> <span class="n">RandomForestClassier</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span> <span class="o">=</span> <span class="n">RandomForestClassier</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
@@ -339,15 +339,15 @@ in a regression model).</p>
 
 <dl class="method">
 <dt id="skater.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence">
-<code class="descname">partial_dependence</code><span class="sig-paren">(</span><em>feature_ids</em>, <em>modelinstance</em>, <em>filter_classes=None</em>, <em>grid=None</em>, <em>grid_resolution=30</em>, <em>n_jobs=-1</em>, <em>grid_range=None</em>, <em>sample=True</em>, <em>sampling_strategy='random-choice'</em>, <em>n_samples=500</em>, <em>bin_count=50</em>, <em>samples_per_bin=10</em>, <em>return_metadata=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/partial_dependence.html#PartialDependence.partial_dependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence" title="Permalink to this definition">¶</a></dt>
+<code class="descname">partial_dependence</code><span class="sig-paren">(</span><em>feature_ids</em>, <em>modelinstance</em>, <em>filter_classes=None</em>, <em>grid=None</em>, <em>grid_resolution=30</em>, <em>n_jobs=-1</em>, <em>grid_range=None</em>, <em>sample=True</em>, <em>sampling_strategy=’random-choice’</em>, <em>n_samples=1000</em>, <em>bin_count=50</em>, <em>samples_per_bin=10</em>, <em>return_metadata=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/partial_dependence.html#PartialDependence.partial_dependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.partial_dependence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Approximates the partial dependence of the predict_fn with respect to the
 variables passed.</p>
 <dl class="docutils">
 <dt>feature_ids: list</dt>
 <dd>the names/ids of the features for which partial dependence is to be computed.
-Note that the algorithm&#8217;s complexity scales exponentially with additional
+Note that the algorithm’s complexity scales exponentially with additional
 features, so generally one should only look at one or two features at a
-time. These feature ids must be available in the class&#8217;s associated DataSet.
+time. These feature ids must be available in the class’s associated DataSet.
 As of now, we only support looking at 1 or 2 features at a time.</dd>
 <dt>modelinstance: skater.model.model.Model subtype</dt>
 <dd><p class="first">an estimator function of a fitted model used to derive prediction. Supports
@@ -368,7 +368,7 @@ dataset.</dd>
 is 5% to 95%, then that range will be cut into &lt;grid_resolution&gt;
 equally size bins. Defaults to 30.</dd>
 <dt>n_jobs: int</dt>
-<dd>The number of CPUs to use to compute the PDs. -1 means &#8216;all CPUs&#8217;.
+<dd>The number of CPUs to use to compute the PDs. -1 means ‘all CPUs’.
 Defaults to using all cores(-1).</dd>
 <dt>grid_range: tuple</dt>
 <dd>the percentile extrama to consider. 2 element tuple, increasing, bounded
@@ -380,18 +380,18 @@ between 0 and 1.</dd>
 details.</dd>
 <dt>n_samples: int</dt>
 <dd>The number of samples to use from the original dataset. Note this is
-only active if sample = True and sampling strategy = &#8216;uniform&#8217;. If
-using &#8216;uniform-over-similarity-ranks&#8217;, use samples per bin</dd>
+only active if sample = True and sampling strategy = ‘uniform’. If
+using ‘uniform-over-similarity-ranks’, use samples per bin</dd>
 <dt>bin_count: int</dt>
 <dd>The number of bins to use when using the similarity based sampler. Note
 this is only active if sample = True and
-sampling_strategy = &#8216;uniform-over-similarity-ranks&#8217;.
+sampling_strategy = ‘uniform-over-similarity-ranks’.
 total samples = bin_count * samples per bin.</dd>
 <dt>samples_per_bin: int</dt>
 <dd>The number of samples to collect for each bin within the sampler. Note
 this is only active if sample = True and
-sampling_strategy = &#8216;uniform-over-similarity-ranks&#8217;. If using
-sampling_strategy = &#8216;uniform&#8217;, use n_samples.
+sampling_strategy = ‘uniform-over-similarity-ranks’. If using
+sampling_strategy = ‘uniform’, use n_samples.
 total samples = bin_count * samples per bin.</dd>
 </dl>
 <p>return_metadata: boolean</p>
@@ -428,16 +428,16 @@ total samples = bin_count * samples per bin.</dd>
 
 <dl class="method">
 <dt id="skater.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence">
-<code class="descname">plot_partial_dependence</code><span class="sig-paren">(</span><em>feature_ids</em>, <em>modelinstance</em>, <em>filter_classes=None</em>, <em>grid=None</em>, <em>grid_resolution=30</em>, <em>grid_range=None</em>, <em>n_jobs=-1</em>, <em>sample=True</em>, <em>sampling_strategy='random-choice'</em>, <em>n_samples=10000</em>, <em>bin_count=50</em>, <em>samples_per_bin=10</em>, <em>with_variance=False</em>, <em>figsize=(16</em>, <em>10)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/partial_dependence.html#PartialDependence.plot_partial_dependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot_partial_dependence</code><span class="sig-paren">(</span><em>feature_ids</em>, <em>modelinstance</em>, <em>filter_classes=None</em>, <em>grid=None</em>, <em>grid_resolution=30</em>, <em>grid_range=None</em>, <em>n_jobs=-1</em>, <em>sample=True</em>, <em>sampling_strategy=’random-choice’</em>, <em>n_samples=1000</em>, <em>bin_count=50</em>, <em>samples_per_bin=10</em>, <em>with_variance=False</em>, <em>figsize=(16</em>, <em>10)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skater/core/global_interpretation/partial_dependence.html#PartialDependence.plot_partial_dependence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.global_interpretation.partial_dependence.PartialDependence.plot_partial_dependence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes partial_dependence of a set of variables. Essentially approximates
 the partial partial_dependence of the predict_fn with respect to the variables
 passed.</p>
 <dl class="docutils">
 <dt>feature_ids: list</dt>
 <dd>the names/ids of the features for which partial dependence is to be computed.
-Note that the algorithm&#8217;s complexity scales exponentially with additional
+Note that the algorithm’s complexity scales exponentially with additional
 features, so generally one should only look at one or two features at a
-time. These feature ids must be available in the class&#8217;s associated DataSet.
+time. These feature ids must be available in the class’s associated DataSet.
 As of now, we only support looking at 1 or 2 features at a time.</dd>
 <dt>modelinstance: skater.model.model.Model subtype</dt>
 <dd><p class="first">an estimator function of a fitted model used to derive prediction. Supports
@@ -458,7 +458,7 @@ equally size bins. Defaults to 30.</dd>
 <dd>the percentile extrama to consider. 2 element tuple, increasing, bounded
 between 0 and 1.</dd>
 <dt>n_jobs: int</dt>
-<dd>The number of CPUs to use to compute the PDs. -1 means &#8216;all CPUs&#8217;.
+<dd>The number of CPUs to use to compute the PDs. -1 means ‘all CPUs’.
 Defaults to using all cores(-1).</dd>
 <dt>sample: boolean</dt>
 <dd>Whether to sample from the original dataset.</dd>
@@ -467,22 +467,22 @@ Defaults to using all cores(-1).</dd>
 details.</dd>
 <dt>n_samples: int</dt>
 <dd>The number of samples to use from the original dataset. Note this is
-only active if sample = True and sampling strategy = &#8216;uniform&#8217;. If
-using &#8216;uniform-over-similarity-ranks&#8217;, use samples per bin</dd>
+only active if sample = True and sampling strategy = ‘uniform’. If
+using ‘uniform-over-similarity-ranks’, use samples per bin</dd>
 <dt>bin_count: int</dt>
 <dd>The number of bins to use when using the similarity based sampler. Note
 this is only active if sample = True and
-sampling_strategy = &#8216;uniform-over-similarity-ranks&#8217;.
+sampling_strategy = ‘uniform-over-similarity-ranks’.
 total samples = bin_count * samples per bin.</dd>
 <dt>samples_per_bin: int</dt>
 <dd>The number of samples to collect for each bin within the sampler. Note
 this is only active if sample = True and
-sampling_strategy = &#8216;uniform-over-similarity-ranks&#8217;. If using
-sampling_strategy = &#8216;uniform&#8217;, use n_samples.
+sampling_strategy = ‘uniform-over-similarity-ranks’. If using
+sampling_strategy = ‘uniform’, use n_samples.
 total samples = bin_count * samples per bin.</dd>
 <dt>with_variance(bool):</dt>
 <dd>whether to include pdp error bars in the plots. Currently disabled for 3D
-plots for visibility. If you have a use case where you&#8217;d like error bars for
+plots for visibility. If you have a use case where you’d like error bars for
 3D pdp plots, let us know!</dd>
 <dt>plot_title(string):</dt>
 <dd>title for pdp plots</dd>
@@ -525,7 +525,7 @@ surrogates around a point correspond to anchorLIME.</p>
 <h3>LIME<a class="headerlink" href="#lime" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer">
-<em class="property">class </em><code class="descclassname">skater.core.local_interpretation.lime.lime_tabular.</code><code class="descname">LimeTabularExplainer</code><span class="sig-paren">(</span><em>training_data</em>, <em>training_labels=None</em>, <em>feature_names=None</em>, <em>categorical_features=None</em>, <em>categorical_names=None</em>, <em>kernel_width=None</em>, <em>verbose=False</em>, <em>class_names=None</em>, <em>feature_selection='auto'</em>, <em>discretize_continuous=True</em>, <em>discretizer='quartile'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">skater.core.local_interpretation.lime.lime_tabular.</code><code class="descname">LimeTabularExplainer</code><span class="sig-paren">(</span><em>training_data</em>, <em>training_labels=None</em>, <em>feature_names=None</em>, <em>categorical_features=None</em>, <em>categorical_names=None</em>, <em>kernel_width=None</em>, <em>verbose=False</em>, <em>class_names=None</em>, <em>feature_selection=’auto’</em>, <em>discretize_continuous=True</em>, <em>discretizer=’quartile’</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Explains predictions on tabular (i.e. matrix) data.
 For numerical features, perturb them by sampling from a Normal(0,1) and
 doing the inverse operation of mean-centering and scaling, according to the
@@ -535,7 +535,7 @@ feature that is 1 when the value is the same as the instance being
 explained.</p>
 <dl class="method">
 <dt id="skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_instance">
-<code class="descname">explain_instance</code><span class="sig-paren">(</span><em>data_row</em>, <em>classifier_fn</em>, <em>labels=(1</em>, <em>)</em>, <em>top_labels=None</em>, <em>num_features=10</em>, <em>num_samples=5000</em>, <em>distance_metric='euclidean'</em>, <em>model_regressor=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer.explain_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_instance" title="Permalink to this definition">¶</a></dt>
+<code class="descname">explain_instance</code><span class="sig-paren">(</span><em>data_row</em>, <em>classifier_fn</em>, <em>labels=(1</em>, <em>)</em>, <em>top_labels=None</em>, <em>num_features=10</em>, <em>num_samples=5000</em>, <em>distance_metric=’euclidean’</em>, <em>model_regressor=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer.explain_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_instance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates explanations for a prediction.</p>
 <p>First, we generate neighborhood data by randomly perturbing features
 from the instance (see __data_inverse). We then learn locally weighted
@@ -558,7 +558,7 @@ num_samples: size of the neighborhood to learn the linear model
 distance_metric: the distance metric to use for weights.
 model_regressor: sklearn regressor to use in explanation. Defaults
 to Ridge regression in LimeBase. Must have <a href="#id1"><span class="problematic" id="id2">model_regressor.coef_</span></a>
-and &#8216;sample_weight&#8217; as a parameter to model_regressor.fit()</p>
+and ‘sample_weight’ as a parameter to model_regressor.fit()</p>
 </dd>
 <dt>Returns:</dt>
 <dd>An Explanation object (see explanation.py) with the corresponding
@@ -568,7 +568,7 @@ explanations.</dd>
 
 <dl class="method">
 <dt id="skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_regressor_instance">
-<code class="descname">explain_regressor_instance</code><span class="sig-paren">(</span><em>data_row</em>, <em>predict_fn</em>, <em>num_features=10</em>, <em>num_samples=5000</em>, <em>distance_metric='euclidean'</em>, <em>model_regressor=None</em>, <em>testing=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer.explain_regressor_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_regressor_instance" title="Permalink to this definition">¶</a></dt>
+<code class="descname">explain_regressor_instance</code><span class="sig-paren">(</span><em>data_row</em>, <em>predict_fn</em>, <em>num_features=10</em>, <em>num_samples=5000</em>, <em>distance_metric=’euclidean’</em>, <em>model_regressor=None</em>, <em>testing=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lime/lime_tabular.html#LimeTabularExplainer.explain_regressor_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skater.core.local_interpretation.lime.lime_tabular.LimeTabularExplainer.explain_regressor_instance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates explanations for a prediction.
 First, we generate neighborhood data by randomly perturbing features
 from the instance (see __data_inverse). We then learn locally weighted
