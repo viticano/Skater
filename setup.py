@@ -22,7 +22,7 @@ def setup_package():
             about = {}
             exec(f.read(), about)
 
-        with io.open(os.path.join(root, 'README.rst'), encoding='utf8') as f:
+        with io.open(os.path.join(root, 'description.rst'), encoding='utf8') as f:
             readme = f.read()
 
     setup(

@@ -9,10 +9,6 @@ Skater to learn about the models internal decision policies.
 The package was originally developed by Aaron Kramer, Pramit Choudhary and internal DataScience Team at DataScience.com
 to help enable practitioners explain and interpret predictive "black boxes" in a human interpretable way.
 
-.. image:: https://api.travis-ci.com/repositories/datascienceinc/Skater.svg?token=okdWYn5kDgeoCPJZGPEz&branch=master
-    :target: https://travis-ci.com/datascienceinc/Skater
-    :alt: Build Status
-
 📖 Documentation
 ================
 
@@ -63,54 +59,3 @@ is recommended that you use a virtual environment (virtualenv, conda environment
     pip install -U Skater
 
 
-Usage
-==============
-The code below illustrates a typical workflow with the Skater package.
-
-::
-
-    import numpy as np
-    from scipy.stats import norm
-
-    #gen some data
-    B = np.random.normal(0, 10, size = 3)
-    X = np.random.normal(0,10, size=(1000, 3))
-    feature_names = ["feature_{}".format(i) for i in xrange(3)]
-    e = norm(0, 5)
-    y = np.dot(X, B) + e.rvs(1000)
-    example = X[0]
-
-    #model it
-    from sklearn.ensemble import RandomForestRegressor
-    regressor = RandomForestRegressor()
-    regressor.fit(X, y)
-
-
-    #partial dependence
-    from skate.core.explanations import Interpretation
-    from skate.model import InMemoryModel
-    i = Interpretation()
-    i.load_data(X, feature_names = feature_names)
-    model = InMemoryModel(regressor.predict, examples = X)
-    i.partial_dependence.plot_partial_dependence([feature_names[0], feature_names[1]],
-                                                model)
-
-    #local interpretation
-    from skate.core.local_interpretation.lime.lime_tabular import LimeTabularExplainer
-    explainer = LimeTabularExplainer(X, feature_names = feature_names)
-    explainer.explain_instance(example,  regressor.predict).show_in_notebook()
-
-Testing
-~~~~~~~
-1. If repo is cloned:
-::
-
-    python skate/tests/all_tests.py
-
-2. If pip installed:
-::
-
-    python -c "from skater.tests.all_tests import run_tests; run_tests()"
-
-
-.. |Build Status-master| image:: https://api.travis-ci.com/repositories/datascienceinc/Skater.svg?token=okdWYn5kDgeoCPJZGPEz&branch=master
