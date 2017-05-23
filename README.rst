@@ -40,7 +40,7 @@ to help enable practitioners explain and interpret predictive "black boxes" in a
 =========================  ===
 
 .. _GitHub issue tracker: https://github.com/datascienceinc/Skater/issues
-.. _Gitter chat: https://gitter.im/datascienceinc/skater
+.. _Gitter chat: https://gitter.im/datascienceinc-skater
 
 Install Skater
 ================
