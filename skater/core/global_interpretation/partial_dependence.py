@@ -102,7 +102,13 @@ def _compute_pd(index, estimator_fn, grid_expanded, pd_metadata, input_data, fil
 
 
 class PartialDependence(BaseGlobalInterpretation):
-    """Contains methods for partial dependence. Subclass of BaseGlobalInterpretation"""
+    """Contains methods for partial dependence. Subclass of BaseGlobalInterpretation
+
+       Partial dependence adapted from:
+
+       T. Hastie, R. Tibshirani and J. Friedman,
+       “Elements of Statistical Learning Ed. 2”, Springer, 2009.
+    """
 
     __all__ = ['partial_dependence', 'plot_partial_dependence']
 
