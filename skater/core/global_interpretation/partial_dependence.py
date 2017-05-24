@@ -107,7 +107,7 @@ class PartialDependence(BaseGlobalInterpretation):
        Partial dependence adapted from:
 
        T. Hastie, R. Tibshirani and J. Friedman,
-       “Elements of Statistical Learning Ed. 2”, Springer, 2009.
+       Elements of Statistical Learning Ed. 2, Springer, 2009.
     """
 
     __all__ = ['partial_dependence', 'plot_partial_dependence']
