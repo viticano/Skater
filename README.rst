@@ -95,8 +95,8 @@ The code below illustrates a typical workflow with the Skater package.
 
 
     #partial dependence
-    from skate.core.explanations import Interpretation
-    from skate.model import InMemoryModel
+    from skater.core.explanations import Interpretation
+    from skater.model import InMemoryModel
     i = Interpretation()
     i.load_data(X, feature_names = feature_names)
     model = InMemoryModel(regressor.predict, examples = X)
