@@ -1,4 +1,4 @@
-"""Partial Dependence class"""
+"""Feature Importance class"""
 from itertools import cycle
 import numpy as np
 import pandas as pd
@@ -21,6 +21,10 @@ class FeatureImportance(BaseGlobalInterpretation):
         """
         Computes feature importance of all features related to a model instance.
         Supports classification, multi-class classification, and regression.
+
+        Wei, Pengfei, Zhenzhou Lu, and Jingwen Song.
+        "Variable Importance Analysis: A Comprehensive Review".
+        Reliability Engineering & System Safety 142 (2015): 399-432. 
 
         Parameters
         ----------
