@@ -24,7 +24,7 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         Wei, Pengfei, Zhenzhou Lu, and Jingwen Song.
         "Variable Importance Analysis: A Comprehensive Review".
-        Reliability Engineering & System Safety 142 (2015): 399-432. 
+        Reliability Engineering & System Safety 142 (2015): 399-432.
 
         Parameters
         ----------
