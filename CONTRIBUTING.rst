@@ -93,3 +93,46 @@ by the following criteria:
 
 .. |Build Status-master| image:: https://api.travis-ci.com/repositories/datascienceinc/Skater.svg?token=okdWYn5kDgeoCPJZGPEz&branch=master
 .. |Skater Logo White| image:: https://cdn2.hubspot.net/hubfs/532045/Logos/DS_Skater%2BDataScience_Colored.svg
+
+
+Roadmap
+---------------
+We'd like to improve the package in a few key ways. The list below
+represents aspects we definitely want to address.
+
+======================= ===
+Performance             We would like to improve performance where ever possible. Model agnostic algorithms can
+                        only be implemented under a "perturb and observe" framework, whereby inputs are selectively
+                        chosen, outputs are observed, and metrics, inferences, visualizations are created. Therefore,
+                        the bottleneck is always the speed of the prediction function, which we will not have control over.
+                        The best way to improve Skater performance is with parallelization (what is the quickest way
+                        to execute N function calls) and intelligent sampling (how few function calls can we make/
+                        how few observations can we pass to each function).
+Algorithms              There are other interpretation algorithms we'd like to support. One family of algorithms would
+                        fall under the category of "model surrogates", where models are approximated, either locally
+                        (like LIME) or globally. These algorithms must be accurate/faithful to the original model,
+                        and simple/interpretable to be useful. We are considering bayesian rule lists and regressions for
+                        now, though this may change. The user would also need to know if and where the surrogate is
+                        a poor representative of the original model. There are also extensions to partial dependence such 
+                        as ICE and accumulated local effects plots that may give better indication of interaction effects.
+Plotting                We'd like to iterate on our visualizations to make them more intuitive, and ideally not rely
+                        on matplotlib.
+======================= ===
+
+The following list represents aspects that are not definite, but are currently being considered for the roadmap.
+
+=======================   ===
+Validation                Currently Skater explains model behavior. It in no way evaluates the quality of that behavior
+                          through validation. Extending the library to support conditional validation--when and why does a
+                          model do well or poorly--may be within scope.
+
+Model Comparison          Early users of the package used Skater to compare models to each other. Currently, model comparisons
+                          must be done manually by the user; run an algorithm, store results in a dictionary, plot.
+
+Dependence probabilities  Currently there is no built in way to assess whether a model may have learned an interaction
+                          other than explicitly plotting partial dependence with respect to two features. We're interested
+                          in providing a matrix of probabilities of dependence. More formally, for features x1, x2, and model f
+                          f(x1, x2, x_compliment), the probability that the partial derivative of f with respect to x1
+                          is unequal to the probability is unequal to that conditioned on values of x2.
+
+========================  ===
