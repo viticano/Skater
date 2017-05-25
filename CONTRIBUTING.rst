@@ -113,7 +113,7 @@ Algorithms              There are other interpretation algorithms we'd like to s
                         (like LIME) or globally. These algorithms must be accurate/faithful to the original model,
                         and simple/interpretable to be useful. We are considering bayesian rule lists and regressions for
                         now, though this may change. The user would also need to know if and where the surrogate is
-                        a poor representative of the original model. There are also extensions to partial dependence such 
+                        a poor representative of the original model. There are also extensions to partial dependence such
                         as ICE and accumulated local effects plots that may give better indication of interaction effects.
 Plotting                We'd like to iterate on our visualizations to make them more intuitive, and ideally not rely
                         on matplotlib.
@@ -125,14 +125,11 @@ The following list represents aspects that are not definite, but are currently b
 Validation                Currently Skater explains model behavior. It in no way evaluates the quality of that behavior
                           through validation. Extending the library to support conditional validation--when and why does a
                           model do well or poorly--may be within scope.
-
 Model Comparison          Early users of the package used Skater to compare models to each other. Currently, model comparisons
                           must be done manually by the user; run an algorithm, store results in a dictionary, plot.
-
 Dependence probabilities  Currently there is no built in way to assess whether a model may have learned an interaction
                           other than explicitly plotting partial dependence with respect to two features. We're interested
                           in providing a matrix of probabilities of dependence. More formally, for features x1, x2, and model f
                           f(x1, x2, x_compliment), the probability that the partial derivative of f with respect to x1
                           is unequal to the probability is unequal to that conditioned on values of x2.
-
 ========================  ===
