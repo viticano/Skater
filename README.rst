@@ -104,7 +104,7 @@ The code below illustrates a typical workflow with the Skater package.
                                                 model)
 
     #local interpretation
-    from skate.core.local_interpretation.lime.lime_tabular import LimeTabularExplainer
+    from skater.core.local_interpretation.lime.lime_tabular import LimeTabularExplainer
     explainer = LimeTabularExplainer(X, feature_names = feature_names)
     explainer.explain_instance(example,  regressor.predict).show_in_notebook()
 
