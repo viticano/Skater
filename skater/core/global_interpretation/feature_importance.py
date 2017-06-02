@@ -128,7 +128,8 @@ class FeatureImportance(BaseGlobalInterpretation):
         n_jobs = None if n_jobs < 0 else n_jobs
         arg_list = self.data_set.feature_ids
         # just a function of feature_id
-        fi_func = partial(input_data=self.data_set.data.copy(),
+        fi_func = partial(compute_feature_importance,
+                          input_data=self.data_set.data.copy(),
                           estimator_fn=predict_fn,
                           original_predictions=original_predictions,
                           feature_info=self.data_set.feature_info,
