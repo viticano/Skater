@@ -2,6 +2,7 @@
 from itertools import cycle
 import numpy as np
 import pandas as pd
+from functools import partial
 
 from ...data import DataManager
 from .base import BaseGlobalInterpretation
@@ -9,6 +10,29 @@ from ...util.plotting import COLORS
 from ...util.exceptions import *
 from ...model.base import ModelType
 from ...util.dataops import divide_zerosafe
+
+
+def compute_feature_importance(feature_id, input_data, estimator_fn,
+                               original_predictions, feature_info,
+                               feature_names, n, method):
+    copy_of_data_set = DataManager(data.copy(), feature_names=feature_names)
+    # collect perturbations
+    if feature_info[feature_id]['numeric']:
+        samples = copy_of_data_set.generate_column_sample(feature_id, n_samples=n, method=method)
+    else:
+        samples = copy_of_data_set.generate_column_sample(feature_id, n_samples=n, method=method)
+
+    #set the samples
+    copy_of_data_set[feature_id] = samples
+
+    # predict based on perturbed values
+    new_predictions = estimator_fn.predict(copy_of_data_set.data)
+
+    importance = compute_importance(new_predictions,
+                                    original_predictions,
+                                    copy_of_data_set[feature_id],
+                                    samples)
+    return {feature_id:importance}
 
 
 class FeatureImportance(BaseGlobalInterpretation):
@@ -72,25 +96,29 @@ class FeatureImportance(BaseGlobalInterpretation):
                                        feature_names=self.data_set.feature_ids,
                                        index=self.data_set.index)
 
-        for feature_id in self.data_set.feature_ids:
-            # collect perturbations
-            if self.data_set.feature_info[feature_id]['numeric']:
-                samples = self.data_set.generate_column_sample(feature_id, n_samples=n, method='stratified')
-            else:
-                samples = self.data_set.generate_column_sample(feature_id, n_samples=n, method='random-choice')
-            copy_of_data_set[feature_id] = samples
+        # prep for multiprocessing
+        predict_fn = modelinstance._get_static_predictor()
+        n_jobs = None if n_jobs < 0 else n_jobs
+        arg_list = self.data_set.feature_ids
+        # just a function of feature_id
+        fi_func = partial(input_data=self.data_set.data.copy(),
+                          estimator_fn=predict_fn,
+                          original_predictions=original_predictions,
+                          feature_info=self.data_set.feature_info,
+                          feature_names=self.data_set.feature_names,
+                          n=n)
 
-            # predict based on perturbed values
-            new_predictions = model_instance.predict_subset_classes(copy_of_data_set.data, filter_classes)
+        executor_instance = Pool(n_jobs)
 
-            importance = self.compute_importance(new_predictions,
-                                                 original_predictions,
-                                                 self.data_set[feature_id],
-                                                 samples)
-            importances[feature_id] = importance
-
-            # reset copy
-            copy_of_data_set[feature_id] = self.data_set[feature_id]
+        try:
+            importances = executor_instance.map(pd_func, arg_list)
+        except:
+            self.interpreter.logger.debug("Multiprocessing failed, going single process")
+            importances = map(pd_func, arg_list)
+        finally:
+            executor_instance.close()
+            executor_instance.join()
+            executor_instance.terminate()
 
         importances = pd.Series(importances).sort_values(ascending=ascending)
 
