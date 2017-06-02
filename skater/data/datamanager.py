@@ -426,7 +426,7 @@ class DataManager(object):
         ---------
         samples
         """
-        if not self.data_info['feature_info'][feature_id]['numeric']:
+        if not self.feature_info[feature_id]['numeric']:
             raise exceptions.DataSetError("Stratified sampling is currently "
                                           "supported for numeric features only.")
 

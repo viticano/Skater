@@ -52,7 +52,7 @@ def compute_feature_importance(feature_id, input_data, estimator_fn,
     copy_of_data_set[feature_id] = samples
 
     # predict based on perturbed values
-    new_predictions = estimator_fn.predict(copy_of_data_set.data)
+    new_predictions = estimator_fn(copy_of_data_set.data)
 
     importance = compute_importance(new_predictions,
                                     original_predictions,
@@ -113,7 +113,7 @@ class FeatureImportance(BaseGlobalInterpretation):
                                         filter_classes)
             assert all([i in model_instance.target_names for i in filter_classes]), err_msg
 
-        original_predictions = model_instance.predict_subset_classes(self.data_set.data, filter_classes)
+        original_predictions = model_instance.predict(self.data_set.data)
 
         n = original_predictions.shape[0]
 
@@ -135,12 +135,12 @@ class FeatureImportance(BaseGlobalInterpretation):
                           n=n)
 
         executor_instance = Pool(n_jobs)
-
+        importances = {}
         try:
-            importances = executor_instance.map(fi_func, arg_list)
+            map(importances.update, executor_instance.map(fi_func, arg_list))
         except:
             self.interpreter.logger.debug("Multiprocessing failed, going single process")
-            importances = map(fi_func, arg_list)
+            map(importances.update, map(fi_func, arg_list))
         finally:
             executor_instance.close()
             executor_instance.join()
