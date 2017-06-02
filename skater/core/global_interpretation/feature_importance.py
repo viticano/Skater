@@ -50,7 +50,7 @@ def compute_feature_importance(feature_id, input_data, estimator_fn,
     else:
         samples = copy_of_data_set.generate_column_sample(feature_id, n_samples=n, method=method)
 
-    #set the samples
+    # set the samples
     copy_of_data_set[feature_id] = samples
 
     # predict based on perturbed values
@@ -119,9 +119,9 @@ class FeatureImportance(BaseGlobalInterpretation):
 
         n = original_predictions.shape[0]
 
-        copy_of_data_set = DataManager(self.data_set.data.copy(),
-                                       feature_names=self.data_set.feature_ids,
-                                       index=self.data_set.index)
+        # copy_of_data_set = DataManager(self.data_set.data.copy(),
+        #                                feature_names=self.data_set.feature_ids,
+        #                                index=self.data_set.index)
 
         # prep for multiprocessing
         predict_fn = model_instance._get_static_predictor()
@@ -132,7 +132,7 @@ class FeatureImportance(BaseGlobalInterpretation):
                           estimator_fn=predict_fn,
                           original_predictions=original_predictions,
                           feature_info=self.data_set.feature_info,
-                          feature_names=self.data_set.feature_names,
+                          feature_names=self.data_set.feature_ids,
                           n=n)
 
         executor_instance = Pool(n_jobs)
