@@ -15,7 +15,7 @@ from ...util.dataops import divide_zerosafe
 
 def compute_feature_importance(feature_id, input_data, estimator_fn,
                                original_predictions, feature_info,
-                               feature_names, n, method):
+                               feature_names, n):
     """Global function for computing column-wise importance
 
     Parameters
@@ -34,8 +34,6 @@ def compute_feature_importance(feature_id, input_data, estimator_fn,
 
     n: int
 
-    method: string
-
     Returns
     ----------
     importance: dict
@@ -46,9 +44,9 @@ def compute_feature_importance(feature_id, input_data, estimator_fn,
 
     # collect perturbations
     if feature_info[feature_id]['numeric']:
-        samples = copy_of_data_set.generate_column_sample(feature_id, n_samples=n, method=method)
+        samples = copy_of_data_set.generate_column_sample(feature_id, n_samples=n, method='stratified')
     else:
-        samples = copy_of_data_set.generate_column_sample(feature_id, n_samples=n, method=method)
+        samples = copy_of_data_set.generate_column_sample(feature_id, n_samples=n, method='random-choice')
 
     # set the samples
     copy_of_data_set[feature_id] = samples
