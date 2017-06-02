@@ -137,14 +137,17 @@ class FeatureImportance(BaseGlobalInterpretation):
         executor_instance = Pool(n_jobs)
         importances = {}
         try:
-            map(importances.update, executor_instance.map(fi_func, arg_list))
+            importance_dicts = executor_instance.map(fi_func, arg_list)
         except:
             self.interpreter.logger.debug("Multiprocessing failed, going single process")
-            map(importances.update, map(fi_func, arg_list))
+            importance_dicts = map(fi_func, arg_list)
         finally:
             executor_instance.close()
             executor_instance.join()
             executor_instance.terminate()
+
+        for i in importance_dicts:
+            importances.update(i)
 
         importances = pd.Series(importances).sort_values(ascending=ascending)
 
