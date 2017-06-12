@@ -136,7 +136,7 @@ class PartialDependence(BaseGlobalInterpretation):
         return "{}".format(columnname)
 
     def _check_features(self, feature_ids):
-        if isinstance(feature_or_feature_pair, str):
+        if isinstance(feature_ids, str):
             feature_ids = [feature_ids]
 
         if len(feature_ids) >= 3:
